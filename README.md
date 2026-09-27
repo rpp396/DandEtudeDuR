@@ -6,11 +6,11 @@ Genera ritmos en partitura según el compás y las figuras que elijas, los repro
 
 ## Qué incluye
 
-- **Práctica libre:** compases 2/4, 3/4, 4/4, 5/4, 2/2, 3/8, 6/8, 9/8, 12/8, 5/8 y 7/8; de 1 a 16 compases; redonda, blanca, negra, corchea y semicorchea (con y sin puntillo), tresillos y silencios.
+- **Práctica libre:** compases 2/4, 3/4, 4/4, 5/4, 2/2, 3/2, 3/8, 6/8, 9/8, 12/8, 5/8, 7/8 y 8/8; de 1 a 16 compases; redonda, blanca, negra, corchea y semicorchea (con y sin puntillo), tresillos, silencios, y síncopas y ligaduras opcionales.
 - **Metrónomo:** tempo de 30 a 240 ppm con indicación italiana, acento, subdivisión, cuenta previa y marcado de tempo con toques.
-- **Práctica con evaluación:** en modo batería se mide el ataque de cada nota; en modo piano también cuánto la mantienes. Los golpes de más se pueden penalizar o solo contar.
+- **Práctica con evaluación:** en modo batería se mide el ataque de cada nota; en modo piano también cuánto la mantienes. Los golpes de más se pueden penalizar o solo contar, y puedes oír tus propios toques.
 - **Medición de latencia:** calcula la corrección para tu equipo, por ejemplo con auriculares Bluetooth.
-- **Campaña:** 20 niveles en 5 capítulos, del pulso en negras a los compases irregulares, con estrellas y desbloqueo progresivo.
+- **Campaña:** 26 niveles en 6 capítulos, del pulso en negras a las síncopas y los compases irregulares, con estrellas y desbloqueo progresivo.
 - **Mi progreso:** historial de prácticas, gráfica de precisión y comparación con las prácticas anteriores.
 
 ## Uso

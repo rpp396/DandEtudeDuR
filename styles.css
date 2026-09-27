@@ -85,7 +85,7 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
 .ts{font-family:var(--serif);font-size:27px;fill:var(--ink)}
 .mn{font-family:var(--mono);font-size:10px;fill:var(--muted)}
 .tup{font-family:var(--serif);font-style:italic;font-size:12px;fill:currentColor}
-.ev,.beam{color:var(--ink)}
+.ev,.beam,.tie{color:var(--ink)}
 .stem{stroke:currentColor;stroke-width:1.4}
 .hole{fill:var(--paper)}
 .ev.rest{color:var(--ink)}
