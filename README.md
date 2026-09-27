@@ -15,6 +15,6 @@ Genera ritmos en partitura según el compás y las figuras que elijas, los repro
 
 ## Uso
 
-Abre `index.html` en el navegador. No necesita instalación ni compilación. El progreso se guarda en el navegador.
+Abre `index.html` en el navegador (junto a `styles.css`, en la misma carpeta). No necesita instalación ni compilación. El progreso se guarda en el navegador.
 
 Para el detalle técnico, consulta [`CLAUDE.md`](CLAUDE.md).

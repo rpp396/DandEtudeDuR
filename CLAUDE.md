@@ -2,7 +2,7 @@
 
 App web para estudiar lectura rítmica. Genera ritmos aleatorios en partitura, los reproduce con metrónomo y mide la precisión del usuario cuando los toca con la pantalla o el teclado. La interfaz está en español.
 
-Todo vive en un solo archivo, `index.html` (HTML + CSS + JS sin dependencias ni build). Para probarlo basta con abrirlo en el navegador o servir la carpeta (`python3 -m http.server`). El audio arranca solo después de que el usuario pulse un botón (política de autoplay).
+La app son dos archivos sin dependencias ni build: `index.html` (HTML + JS) y `styles.css` (todos los estilos, incluidas las variables de color y el modo oscuro). Para probarlo basta con abrirlo en el navegador o servir la carpeta (`python3 -m http.server`). El audio arranca solo después de que el usuario pulse un botón (política de autoplay).
 
 Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en la cuenta mediante `window.claude.use("db")` / `use("user")`; fuera de claude.ai esas llamadas no existen y la app usa `localStorage` automáticamente (ver «Guardado del progreso»).
 
@@ -42,7 +42,7 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 
 ## Ideas pendientes
 
-- Separar el archivo en módulos (`audio.js`, `notation.js`, `scoring.js`…) si crece más.
+- Separar el JS en scripts clásicos (`audio.js`, `notation.js`, `scoring.js`…) si crece más de ~2500 líneas. Evitar módulos ES: rompen la apertura directa con `file://`.
 - Ligaduras y síncopas entre tiempos; más compases y niveles.
 - Opción de que el toque del usuario suene (útil en modo piano).
 - Exportar el historial (CSV).
