@@ -6,11 +6,12 @@ Genera ritmos en partitura según el compás y las figuras que elijas, los repro
 
 ## Qué incluye
 
-- **Práctica libre:** compases 2/4, 3/4, 4/4, 5/4, 2/2, 3/2, 3/8, 6/8, 9/8, 12/8, 5/8, 7/8 y 8/8 (en los de amalgama eliges la agrupación, por ejemplo 2+2+3, 2+3+2 o 3+2+2); de 1 a 16 compases; redonda, blanca, negra, corchea y semicorchea (con y sin puntillo), tresillos, silencios (también de semicorchea), y síncopas y ligaduras opcionales.
+- **Práctica libre:** compases 2/4, 3/4, 4/4, 5/4, 2/2, 3/2, 3/8, 6/8, 9/8, 12/8, 5/8, 7/8 y 8/8 (en los de amalgama eliges la agrupación, por ejemplo 2+2+3, 2+3+2 o 3+2+2); de 1 a 16 compases; redonda, blanca, negra, corchea y semicorchea (con y sin puntillo), tresillos, y síncopas y ligaduras opcionales. Los silencios se eligen uno por uno, igual que las figuras: de redonda, blanca, negra, negra con puntillo, corchea y semicorchea.
 - **Metrónomo:** tempo de 30 a 240 ppm con indicación italiana, acento, subdivisión, cuenta previa y marcado de tempo con toques.
 - **Práctica con evaluación:** en modo batería se mide el ataque de cada nota; en modo piano también cuánto la mantienes. Los golpes de más se pueden penalizar o solo contar, y puedes oír tus propios toques.
 - **Medición de latencia:** calcula la corrección para tu equipo, por ejemplo con auriculares Bluetooth.
-- **Campaña:** 26 niveles en 6 capítulos, del pulso en negras a las síncopas y los compases irregulares, con estrellas y desbloqueo progresivo.
+- **Campaña:** 29 niveles en 6 capítulos, del pulso en negras a las síncopas y los compases de amalgama (con distintas agrupaciones), con estrellas y desbloqueo progresivo. Cada nivel fija qué silencios pueden salir.
+- **Resultados sobre la partitura:** cada nota muestra tu desvío, las notas sin tocar se marcan con una ✕ y los golpes de más con un triángulo en el lugar donde tocaste.
 - **Mi progreso:** historial de prácticas, gráfica de precisión y comparación con las prácticas anteriores.
 
 ## Uso
@@ -24,7 +25,7 @@ Abre `index.html` en el navegador (junto a `styles.css`, en la misma carpeta). N
 ![Pantalla principal con las partes numeradas](docs/capturas/1-pantalla-principal.png)
 
 1. **Modo:** *Práctica libre* (tú eliges todo), *Campaña* (niveles guiados) o *Mi progreso*.
-2. **Compás:** elige el compás (en 5/8, 7/8 y 8/8 aparece además la agrupación de las corcheas) y, debajo, cuántos compases quieres y qué figuras pueden salir. Más abajo en el panel están los silencios, las síncopas y ligaduras, y las opciones del metrónomo.
+2. **Compás:** elige el compás (en 5/8, 7/8 y 8/8 aparece además la agrupación de las corcheas) y, debajo, cuántos compases quieres y qué figuras pueden salir. Debajo de las figuras eliges, uno por uno, qué **silencios** pueden salir (si alguno no puede aparecer con las figuras o el compás elegidos, la app te lo avisa). Más abajo están las síncopas y ligaduras y las opciones del metrónomo.
 3. **Tempo:** con − / +, escribiendo el número o marcándolo con toques.
 4. **Escuchar:** *Reproducir* toca el ritmo con el metrónomo para que lo oigas antes de practicarlo. *Nuevo ritmo* (o la tecla <kbd>N</kbd>) genera otro.
 5. **Partitura:** además de leerla, es donde tocas.
@@ -53,6 +54,7 @@ En los silencios y en las notas ligadas no se toca: la ligadura alarga la nota a
 2. **Nota sin tocar:** una ✕ roja.
 3. **Precisión:** la nota global, con un consejo (si tiendes a adelantarte o atrasarte).
 4. **Recuento:** exactas, bien, cerca, sin tocar y golpes de más. En modo piano aparece además una barra bajo cada nota que compara cuánto la mantuviste con lo que debía durar.
+5. **Golpe de más:** un triángulo gris marca dónde tocaste sin que hubiera nota (en un silencio, en la parte sostenida de una figura larga o en una nota ligada).
 
 Si siempre te marca «tarde» aunque vayas a tiempo (pasa con auriculares Bluetooth), usa **Medir latencia**: tocas con 16 clics y la app calcula la corrección.
 
@@ -61,7 +63,7 @@ Si siempre te marca «tarde» aunque vayas a tiempo (pasa con auriculares Blueto
 ![Campaña: ficha del nivel y mapa de niveles con estrellas](docs/capturas/4-campana.png)
 
 1. **Nivel actual:** qué se practica, compás, tempo fijo y la precisión necesaria para 1, 2 y 3 estrellas.
-2. **Mapa de niveles:** 26 niveles en 6 capítulos. Cada nivel se desbloquea al conseguir al menos una estrella en el anterior.
+2. **Mapa de niveles:** 29 niveles en 6 capítulos. Cada nivel se desbloquea al conseguir al menos una estrella en el anterior. Los silencios se introducen poco a poco: primero de negra y blanca, luego de corchea y, en «Silencio de semicorchea», el de semicorchea. En «Desafíos» hay niveles de 7/8 y 5/8 con distintas agrupaciones (2+2+3 y 3+2+2; 3+2 y 2+3).
 
 ### 5. Mi progreso
 
