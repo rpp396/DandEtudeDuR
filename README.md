@@ -53,6 +53,7 @@ En los silencios y en las notas ligadas no se toca: la ligadura alarga la nota a
 2. **Nota sin tocar:** una ✕ roja.
 3. **Precisión:** la nota global, con un consejo (si tiendes a adelantarte o atrasarte).
 4. **Recuento:** exactas, bien, cerca, sin tocar y golpes de más. En modo piano aparece además una barra bajo cada nota que compara cuánto la mantuviste con lo que debía durar.
+5. **Golpe de más:** un triángulo gris marca dónde tocaste sin que hubiera nota (en un silencio, en la parte sostenida de una figura larga o en una nota ligada).
 
 Si siempre te marca «tarde» aunque vayas a tiempo (pasa con auriculares Bluetooth), usa **Medir latencia**: tocas con 16 clics y la app calcula la corrección.
 

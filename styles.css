@@ -97,6 +97,7 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
 .ref{stroke:var(--staff);stroke-width:1}
 .mk.j-exact{fill:var(--good)} .mk.j-good{fill:var(--ok)} .mk.j-near{fill:var(--near)}
 .mkx{stroke:var(--bad);stroke-width:1.8;stroke-linecap:round}
+.mkextra{fill:var(--muted)}
 .dtrack{fill:var(--line)}
 .dbar{fill:var(--muted)} .dbar.d-exact{fill:var(--good)} .dbar.d-ok{fill:var(--ok)} .dbar.d-short,.dbar.d-long{fill:var(--near)}
 .dtick{stroke:var(--ink);stroke-width:1.2}
@@ -153,6 +154,7 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
 .counts li{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
 .counts .n{margin-left:auto;font-family:var(--mono);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
 .sw-dot{width:10px;height:10px;border-radius:50%;flex:none}
+.sw-dot.tri{border-radius:0;clip-path:polygon(50% 0,100% 100%,0 100%)}
 .res-note{font-size:13px;color:var(--muted);margin:0}
 .res-actions{display:flex;gap:8px;flex-wrap:wrap}
 

@@ -103,7 +103,7 @@
           <li><span class="sw-dot" style="background:var(--ok)"></span>Bien (±90 ms)<span class="n" id="cGood">0</span></li>
           <li><span class="sw-dot" style="background:var(--near)"></span>Cerca<span class="n" id="cNear">0</span></li>
           <li><span class="sw-dot" style="background:var(--bad)"></span>Sin tocar<span class="n" id="cMiss">0</span></li>
-          <li><span class="sw-dot" style="background:var(--muted)"></span>Golpes de más<span class="n" id="cExtra">0</span></li>
+          <li><span class="sw-dot tri" style="background:var(--muted)"></span>Golpes de más<span class="n" id="cExtra">0</span></li>
         </ul>
         <ul class="counts" id="durCounts" hidden>
           <li><span class="sw-dot" style="background:var(--good)"></span>Duración justa<span class="n" id="dExact">0</span></li>
@@ -116,7 +116,7 @@
           <p id="rcText"></p>
           <button class="btn primary" id="rcNext" type="button">Siguiente nivel</button>
         </div>
-        <p class="res-note">Los puntos bajo cada nota muestran tu desvío: a la izquierda de la rayita tocaste antes, a la derecha tocaste tarde.<span id="durNote" hidden> En modo piano, la barra de debajo compara cuánto mantuviste la nota (color) con lo que debía durar (gris); la rayita marca dónde tenías que soltar.</span></p>
+        <p class="res-note">Los puntos bajo cada nota muestran tu desvío: a la izquierda de la rayita tocaste antes, a la derecha tocaste tarde. Los triángulos grises marcan dónde tocaste sin que hubiera nota (golpes de más).<span id="durNote" hidden> En modo piano, la barra de debajo compara cuánto mantuviste la nota (color) con lo que debía durar (gris); la rayita marca dónde tenías que soltar.</span></p>
         <div class="res-actions">
           <button class="btn primary" id="rAgain" type="button">Repetir práctica</button>
           <button class="btn" id="rNew" type="button">Nuevo ritmo</button>
@@ -324,7 +324,7 @@ function load(){
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(set)); }catch(e){} }
 
 /* ---------- Generación ---------- */
-let score = null, judg = [], extras = 0;
+let score = null, judg = [], extras = 0, extraTks = []; // extraTks: posición (en ticks) de cada golpe de más
 const sum = a => a.reduce((s,x)=>s+x,0);
 function allowed(c){ const C=cfg(); if(c.rest && !C.rests) return false; if(c.sync && !C.ties) return false; return c.req.every(k=>C.figs.includes(k)); }
 function weighted(a){ const t=sum(a.map(x=>x.w)); let r=Math.random()*t; for(const x of a){ r-=x.w; if(r<=0) return x; } return a[a.length-1]; }
@@ -367,7 +367,7 @@ function generate(){
   // e.len = duración que suena (la nota ligada suma las que le siguen); e.head = nota que se toca
   flat.forEach(e=>{ e.len=e.dur; e.head=e.i; if(e.tie){ const h=flat[flat[e.i-1].head]; e.head=h.i; h.len+=e.dur; } });
   score={key:C.sig,grp:sig.grp,bars:C.bars,sig,L,measures,flat,fb};
-  judg=[]; extras=0; $('#results').hidden=true;
+  judg=[]; extras=0; extraTks=[]; $('#results').hidden=true;
   renderScore(); renderSummary(); renderLights(); renderTempoGlyph();
 }
 
@@ -536,6 +536,14 @@ function measureSVG(mi,mx,MW){
     }
   });
   runs.forEach(r=>{ s+=beamsSVG(r); });
+  // golpes de más: triángulo gris en la fila de los marcadores, en su posición dentro del compás
+  const m0=mi*score.L;
+  extraTks.forEach(tk=>{
+    if(tk<m0 || tk>=m0+score.L) return;
+    const t=tk-m0, k=evs.findIndex(e=>t>=e.start && t<e.start+e.dur); if(k<0) return;
+    const e=evs[k], nx = k<evs.length-1 ? evs[k+1].x : mx+MW-8, x=e.x+(t-e.start)/e.dur*(nx-e.x), my=Y0+56;
+    s+=`<path class="mkextra" d="M${x} ${my-4.5}L${x+4.5} ${my+3.5}L${x-4.5} ${my+3.5}Z"><title>Golpe de más</title></path>`;
+  });
   return s;
 }
 
@@ -705,7 +713,7 @@ function start(mode){
   const countBars = mode==='metro'?0:(+set.countIn);
   S={mode,running:true,bus,spt,lat,t0,passStart:t0+countBars*L*spt,passDur:score.bars*L*spt,
      loop:mode==='play'&&set.loop,vis:[],visPtr:0,genPass:0,nextBar:t0,nowI:-1,light:-1,notes:[]};
-  judg=[]; extras=0; $('#results').hidden=true; if(mode==='practice') $('#calib').hidden=true;
+  judg=[]; extras=0; extraTks=[]; $('#results').hidden=true; if(mode==='practice') $('#calib').hidden=true;
   if(mode!=='metro'){
     for(let b=0;b<countBars;b++) barClicks(t0+b*L*spt,spt,true,true);
     schedulePass(0); S.genPass=1;
@@ -830,7 +838,13 @@ function tap(src){
     const err=now-n.t;
     if(Math.abs(err)<=n.win && (!best || Math.abs(err)<Math.abs(bestErr))){ best=n; bestErr=err; }
   }
-  if(!best){ extras++; flashPad('miss'); updateLive(); return; }
+  if(!best){
+    extras++;
+    // misma referencia de tiempo que las notas (latencia de salida y corrección del usuario)
+    const tk=(now-S.passStart-S.lat-set.offset/1000)/S.spt;
+    extraTks.push(Math.max(0,Math.min(score.bars*score.L-0.01,tk)));
+    flashPad('miss'); updateLive(); return;
+  }
   best.done=true;
   if(S.hold){ const h=S.holds.get(src||'x'); if(h) h.note=best; }
   const ms=bestErr*1000, a=Math.abs(ms);
