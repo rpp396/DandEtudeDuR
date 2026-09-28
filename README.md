@@ -6,7 +6,7 @@ Genera ritmos en partitura según el compás y las figuras que elijas, los repro
 
 ## Qué incluye
 
-- **Práctica libre:** compases 2/4, 3/4, 4/4, 5/4, 2/2, 3/2, 3/8, 6/8, 9/8, 12/8, 5/8, 7/8 y 8/8; de 1 a 16 compases; redonda, blanca, negra, corchea y semicorchea (con y sin puntillo), tresillos, silencios, y síncopas y ligaduras opcionales.
+- **Práctica libre:** compases 2/4, 3/4, 4/4, 5/4, 2/2, 3/2, 3/8, 6/8, 9/8, 12/8, 5/8, 7/8 y 8/8 (en los de amalgama eliges la agrupación, por ejemplo 2+2+3, 2+3+2 o 3+2+2); de 1 a 16 compases; redonda, blanca, negra, corchea y semicorchea (con y sin puntillo), tresillos, silencios (también de semicorchea), y síncopas y ligaduras opcionales.
 - **Metrónomo:** tempo de 30 a 240 ppm con indicación italiana, acento, subdivisión, cuenta previa y marcado de tempo con toques.
 - **Práctica con evaluación:** en modo batería se mide el ataque de cada nota; en modo piano también cuánto la mantienes. Los golpes de más se pueden penalizar o solo contar, y puedes oír tus propios toques.
 - **Medición de latencia:** calcula la corrección para tu equipo, por ejemplo con auriculares Bluetooth.
@@ -24,7 +24,7 @@ Abre `index.html` en el navegador (junto a `styles.css`, en la misma carpeta). N
 ![Pantalla principal con las partes numeradas](docs/capturas/1-pantalla-principal.png)
 
 1. **Modo:** *Práctica libre* (tú eliges todo), *Campaña* (niveles guiados) o *Mi progreso*.
-2. **Compás:** elige el compás y, debajo, cuántos compases quieres y qué figuras pueden salir. Más abajo en el panel están los silencios, las síncopas y ligaduras, y las opciones del metrónomo.
+2. **Compás:** elige el compás (en 5/8, 7/8 y 8/8 aparece además la agrupación de las corcheas) y, debajo, cuántos compases quieres y qué figuras pueden salir. Más abajo en el panel están los silencios, las síncopas y ligaduras, y las opciones del metrónomo.
 3. **Tempo:** con − / +, escribiendo el número o marcándolo con toques.
 4. **Escuchar:** *Reproducir* toca el ritmo con el metrónomo para que lo oigas antes de practicarlo. *Nuevo ritmo* (o la tecla <kbd>N</kbd>) genera otro.
 5. **Partitura:** además de leerla, es donde tocas.
@@ -40,6 +40,8 @@ Al pulsar *Practicar*, la partitura se enmarca en azul y suena la cuenta previa 
 1. **Pulso:** las luces siguen al metrónomo.
 2. **Nota actual:** el cursor marca la nota que suena; las que ya tocaste se colorean según tu precisión.
 3. **Aciertos en directo:** cuántas notas llevas.
+
+Si el ritmo ocupa varias líneas, la página se desplaza sola para que siempre veas la línea que suena y la siguiente.
 
 En los silencios y en las notas ligadas no se toca: la ligadura alarga la nota anterior. Fuera de la práctica, la partitura se comporta como una imagen normal (puedes desplazar la página sin que cuente como toque).
 
