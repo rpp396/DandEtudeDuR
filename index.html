@@ -136,6 +136,7 @@
       <div class="sec" id="secSig">
         <h2>Compás</h2>
         <div class="sig-grid" id="sigs"></div>
+        <div class="grp-row" id="grpRow" hidden><span class="rlabel">Agrupación de las corcheas</span><div class="seg" id="grpSeg" role="group" aria-label="Agrupación del compás"></div></div>
         <div class="row">
           <span>Número de compases</span>
           <div class="stepper">
@@ -250,7 +251,17 @@ const SIGS = {
   '7/8':{groups:[12,12,18],click:6,kind:'odd'},
   '8/8':{groups:[18,18,12],click:6,kind:'odd'},
 };
-const SIG_TITLES = {'2/2':'Compasillo partido (alla breve)','3/2':'Tres tiempos de blanca','5/8':'Agrupado 3+2','7/8':'Agrupado 2+2+3','8/8':'Agrupado 3+3+2'};
+const SIG_TITLES = {'2/2':'Compasillo partido (alla breve)','3/2':'Tres tiempos de blanca','5/8':'Amalgama: 3+2 o 2+3','7/8':'Amalgama: 2+2+3, 2+3+2 o 3+2+2','8/8':'Amalgama: 3+3+2, 3+2+3 o 2+3+3'};
+// Agrupaciones posibles de los compases de amalgama (la primera es la de SIGS). 2 = dos corcheas (12 ticks), 3 = tres (18).
+const ODD_GROUPS = {'5/8':['3+2','2+3'], '7/8':['2+2+3','2+3+2','3+2+2'], '8/8':['3+3+2','3+2+3','2+3+3']};
+// Compás efectivo: en amalgama aplica la agrupación elegida (set.grp[sig] en práctica libre, l.grp en campaña)
+function sigOf(C){
+  const base=SIGS[C.sig], opts=ODD_GROUPS[C.sig];
+  if(!opts) return {...base, grp:null};
+  const want = typeof C.grp==='string' ? C.grp : (C.grp||{})[C.sig];
+  const g = opts.includes(want) ? want : opts[0];
+  return {...base, groups:g.split('+').map(n=>n==='2'?12:18), grp:g};
+}
 const SIMPLE_BEAT = [
   {req:['q'], ev:[[12]]},
   {req:['e'], ev:[[6],[6]]},
@@ -263,6 +274,12 @@ const SIMPLE_BEAT = [
   {req:['q'], rest:true, ev:[[12,1]]},
   {req:['e'], rest:true, ev:[[6,1],[6]]},
   {req:['e'], rest:true, ev:[[6],[6,1]]},
+  {req:['s'], rest:true, ev:[[3,1],[3],[3],[3]]},
+  {req:['s'], rest:true, ev:[[3],[3],[3,1],[3]]},
+  {req:['e','s'], rest:true, ev:[[6,1],[3],[3]]},
+  {req:['e','s'], rest:true, ev:[[3,1],[3],[6]]},
+  {req:['e','s'], rest:true, ev:[[6],[3,1],[3]]},
+  {req:['ed','s'], rest:true, ev:[[3,1],[9]]},
 ];
 const SIMPLE_MULTI = [
   {req:['h'], ev:[[24]]},
@@ -289,16 +306,20 @@ const COMP_BEAT = [
   {req:['e'], rest:true, ev:[[6],[6],[6,1]]},
   {req:['q','e'], rest:true, ev:[[12],[6,1]]},
   {req:['q','e'], rest:true, ev:[[12,1],[6]]},
+  {req:['s'], rest:true, ev:[[3,1],[3],[3],[3],[3],[3]]},
+  {req:['e','s'], rest:true, ev:[[3,1],[3],[6],[6]]},
+  {req:['e','s'], rest:true, ev:[[6],[3,1],[3],[6]]},
+  {req:['e','s'], rest:true, ev:[[6],[6],[3,1],[3]]},
 ];
 const COMP_MULTI = [ {req:['hd'], ev:[[36]]} ];
 
 const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:true, sound:true, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
-  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, ties:false, tapSound:false, tapVol:0.6};
+  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, ties:false, tapSound:false, tapVol:0.6, grp:{}};
 let set = load();
 function load(){
-  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; return s; } }catch(e){}
-  return {...DEFAULTS, figs:[...DEFAULTS.figs]};
+  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; return s; } }catch(e){}
+  return {...DEFAULTS, figs:[...DEFAULTS.figs], grp:{}};
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(set)); }catch(e){} }
 
@@ -337,7 +358,7 @@ function genMeasure(sig, L){
   return last;
 }
 function generate(){
-  const C=cfg(), sig=SIGS[C.sig], L=sum(sig.groups);
+  const C=cfg(), sig=sigOf(C), L=sum(sig.groups);
   const measures=[]; let fb=false;
   for(let m=0;m<C.bars;m++){ const r=genMeasure(sig,L); fb=fb||r.fb; measures.push(r.evs); }
   const flat=[];
@@ -345,7 +366,7 @@ function generate(){
   if(C.ties) addTies(flat);
   // e.len = duración que suena (la nota ligada suma las que le siguen); e.head = nota que se toca
   flat.forEach(e=>{ e.len=e.dur; e.head=e.i; if(e.tie){ const h=flat[flat[e.i-1].head]; e.head=h.i; h.len+=e.dur; } });
-  score={key:C.sig,bars:C.bars,sig,L,measures,flat,fb};
+  score={key:C.sig,grp:sig.grp,bars:C.bars,sig,L,measures,flat,fb};
   judg=[]; extras=0; $('#results').hidden=true;
   renderScore(); renderSummary(); renderLights(); renderTempoGlyph();
 }
@@ -386,6 +407,11 @@ function restSVG(x,y0,dur){
       `<path d="M${x+3.5} ${y0+26}C${x-3} ${y0+22} ${x-5} ${y0+30} ${x+0.5} ${y0+35}" fill="none" stroke="${c}" stroke-width="2.3" stroke-linecap="round"/>`;
     if(dur===18) s+=`<circle cx="${x+10}" cy="${y0+15}" r="1.8" fill="${c}"/>`;
     return s;
+  }
+  if(dur===3){ // semicorchea: dos ganchos
+    const sx=x+5, sy=y0+9, ex=x-0.5, ey=y0+34, at=yy=>sx+(ex-sx)*(yy-sy)/(ey-sy);
+    return `<circle cx="${x-1.5}" cy="${y0+11}" r="2.3" fill="${c}"/><path d="M${x-1.5} ${y0+12.8}Q${x+2} ${y0+13.8} ${sx} ${sy}L${ex} ${ey}" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`+
+      `<circle cx="${x-3.5}" cy="${y0+20}" r="2.3" fill="${c}"/><path d="M${x-3.5} ${y0+21.8}Q${x} ${y0+22.8} ${at(y0+18.5)} ${y0+18.5}" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`;
   }
   // corchea
   return `<circle cx="${x-2.5}" cy="${y0+15}" r="2.4" fill="${c}"/><path d="M${x-2.5} ${y0+16.8}Q${x+1} ${y0+17.8} ${x+4} ${y0+13}L${x-0.5} ${y0+30}" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`;
@@ -517,13 +543,19 @@ function measureSVG(mi,mx,MW){
 function renderSigs(){
   $('#sigs').innerHTML=Object.keys(SIGS).map(k=>{ const [n,d]=k.split('/'); return `<button type="button" class="sig" data-sig="${k}" aria-pressed="${k===set.sig}" title="${SIG_TITLES[k]||'Compás '+k}" aria-label="Compás ${k}"><span>${n}</span><span>${d}</span></button>`; }).join('');
 }
+function renderGrp(){
+  const opts=ODD_GROUPS[set.sig]; $('#grpRow').hidden=!opts; if(!opts) return;
+  const cur=sigOf(set).grp;
+  $('#grpSeg').innerHTML=opts.map(g=>`<button type="button" data-g="${g}" aria-pressed="${g===cur}">${g}</button>`).join('');
+}
 function renderFigs(){
   $('#figs').innerHTML=FIGS.map(f=>`<button type="button" class="fig" data-k="${f.k}" aria-pressed="${set.figs.includes(f.k)}">${miniFig(f.k)}<span class="fn">${f.name}</span><span class="fv">${f.val}</span></button>`).join('');
 }
 function renderSummary(){
   const C=cfg();
   const names=FIGS.filter(f=>C.figs.includes(f.k)).map(f=>f.name.toLowerCase());
-  $('#summary').innerHTML=`<b>${C.sig}</b> ${C.bars} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${C.rests?' · con silencios':''}${C.ties?' · con ligaduras':''}`;
+  const g=sigOf(C).grp;
+  $('#summary').innerHTML=`<b>${C.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${C.bars} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${C.rests?' · con silencios':''}${C.ties?' · con ligaduras':''}`;
   const n=$('#notice');
   const sig=SIGS[C.sig];
   const warnT = C.figs.includes('t') && sig.kind!=='simple';
@@ -706,9 +738,17 @@ function schedTick(){
 }
 function setNow(i){
   if(i===S.nowI) return;
+  if(i>=0) followScore(i);
   if(S.nowI>=0 && evEls[S.nowI]) evEls[S.nowI].classList.remove('now');
   S.nowI=i;
   if(i>=0 && set.cursor && evEls[i]) evEls[i].classList.add('now');
+}
+// Desplaza la página cuando la nota actual cambia de sistema, para que se vean ese sistema y el siguiente
+function followScore(i){
+  const el=evEls[i], sys=el && el.closest('svg.sys'); if(!sys || sys===S.sysEl) return;
+  S.sysEl=sys;
+  const nxt=sys.nextElementSibling, top=sys.getBoundingClientRect().top, bottom=(nxt||sys).getBoundingClientRect().bottom;
+  if(top<8 || bottom>innerHeight-8) scrollTo({top:scrollY+top-16, behavior:'smooth'});
 }
 function setLight(i){
   if(i===S.light) return;
@@ -856,7 +896,7 @@ function showResults(notes, holds, endT){
   $('#cExact').textContent=c.exact; $('#cGood').textContent=c.good; $('#cNear').textContent=c.near; $('#cMiss').textContent=c.miss; $('#cExtra').textContent=extras;
   const mean = errs.length ? Math.round(sum(errs)/errs.length) : null;
   afterPractice({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), t:Date.now(), mode:stageMode,
-    lvl: stageMode==='campana'?levelIdx:null, lid: stageMode==='campana'?LEVELS[levelIdx].id:null, sig:score.key, bars:score.bars, bpm:curBpm(), pct, n:N,
+    lvl: stageMode==='campana'?levelIdx:null, lid: stageMode==='campana'?LEVELS[levelIdx].id:null, sig:score.key, grp:score.grp, bars:score.bars, bpm:curBpm(), pct, n:N,
     exact:c.exact, good:c.good, near:c.near, miss:c.miss, extra:extras, mean, play:holdMode?'piano':'bateria', pen:!!set.penalize});
   $('#results').hidden=false;
 }
@@ -981,9 +1021,9 @@ const LEVELS = [
   {id:'L22',ch:4,title:'Ligaduras de prolongación',desc:'La ligadura une dos notas: toca solo la primera y cuenta las dos. La segunda no se toca.',sig:'4/4',bars:4,figs:['q','h','e'],rests:false,ties:true,bpm:66,goal:72},
   {id:'L23',ch:4,title:'Síncopas de semicorchea',desc:'Semicorchea, corchea, semicorchea y notas ligadas sobre el tiempo.',sig:'2/4',bars:4,figs:['q','e','s'],rests:true,ties:true,bpm:60,goal:72},
   {id:'L24',ch:4,title:'Ligaduras en 6/8',desc:'Notas ligadas entre los dos pulsos de negra con puntillo y sobre la barra de compás.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:false,ties:true,bpm:50,goal:74},
-  {id:'L17',ch:5,title:'Siete octavos',desc:'Compás irregular agrupado 2+2+3. El metrónomo marca cada corchea.',sig:'7/8',bars:4,figs:['q','e'],rests:false,bpm:150,goal:74},
-  {id:'L18',ch:5,title:'Cinco octavos',desc:'Agrupado 3+2, ahora con semicorcheas.',sig:'5/8',bars:4,figs:['q','e','s'],rests:true,bpm:150,goal:75},
-  {id:'L25',ch:5,title:'Ocho octavos',desc:'Agrupado 3+3+2: dos grupos largos y uno corto. El metrónomo marca cada corchea.',sig:'8/8',bars:4,figs:['q','qd','e'],rests:true,bpm:150,goal:75},
+  {id:'L17',ch:5,title:'Siete octavos',desc:'Compás irregular agrupado 2+2+3. El metrónomo marca cada corchea.',sig:'7/8',grp:'2+2+3',bars:4,figs:['q','e'],rests:false,bpm:150,goal:74},
+  {id:'L18',ch:5,title:'Cinco octavos',desc:'Agrupado 3+2, ahora con semicorcheas.',sig:'5/8',grp:'3+2',bars:4,figs:['q','e','s'],rests:true,bpm:150,goal:75},
+  {id:'L25',ch:5,title:'Ocho octavos',desc:'Agrupado 3+3+2: dos grupos largos y uno corto. El metrónomo marca cada corchea.',sig:'8/8',grp:'3+3+2',bars:4,figs:['q','qd','e'],rests:true,bpm:150,goal:75},
   {id:'L26',ch:5,title:'Tres blancas',desc:'El 3/2: el pulso es la blanca. Cada clic vale dos negras.',sig:'3/2',bars:4,figs:['h','q','e'],rests:true,bpm:60,goal:75},
   {id:'L19',ch:5,title:'Todo junto',desc:'Ocho compases con casi todas las figuras.',sig:'4/4',bars:8,figs:['h','q','qd','e','ed','s','t'],rests:true,bpm:76,goal:76},
   {id:'L20',ch:5,title:'Maestría',desc:'Todas las figuras a tempo de Allegro.',sig:'4/4',bars:8,figs:['w','h','hd','q','qd','e','ed','s','t'],rests:true,bpm:100,goal:80},
@@ -1010,7 +1050,7 @@ function renderLevelBar(){
   $('#lvTitle').textContent=l.title;
   $('#lvDesc').textContent=l.desc;
   const unit={12:'♩',24:'𝅗𝅥',18:'♩.',6:'♪'}[SIGS[l.sig].click];
-  $('#lvMeta').innerHTML=`<span>${l.sig}</span><span>${l.bars} compases</span><span>${l.bpm} ppm</span><span>Objetivo ${l.goal}%</span><span>★★ ${l.s2}%</span><span>★★★ ${l.s3}%</span>${st.best?`<span>Mejor: ${st.best}%</span>`:''}`;
+  $('#lvMeta').innerHTML=`<span>${l.sig}${l.grp?' ('+l.grp+')':''}</span><span>${l.bars} compases</span><span>${l.bpm} ppm</span><span>Objetivo ${l.goal}%</span><span>★★ ${l.s2}%</span><span>★★★ ${l.s3}%</span>${st.best?`<span>Mejor: ${st.best}%</span>`:''}`;
   $('#lvStars').innerHTML=starStr(st.stars); $('#lvStars').setAttribute('aria-label',`${st.stars} de 3 estrellas`);
   $('#lvPrev').disabled=levelIdx===0;
   $('#lvNext').disabled=levelIdx>=LEVELS.length-1 || !unlocked(levelIdx+1);
@@ -1172,7 +1212,7 @@ function renderProgress(){
   else {
     const rows=list.slice(-30).reverse().map(r=>{
       const dev = r.mean==null ? '—' : Math.abs(r.mean)<5 ? 'a tiempo' : `${Math.abs(r.mean)} ms ${r.mean>0?'tarde':'antes'}`;
-      return `<tr><td>${fmtDate(r.t)} <span class="hint" style="display:inline">${fmtTime(r.t)}</span></td><td>${exName(r)}</td><td>${r.sig} · ${r.bars} c.</td><td class="num">${r.bpm}</td><td class="num">${r.pct}%<span class="pbar"><i style="width:${r.pct}%"></i></span></td><td class="num">${r.exact}/${r.n}</td><td class="num">${r.miss}</td><td>${dev}</td></tr>`;
+      return `<tr><td>${fmtDate(r.t)} <span class="hint" style="display:inline">${fmtTime(r.t)}</span></td><td>${exName(r)}</td><td>${r.sig}${r.grp?' ('+r.grp+')':''} · ${r.bars} c.</td><td class="num">${r.bpm}</td><td class="num">${r.pct}%<span class="pbar"><i style="width:${r.pct}%"></i></span></td><td class="num">${r.exact}/${r.n}</td><td class="num">${r.miss}</td><td>${dev}</td></tr>`;
     }).join('');
     $('#pTable').innerHTML=`<table><thead><tr><th>Fecha</th><th>Ejercicio</th><th>Compás</th><th class="num">Tempo</th><th class="num">Precisión</th><th class="num">Exactas</th><th class="num">Sin tocar</th><th>Desvío medio</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
@@ -1211,7 +1251,11 @@ function renderChart(list){
 function rhythmChanged(){ save(); if(S.running && S.mode!=='metro') stop(); generate(); if(S.running && S.mode==='metro') renderLights(); }
 $('#sigs').addEventListener('click',e=>{
   const b=e.target.closest('.sig'); if(!b) return;
-  set.sig=b.dataset.sig; renderSigs(); rhythmChanged();
+  set.sig=b.dataset.sig; renderSigs(); renderGrp(); rhythmChanged();
+});
+$('#grpSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  set.grp={...set.grp,[set.sig]:b.dataset.g}; renderGrp(); rhythmChanged();
 });
 $('#figs').addEventListener('click',e=>{
   const b=e.target.closest('.fig'); if(!b) return;
@@ -1305,7 +1349,7 @@ $('#pClearBox').addEventListener('click',e=>{
 });
 new ResizeObserver(()=>{ if(!$('#progView').hidden) renderChart(prog.sessions.filter(r=>pFilter==='todo'||r.mode===pFilter)); }).observe($('#progView'));
 
-renderSigs(); renderFigs(); syncControls(); padIdle();
+renderSigs(); renderGrp(); renderFigs(); syncControls(); padIdle();
 setView(stageMode);
 initStore();
 })();
