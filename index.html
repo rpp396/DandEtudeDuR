@@ -62,7 +62,11 @@
           </div>
           <button class="btn" id="bNew" type="button"><svg viewBox="0 0 16 16"><path d="M13 5.5A5.5 5.5 0 1 0 13.5 10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M13.8 1.8v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="bNewLbl">Nuevo ritmo</span></button>
         </div>
-        <div id="score" aria-label="Partitura del ritmo"></div>
+        <div class="pad" id="pad" tabindex="0" role="button" aria-label="Partitura: toca sobre ella en cada nota">
+          <div id="score" aria-label="Partitura del ritmo"></div>
+          <div class="pad-count" id="padCount" hidden></div>
+          <div class="pad-status"><span class="pad-main" id="padMain"></span><span class="pad-sub" id="padSub"></span></div>
+        </div>
       </div>
 
       <div class="practice">
@@ -74,13 +78,6 @@
             <button type="button" data-hold="1" title="También cuenta cuánto mantienes pulsada cada nota">Piano</button>
           </div>
           <span class="p-offset">Corrección actual: <b id="offsetNow">0 ms</b></span>
-        </div>
-        <div class="pad" id="pad" tabindex="0" role="button" aria-label="Zona para tocar el ritmo">
-          <div>
-            <div class="pad-count" id="padCount" hidden></div>
-            <div class="pad-main" id="padMain"></div>
-            <div class="pad-sub" id="padSub"></div>
-          </div>
         </div>
       </div>
 
@@ -689,7 +686,7 @@ function start(mode){
     ns.forEach((n,j)=>{ const pg=j>0?n.t-ns[j-1].t:1, ng=j<ns.length-1?ns[j+1].t-n.t:1; n.win=Math.max(0.05,Math.min(0.18,Math.min(pg,ng)/2)); });
     S.notes=ns;
     pad.classList.add('live'); $('#padMain').textContent=set.hold?'Pulsa en cada nota y mantén mientras dure':'Toca en cada nota'; $('#padSub').textContent='Escucha la cuenta y empieza en el primer tiempo.';
-    pad.focus({preventScroll:true});
+    showPad();
   } else if(document.activeElement && document.activeElement.blur && mode!=='metro') { /* keep focus */ }
   S.timer=setInterval(schedTick,40);
   S.raf=requestAnimationFrame(frame);
@@ -867,6 +864,11 @@ function showResults(notes, holds, endT){
 /* ---------- Medición de latencia ---------- */
 const K_BPM=90, K_LEAD=4, K_N=16;
 let K={suggest:null};
+function showPad(){
+  const p=$('#pad'), r=p.getBoundingClientRect();
+  p.focus({preventScroll:true});
+  if(r.top<0 || r.bottom>innerHeight) p.scrollIntoView({block:r.height>innerHeight?'start':'center',behavior:'smooth'});
+}
 function padIdle(){
   $('#pad').classList.remove('live');
   $('#padMain').textContent='Pulsa «Practicar» y toca aquí en cada nota';
@@ -887,7 +889,7 @@ function startCalib(){
   $('#pad').classList.add('live');
   $('#padMain').textContent='Toca justo con cada clic';
   $('#padSub').textContent=`Escucha 4 clics de cuenta y luego toca con los ${K_N} siguientes, a ${K_BPM} ppm.`;
-  $('#pad').focus({preventScroll:true});
+  showPad();
   S.raf=requestAnimationFrame(frame);
   updateTransport();
 }
@@ -1252,7 +1254,12 @@ $('#kApply').addEventListener('click',()=>{
   set.offset=K.suggest; $('#offset').value=set.offset; updOutputs(); save();
   $('#kApply').disabled=true; $('#kApply').textContent='Corrección aplicada';
 });
-$('#pad').addEventListener('pointerdown',e=>{ e.preventDefault(); try{ $('#pad').setPointerCapture(e.pointerId); }catch(_){} tap('p'+e.pointerId); });
+// La partitura es la zona de toque, pero solo durante la práctica o la medición: en reposo se puede desplazar y seleccionar con normalidad
+$('#pad').addEventListener('pointerdown',e=>{
+  if(!S.running || (S.mode!=='practice' && S.mode!=='calib')) return;
+  if(e.button>0) return;
+  e.preventDefault(); try{ $('#pad').setPointerCapture(e.pointerId); }catch(_){} tap('p'+e.pointerId);
+});
 ['pointerup','pointercancel','lostpointercapture'].forEach(t=>$('#pad').addEventListener(t,e=>release('p'+e.pointerId)));
 $('#pad').addEventListener('contextmenu',e=>{ if(S.running) e.preventDefault(); });
 const isField=el=>el && (el.tagName==='INPUT'||el.tagName==='SELECT'||el.tagName==='TEXTAREA');
