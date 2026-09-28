@@ -151,7 +151,9 @@
         <h2>Figuras</h2>
         <div class="fig-grid" id="figs"></div>
         <p class="hint">El número indica cuántas negras dura cada figura.</p>
-        <label class="sw"><input type="checkbox" id="rests"><span class="track"></span><span>Incluir silencios<small>De las figuras que elegiste</small></span></label>
+        <h2 class="sub">Silencios</h2>
+        <div class="fig-grid" id="restFigs"></div>
+        <p class="hint">Elige qué silencios pueden salir, igual que las figuras. Sin ninguno, el ritmo no tendrá silencios.</p>
         <label class="sw"><input type="checkbox" id="ties"><span class="track"></span><span>Síncopas y ligaduras<small>Notas ligadas entre tiempos y compases, y síncopas como corchea-negra-corchea. La nota ligada no se vuelve a tocar.</small></span></label>
       </div>
 
@@ -263,70 +265,88 @@ function sigOf(C){
   return {...base, groups:g.split('+').map(n=>n==='2'?12:18), grp:g};
 }
 const SIMPLE_BEAT = [
-  {req:['q'], ev:[[12]]},
-  {req:['e'], ev:[[6],[6]]},
-  {req:['s'], ev:[[3],[3],[3],[3]]},
-  {req:['e','s'], ev:[[6],[3],[3]]},
-  {req:['e','s'], ev:[[3],[3],[6]]},
-  {req:['e','s'], ev:[[3],[6],[3]]},
-  {req:['ed','s'], ev:[[9],[3]]},
-  {req:['t'], ev:[[4],[4],[4]], tuplet:true},
-  {req:['q'], rest:true, ev:[[12,1]]},
-  {req:['e'], rest:true, ev:[[6,1],[6]]},
-  {req:['e'], rest:true, ev:[[6],[6,1]]},
-  {req:['s'], rest:true, ev:[[3,1],[3],[3],[3]]},
-  {req:['s'], rest:true, ev:[[3],[3],[3,1],[3]]},
-  {req:['e','s'], rest:true, ev:[[6,1],[3],[3]]},
-  {req:['e','s'], rest:true, ev:[[3,1],[3],[6]]},
-  {req:['e','s'], rest:true, ev:[[6],[3,1],[3]]},
-  {req:['ed','s'], rest:true, ev:[[3,1],[9]]},
+  {ev:[[12]]},
+  {ev:[[6],[6]]},
+  {ev:[[3],[3],[3],[3]]},
+  {ev:[[6],[3],[3]]},
+  {ev:[[3],[3],[6]]},
+  {ev:[[3],[6],[3]]},
+  {ev:[[9],[3]]},
+  {ev:[[4],[4],[4]], tuplet:true},
+  {ev:[[12,1]]},
+  {ev:[[6,1],[6]]},
+  {ev:[[6],[6,1]]},
+  {ev:[[3,1],[3],[3],[3]]},
+  {ev:[[3],[3],[3,1],[3]]},
+  {ev:[[6,1],[3],[3]]},
+  {ev:[[3,1],[3],[6]]},
+  {ev:[[6],[3,1],[3]]},
+  {ev:[[3,1],[9]]},
 ];
 const SIMPLE_MULTI = [
-  {req:['h'], ev:[[24]]},
-  {req:['hd'], ev:[[36]]},
-  {req:['w'], ev:[[48]], wholeBar:true},
-  {req:['qd','e'], ev:[[18],[6]]},
-  {req:['e','q'], sync:true, ev:[[6],[12],[6]]},
-  {req:['q','h'], sync:true, ev:[[12],[24],[12]], wholeBar:true},
-  {req:['h'], rest:true, ev:[[24,1]]},
-  {req:['w'], rest:true, ev:[[48,1]], wholeBar:true},
+  {ev:[[24]]},
+  {ev:[[36]]},
+  {ev:[[48]], wholeBar:true},
+  {ev:[[18],[6]]},
+  {sync:true, ev:[[6],[12],[6]]},
+  {sync:true, ev:[[12],[24],[12]], wholeBar:true},
+  {ev:[[24,1]]},
+  {ev:[[48,1]], wholeBar:true},
 ];
 const COMP_BEAT = [
-  {req:['qd'], ev:[[18]]},
-  {req:['e'], ev:[[6],[6],[6]]},
-  {req:['q','e'], ev:[[12],[6]]},
-  {req:['q','e'], ev:[[6],[12]]},
-  {req:['e','s'], ev:[[3],[3],[6],[6]]},
-  {req:['e','s'], ev:[[6],[3],[3],[6]]},
-  {req:['e','s'], ev:[[6],[6],[3],[3]]},
-  {req:['s'], ev:[[3],[3],[3],[3],[3],[3]]},
-  {req:['ed','s','e'], ev:[[9],[3],[6]]},
-  {req:['qd'], rest:true, ev:[[18,1]]},
-  {req:['e'], rest:true, ev:[[6,1],[6],[6]]},
-  {req:['e'], rest:true, ev:[[6],[6],[6,1]]},
-  {req:['q','e'], rest:true, ev:[[12],[6,1]]},
-  {req:['q','e'], rest:true, ev:[[12,1],[6]]},
-  {req:['s'], rest:true, ev:[[3,1],[3],[3],[3],[3],[3]]},
-  {req:['e','s'], rest:true, ev:[[3,1],[3],[6],[6]]},
-  {req:['e','s'], rest:true, ev:[[6],[3,1],[3],[6]]},
-  {req:['e','s'], rest:true, ev:[[6],[6],[3,1],[3]]},
+  {ev:[[18]]},
+  {ev:[[6],[6],[6]]},
+  {ev:[[12],[6]]},
+  {ev:[[6],[12]]},
+  {ev:[[3],[3],[6],[6]]},
+  {ev:[[6],[3],[3],[6]]},
+  {ev:[[6],[6],[3],[3]]},
+  {ev:[[3],[3],[3],[3],[3],[3]]},
+  {ev:[[9],[3],[6]]},
+  {ev:[[18,1]]},
+  {ev:[[6,1],[6],[6]]},
+  {ev:[[6],[6],[6,1]]},
+  {ev:[[12],[6,1]]},
+  {ev:[[12,1],[6]]},
+  {ev:[[3,1],[3],[3],[3],[3],[3]]},
+  {ev:[[3,1],[3],[6],[6]]},
+  {ev:[[6],[3,1],[3],[6]]},
+  {ev:[[6],[6],[3,1],[3]]},
 ];
-const COMP_MULTI = [ {req:['hd'], ev:[[36]]} ];
+const COMP_MULTI = [ {ev:[[36]]} ];
+// Figuras que usa cada celda, derivadas de sus eventos: req = notas, rreq = silencios
+const DUR2K = {48:'w',36:'hd',24:'h',18:'qd',12:'q',9:'ed',6:'e',4:'t',3:'s'};
+[SIMPLE_BEAT,SIMPLE_MULTI,COMP_BEAT,COMP_MULTI].flat().forEach(c=>{
+  const keys=r=>[...new Set(c.ev.filter(e=>!!e[1]===r).map(e=>DUR2K[e[0]]))];
+  c.req=keys(false); c.rreq=keys(true); c.rest=c.rreq.length>0;
+});
+// Silencios que se pueden elegir (cada uno por separado, como las figuras)
+const RESTS = [
+  {k:'w', name:'Silencio de redonda', short:'redonda', val:'4'},
+  {k:'h', name:'Silencio de blanca', short:'blanca', val:'2'},
+  {k:'q', name:'Silencio de negra', short:'negra', val:'1'},
+  {k:'qd', name:'Silencio de negra con puntillo', short:'negra con puntillo', val:'1½'},
+  {k:'e', name:'Silencio de corchea', short:'corchea', val:'½'},
+  {k:'s', name:'Silencio de semicorchea', short:'semicorchea', val:'¼'},
+];
+const REST_KEYS = RESTS.map(r=>r.k);
+// Silencios activos: lista (práctica libre y niveles); acepta el booleano antiguo (= silencios de las figuras elegidas)
+function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.figs.filter(k=>REST_KEYS.includes(k)) : []); }
 
-const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:true, sound:true, cursor:true, loop:false,
+const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:true, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
   autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, ties:false, tapSound:false, tapVol:0.6, grp:{}};
 let set = load();
 function load(){
-  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; return s; } }catch(e){}
-  return {...DEFAULTS, figs:[...DEFAULTS.figs], grp:{}};
+  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; s.rests=restList(s).filter(k=>REST_KEYS.includes(k)); return s; } }catch(e){}
+  return {...DEFAULTS, figs:[...DEFAULTS.figs], rests:[...DEFAULTS.rests], grp:{}};
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(set)); }catch(e){} }
 
 /* ---------- Generación ---------- */
 let score = null, judg = [], extras = 0, extraTks = []; // extraTks: posición (en ticks) de cada golpe de más
 const sum = a => a.reduce((s,x)=>s+x,0);
-function allowed(c){ const C=cfg(); if(c.rest && !C.rests) return false; if(c.sync && !C.ties) return false; return c.req.every(k=>C.figs.includes(k)); }
+function allowed(c){ const C=cfg(), R=restList(C); if(c.sync && !C.ties) return false; return c.req.every(k=>C.figs.includes(k)) && c.rreq.every(k=>R.includes(k)); }
 function weighted(a){ const t=sum(a.map(x=>x.w)); let r=Math.random()*t; for(const x of a){ r-=x.w; if(r<=0) return x; } return a[a.length-1]; }
 function genMeasure(sig, L){
   const G = sig.groups; let last = null;
@@ -551,6 +571,14 @@ function measureSVG(mi,mx,MW){
 function renderSigs(){
   $('#sigs').innerHTML=Object.keys(SIGS).map(k=>{ const [n,d]=k.split('/'); return `<button type="button" class="sig" data-sig="${k}" aria-pressed="${k===set.sig}" title="${SIG_TITLES[k]||'Compás '+k}" aria-label="Compás ${k}"><span>${n}</span><span>${d}</span></button>`; }).join('');
 }
+function miniRest(k){
+  const d={w:48,h:24,q:12,qd:18,e:6,s:3}[k];
+  const line = d===48 ? `<line x1="-8" y1="12" x2="8" y2="12" stroke="currentColor" stroke-width="1"/>` : d===24 ? `<line x1="-8" y1="22" x2="8" y2="22" stroke="currentColor" stroke-width="1"/>` : '';
+  return `<svg class="mini" viewBox="-11 -8 ${d===18?30:22} 58" aria-hidden="true">${line}${restSVG(0,2,d)}</svg>`;
+}
+function renderRests(){
+  $('#restFigs').innerHTML=RESTS.map(r=>`<button type="button" class="fig" data-r="${r.k}" aria-pressed="${set.rests.includes(r.k)}">${miniRest(r.k)}<span class="fn">${r.name}</span><span class="fv">${r.val}</span></button>`).join('');
+}
 function renderGrp(){
   const opts=ODD_GROUPS[set.sig]; $('#grpRow').hidden=!opts; if(!opts) return;
   const cur=sigOf(set).grp;
@@ -562,12 +590,25 @@ function renderFigs(){
 function renderSummary(){
   const C=cfg();
   const names=FIGS.filter(f=>C.figs.includes(f.k)).map(f=>f.name.toLowerCase());
+  const rn=RESTS.filter(r=>restList(C).includes(r.k)).map(r=>r.short);
+  const rtxt = !rn.length ? '' : ' · silencios de '+(rn.length>1 ? rn.slice(0,-1).join(', ')+' y '+rn[rn.length-1] : rn[0]);
   const g=sigOf(C).grp;
-  $('#summary').innerHTML=`<b>${C.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${C.bars} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${C.rests?' · con silencios':''}${C.ties?' · con ligaduras':''}`;
+  $('#summary').innerHTML=`<b>${C.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${C.bars} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${rtxt}${C.ties?' · con ligaduras':''}`;
   const n=$('#notice');
   const sig=SIGS[C.sig];
   const warnT = C.figs.includes('t') && sig.kind!=='simple';
+  // silencios elegidos que ninguna celda posible de este compás puede usar
+  const L=sum(sig.groups), cells = sig.kind==='simple' ? [...SIMPLE_BEAT,...SIMPLE_MULTI] : sig.kind==='compound' ? [...COMP_BEAT,...COMP_MULTI] : [...SIMPLE_BEAT.filter(c=>!c.tuplet),...COMP_BEAT];
+  const fits = (r,withFigs) => cells.some(c=>c.rreq.includes(r.k) && (!c.wholeBar || L===48) && (!withFigs || allowed(c)));
+  const chosen = RESTS.filter(r=>restList(C).includes(r.k));
+  const noFit = chosen.filter(r=>!fits(r,false)), needFigs = chosen.filter(r=>fits(r,false) && !fits(r,true));
+  const lst = a => a.map(r=>r.name.toLowerCase()).join(' ni el ');
   if(score.fb){ n.textContent='Algunas partes se completaron con silencios porque las figuras elegidas no encajan en este compás. Prueba a añadir negras o corcheas.'; n.hidden=false; }
+  else if(noFit.length || needFigs.length){
+    n.textContent = [noFit.length ? `En ${C.sig} no cabe el ${lst(noFit)}.` : '',
+      needFigs.length ? `Con las figuras elegidas no puede salir el ${lst(needFigs)}: necesita figuras más cortas a su lado (por ejemplo, semicorcheas para el silencio de semicorchea).` : ''].filter(Boolean).join(' ');
+    n.hidden=false;
+  }
   else if(warnT){ n.textContent='Los tresillos solo se usan en compases de subdivisión binaria (2/4, 3/4, 4/4, 5/4, 2/2).'; n.hidden=false; }
   else n.hidden=true;
 }
@@ -593,7 +634,7 @@ function setBpm(v, fromUser=true){
   if(fromUser){ save(); if(S.running && S.mode!=='metro') stop(); }
 }
 function syncControls(){
-  ['rests','ties','sound','cursor','loop','metro','accent','tapSound'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
+  ['ties','sound','cursor','loop','metro','accent','tapSound'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
   $('#timbre').value=set.timbre; $('#sub').value=set.sub; $('#countIn').value=set.countIn;
   $('#rhythmVol').value=set.rhythmVol; $('#metroVol').value=set.metroVol; $('#tapVol').value=set.tapVol; syncTapVol(); $('#offset').value=set.offset;
   $('#bars').textContent=set.bars;
@@ -925,7 +966,7 @@ function showPad(){
 }
 function padIdle(){
   $('#pad').classList.remove('live');
-  $('#padMain').textContent='Pulsa «Practicar» y toca aquí en cada nota';
+  $('#padMain').textContent='Pulsa «Practicar» y toca sobre la partitura en cada nota';
   $('#padSub').textContent='También puedes usar el teclado evita la barra espaciadora. Antes de empezar suena la cuenta.';
 }
 function startCalib(){
@@ -1015,32 +1056,35 @@ function finishCalib(){
 /* ---------- Campaña ---------- */
 const CHAPTERS = ['El pulso','Corcheas','Semicorcheas y tresillos','Compases compuestos','Síncopas y ligaduras','Desafíos'];
 const LEVELS = [
-  {id:'L1',ch:0,title:'Negras en el pulso',desc:'Una nota por tiempo. Toca justo con cada clic del metrónomo.',sig:'4/4',bars:2,figs:['q'],rests:false,bpm:60,goal:70},
-  {id:'L2',ch:0,title:'Negras y blancas',desc:'La blanca dura dos tiempos: tócala una vez y deja pasar el segundo tiempo sin tocar.',sig:'4/4',bars:2,figs:['q','h'],rests:false,bpm:60,goal:70},
-  {id:'L3',ch:0,title:'La redonda',desc:'Cuatro tiempos en una sola nota. Sigue contando mientras suena.',sig:'4/4',bars:4,figs:['q','h','w'],rests:false,bpm:66,goal:70},
-  {id:'L4',ch:0,title:'Primeros silencios',desc:'En los silencios no se toca, pero el pulso sigue: cuéntalo por dentro.',sig:'4/4',bars:4,figs:['q','h'],rests:true,bpm:66,goal:70},
-  {id:'L5',ch:0,title:'Tres tiempos',desc:'El compás de 3/4 y la blanca con puntillo, que ocupa el compás entero.',sig:'3/4',bars:4,figs:['q','h','hd'],rests:true,bpm:72,goal:72},
-  {id:'L6',ch:1,title:'Dos por tiempo',desc:'Dos corcheas llenan un tiempo. Piensa «un-y, dos-y».',sig:'2/4',bars:4,figs:['q','e'],rests:false,bpm:66,goal:72},
-  {id:'L7',ch:1,title:'Corcheas y silencios',desc:'Un silencio de corchea deja la nota en la segunda mitad del tiempo.',sig:'4/4',bars:4,figs:['q','h','e'],rests:true,bpm:70,goal:72},
-  {id:'L8',ch:1,title:'Negra con puntillo',desc:'Tiempo y medio, casi siempre seguida de una corchea.',sig:'4/4',bars:4,figs:['q','qd','e','h'],rests:false,bpm:72,goal:72},
-  {id:'L9',ch:1,title:'Corcheas en 3/4',desc:'Todo lo anterior, ahora en compás de tres.',sig:'3/4',bars:4,figs:['q','qd','e','h','hd'],rests:true,bpm:80,goal:75},
-  {id:'L10',ch:2,title:'Cuatro por tiempo',desc:'Cuatro semicorcheas por tiempo: «1-e-y-a».',sig:'2/4',bars:4,figs:['q','e','s'],rests:false,bpm:60,goal:72},
-  {id:'L11',ch:2,title:'Mezclas de semicorcheas',desc:'Corchea y dos semicorcheas, y al revés.',sig:'4/4',bars:4,figs:['q','e','s'],rests:true,bpm:66,goal:74},
-  {id:'L12',ch:2,title:'Corchea con puntillo',desc:'El ritmo largo-corto: corchea con puntillo y semicorchea.',sig:'4/4',bars:4,figs:['q','e','ed','s'],rests:false,bpm:66,goal:74},
-  {id:'L13',ch:2,title:'Tresillos',desc:'Tres corcheas iguales en un tiempo. No las conviertas en dos más una.',sig:'4/4',bars:4,figs:['q','e','t'],rests:false,bpm:66,goal:74},
-  {id:'L14',ch:3,title:'El 6/8',desc:'Dos pulsos de negra con puntillo, cada uno dividido en tres corcheas.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:false,bpm:50,goal:72},
-  {id:'L15',ch:3,title:'6/8 con silencios',desc:'Silencios y semicorcheas dentro del compás compuesto.',sig:'6/8',bars:4,figs:['qd','q','e','s'],rests:true,bpm:52,goal:74},
-  {id:'L16',ch:3,title:'El 12/8',desc:'Cuatro pulsos ternarios, con blanca con puntillo.',sig:'12/8',bars:2,figs:['qd','q','e','hd'],rests:true,bpm:56,goal:75},
-  {id:'L21',ch:4,title:'La síncopa',desc:'Corchea, negra, corchea: la negra empieza entre dos tiempos. Tócala en el «y» y deja que el pulso pase por debajo.',sig:'2/4',bars:4,figs:['q','e'],rests:false,ties:true,bpm:60,goal:70},
-  {id:'L22',ch:4,title:'Ligaduras de prolongación',desc:'La ligadura une dos notas: toca solo la primera y cuenta las dos. La segunda no se toca.',sig:'4/4',bars:4,figs:['q','h','e'],rests:false,ties:true,bpm:66,goal:72},
-  {id:'L23',ch:4,title:'Síncopas de semicorchea',desc:'Semicorchea, corchea, semicorchea y notas ligadas sobre el tiempo.',sig:'2/4',bars:4,figs:['q','e','s'],rests:true,ties:true,bpm:60,goal:72},
-  {id:'L24',ch:4,title:'Ligaduras en 6/8',desc:'Notas ligadas entre los dos pulsos de negra con puntillo y sobre la barra de compás.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:false,ties:true,bpm:50,goal:74},
-  {id:'L17',ch:5,title:'Siete octavos',desc:'Compás irregular agrupado 2+2+3. El metrónomo marca cada corchea.',sig:'7/8',grp:'2+2+3',bars:4,figs:['q','e'],rests:false,bpm:150,goal:74},
-  {id:'L18',ch:5,title:'Cinco octavos',desc:'Agrupado 3+2, ahora con semicorcheas.',sig:'5/8',grp:'3+2',bars:4,figs:['q','e','s'],rests:true,bpm:150,goal:75},
-  {id:'L25',ch:5,title:'Ocho octavos',desc:'Agrupado 3+3+2: dos grupos largos y uno corto. El metrónomo marca cada corchea.',sig:'8/8',grp:'3+3+2',bars:4,figs:['q','qd','e'],rests:true,bpm:150,goal:75},
-  {id:'L26',ch:5,title:'Tres blancas',desc:'El 3/2: el pulso es la blanca. Cada clic vale dos negras.',sig:'3/2',bars:4,figs:['h','q','e'],rests:true,bpm:60,goal:75},
-  {id:'L19',ch:5,title:'Todo junto',desc:'Ocho compases con casi todas las figuras.',sig:'4/4',bars:8,figs:['h','q','qd','e','ed','s','t'],rests:true,bpm:76,goal:76},
-  {id:'L20',ch:5,title:'Maestría',desc:'Todas las figuras a tempo de Allegro.',sig:'4/4',bars:8,figs:['w','h','hd','q','qd','e','ed','s','t'],rests:true,bpm:100,goal:80},
+  {id:'L1',ch:0,title:'Negras en el pulso',desc:'Una nota por tiempo. Toca justo con cada clic del metrónomo.',sig:'4/4',bars:2,figs:['q'],rests:[],bpm:60,goal:70},
+  {id:'L2',ch:0,title:'Negras y blancas',desc:'La blanca dura dos tiempos: tócala una vez y deja pasar el segundo tiempo sin tocar.',sig:'4/4',bars:2,figs:['q','h'],rests:[],bpm:60,goal:70},
+  {id:'L3',ch:0,title:'La redonda',desc:'Cuatro tiempos en una sola nota. Sigue contando mientras suena.',sig:'4/4',bars:4,figs:['q','h','w'],rests:[],bpm:66,goal:70},
+  {id:'L4',ch:0,title:'Primeros silencios',desc:'En los silencios no se toca, pero el pulso sigue: cuéntalo por dentro.',sig:'4/4',bars:4,figs:['q','h'],rests:['q','h'],bpm:66,goal:70},
+  {id:'L5',ch:0,title:'Tres tiempos',desc:'El compás de 3/4 y la blanca con puntillo, que ocupa el compás entero.',sig:'3/4',bars:4,figs:['q','h','hd'],rests:['q','h'],bpm:72,goal:72},
+  {id:'L6',ch:1,title:'Dos por tiempo',desc:'Dos corcheas llenan un tiempo. Piensa «un-y, dos-y».',sig:'2/4',bars:4,figs:['q','e'],rests:[],bpm:66,goal:72},
+  {id:'L7',ch:1,title:'Corcheas y silencios',desc:'Un silencio de corchea deja la nota en la segunda mitad del tiempo.',sig:'4/4',bars:4,figs:['q','h','e'],rests:['q','e'],bpm:70,goal:72},
+  {id:'L8',ch:1,title:'Negra con puntillo',desc:'Tiempo y medio, casi siempre seguida de una corchea.',sig:'4/4',bars:4,figs:['q','qd','e','h'],rests:[],bpm:72,goal:72},
+  {id:'L9',ch:1,title:'Corcheas en 3/4',desc:'Todo lo anterior, ahora en compás de tres.',sig:'3/4',bars:4,figs:['q','qd','e','h','hd'],rests:['q','e'],bpm:80,goal:75},
+  {id:'L10',ch:2,title:'Cuatro por tiempo',desc:'Cuatro semicorcheas por tiempo: «1-e-y-a».',sig:'2/4',bars:4,figs:['q','e','s'],rests:[],bpm:60,goal:72},
+  {id:'L11',ch:2,title:'Mezclas de semicorcheas',desc:'Corchea y dos semicorcheas, y al revés.',sig:'4/4',bars:4,figs:['q','e','s'],rests:['q','e'],bpm:66,goal:74},
+  {id:'L12',ch:2,title:'Corchea con puntillo',desc:'El ritmo largo-corto: corchea con puntillo y semicorchea.',sig:'4/4',bars:4,figs:['q','e','ed','s'],rests:[],bpm:66,goal:74},
+  {id:'L27',ch:2,title:'Silencio de semicorchea',desc:'Un silencio de semicorchea retrasa la nota un cuarto de tiempo. Cuenta «1-e-y-a» por dentro y entra justo en su sitio.',sig:'2/4',bars:4,figs:['q','e','s'],rests:['e','s'],bpm:60,goal:72},
+  {id:'L13',ch:2,title:'Tresillos',desc:'Tres corcheas iguales en un tiempo. No las conviertas en dos más una.',sig:'4/4',bars:4,figs:['q','e','t'],rests:[],bpm:66,goal:74},
+  {id:'L14',ch:3,title:'El 6/8',desc:'Dos pulsos de negra con puntillo, cada uno dividido en tres corcheas.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:[],bpm:50,goal:72},
+  {id:'L15',ch:3,title:'6/8 con silencios',desc:'Silencios y semicorcheas dentro del compás compuesto.',sig:'6/8',bars:4,figs:['qd','q','e','s'],rests:['qd','q','e'],bpm:52,goal:74},
+  {id:'L16',ch:3,title:'El 12/8',desc:'Cuatro pulsos ternarios, con blanca con puntillo.',sig:'12/8',bars:2,figs:['qd','q','e','hd'],rests:['qd','e'],bpm:56,goal:75},
+  {id:'L21',ch:4,title:'La síncopa',desc:'Corchea, negra, corchea: la negra empieza entre dos tiempos. Tócala en el «y» y deja que el pulso pase por debajo.',sig:'2/4',bars:4,figs:['q','e'],rests:[],ties:true,bpm:60,goal:70},
+  {id:'L22',ch:4,title:'Ligaduras de prolongación',desc:'La ligadura une dos notas: toca solo la primera y cuenta las dos. La segunda no se toca.',sig:'4/4',bars:4,figs:['q','h','e'],rests:[],ties:true,bpm:66,goal:72},
+  {id:'L23',ch:4,title:'Síncopas de semicorchea',desc:'Semicorchea, corchea, semicorchea y notas ligadas sobre el tiempo.',sig:'2/4',bars:4,figs:['q','e','s'],rests:['e','s'],ties:true,bpm:60,goal:72},
+  {id:'L24',ch:4,title:'Ligaduras en 6/8',desc:'Notas ligadas entre los dos pulsos de negra con puntillo y sobre la barra de compás.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:[],ties:true,bpm:50,goal:74},
+  {id:'L17',ch:5,title:'Siete octavos',desc:'Compás irregular agrupado 2+2+3. El metrónomo marca cada corchea.',sig:'7/8',grp:'2+2+3',bars:4,figs:['q','e'],rests:[],bpm:150,goal:74},
+  {id:'L28',ch:5,title:'Siete octavos: 3+2+2',desc:'El mismo compás con el grupo largo al principio. El metrónomo acentúa el inicio de cada grupo.',sig:'7/8',grp:'3+2+2',bars:4,figs:['q','qd','e'],rests:['e'],bpm:150,goal:75},
+  {id:'L18',ch:5,title:'Cinco octavos',desc:'Agrupado 3+2, ahora con semicorcheas.',sig:'5/8',grp:'3+2',bars:4,figs:['q','e','s'],rests:['e'],bpm:150,goal:75},
+  {id:'L29',ch:5,title:'Cinco octavos: 2+3',desc:'Los grupos al revés: primero el corto. Siente dónde cae cada acento.',sig:'5/8',grp:'2+3',bars:4,figs:['q','qd','e','s'],rests:['e','s'],bpm:150,goal:75},
+  {id:'L25',ch:5,title:'Ocho octavos',desc:'Agrupado 3+3+2: dos grupos largos y uno corto. El metrónomo marca cada corchea.',sig:'8/8',grp:'3+3+2',bars:4,figs:['q','qd','e'],rests:['q','e'],bpm:150,goal:75},
+  {id:'L26',ch:5,title:'Tres blancas',desc:'El 3/2: el pulso es la blanca. Cada clic vale dos negras.',sig:'3/2',bars:4,figs:['h','q','e'],rests:['h','q'],bpm:60,goal:75},
+  {id:'L19',ch:5,title:'Todo junto',desc:'Ocho compases con casi todas las figuras.',sig:'4/4',bars:8,figs:['h','q','qd','e','ed','s','t'],rests:['h','q','e','s'],bpm:76,goal:76},
+  {id:'L20',ch:5,title:'Maestría',desc:'Todas las figuras a tempo de Allegro.',sig:'4/4',bars:8,figs:['w','h','hd','q','qd','e','ed','s','t'],rests:['w','h','q','e','s'],bpm:100,goal:80},
 ];
 // Los id son fijos: el avance (prog.levels) se guarda por id y los niveles nuevos no deben moverlo.
 LEVELS.forEach(l=>{ l.s2=Math.min(l.goal+12,90); l.s3=95; });
@@ -1280,7 +1324,14 @@ $('#figs').addEventListener('click',e=>{
 });
 $('#barsDown').addEventListener('click',()=>{ if(set.bars>1){ set.bars--; $('#bars').textContent=set.bars; rhythmChanged(); } });
 $('#barsUp').addEventListener('click',()=>{ if(set.bars<16){ set.bars++; $('#bars').textContent=set.bars; rhythmChanged(); } });
-['rests','ties'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.checked; rhythmChanged(); }));
+$('#ties').addEventListener('change',e=>{ set.ties=e.target.checked; rhythmChanged(); });
+$('#restFigs').addEventListener('click',e=>{
+  const b=e.target.closest('.fig'); if(!b) return;
+  const k=b.dataset.r, i=set.rests.indexOf(k);
+  if(i>=0) set.rests.splice(i,1); else set.rests.push(k);
+  b.setAttribute('aria-pressed',String(set.rests.includes(k)));
+  rhythmChanged();
+});
 ['sound','loop','metro','accent'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.checked; save(); if(S.running && S.mode!=='metro') stop(); }));
 $('#cursor').addEventListener('change',e=>{ set.cursor=e.target.checked; save(); if(!set.cursor && S.nowI>=0 && evEls[S.nowI]) evEls[S.nowI].classList.remove('now'); });
 ['timbre','sub','countIn'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.value; save(); if(S.running && S.mode!=='metro') stop(); }));
@@ -1363,7 +1414,7 @@ $('#pClearBox').addEventListener('click',e=>{
 });
 new ResizeObserver(()=>{ if(!$('#progView').hidden) renderChart(prog.sessions.filter(r=>pFilter==='todo'||r.mode===pFilter)); }).observe($('#progView'));
 
-renderSigs(); renderGrp(); renderFigs(); syncControls(); padIdle();
+renderSigs(); renderGrp(); renderFigs(); renderRests(); syncControls(); padIdle();
 setView(stageMode);
 initStore();
 })();
