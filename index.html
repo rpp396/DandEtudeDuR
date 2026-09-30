@@ -159,7 +159,7 @@
 
       <div class="sec">
         <h2>Reproducción</h2>
-        <label class="sw"><input type="checkbox" id="sound"><span class="track"></span><span>Escuchar el ritmo<small>Desactívalo para solo ver la partitura con el cursor y el metrónomo.</small></span></label>
+        <label class="sw"><input type="checkbox" id="sound"><span class="track"></span><span>Escuchar el ritmo al practicar<small>«Reproducir» siempre hace sonar el ritmo. Actívalo si quieres oírlo también mientras practicas.</small></span></label>
         <label class="sw"><input type="checkbox" id="cursor"><span class="track"></span><span>Resaltar la nota actual</span></label>
         <label class="sw"><input type="checkbox" id="loop"><span class="track"></span><span>Repetir en bucle<small>Solo al reproducir</small></span></label>
         <div class="field"><label for="timbre">Sonido de las notas</label>
@@ -188,6 +188,7 @@
         <label class="sw"><input type="checkbox" id="holdSw"><span class="track"></span><span>Modo piano: medir la duración<small>Mantén pulsada la tecla o la pantalla mientras dura cada nota y suelta al terminar.</small></span></label>
         <label class="sw"><input type="checkbox" id="tapSound"><span class="track"></span><span>Oír mis toques<small>Cada toque suena: en modo piano, mientras lo mantienes. Con auriculares Bluetooth lo oirás con algo de retraso.</small></span></label>
         <div class="field" id="tapVolField"><span class="rlabel">Volumen de mis toques <output id="tapVolOut"></output></span><input type="range" id="tapVol" min="0" max="1" step="0.05" aria-label="Volumen de mis toques"></div>
+        <label class="sw"><input type="checkbox" id="fab"><span class="track"></span><span>Botón flotante para tocar<small>En móvil y tableta, mientras practicas aparece un botón grande abajo de la pantalla. Toca ahí en vez de sobre la partitura, que se desplaza al cambiar de línea.</small></span></label>
         <label class="sw"><input type="checkbox" id="autosave"><span class="track"></span><span>Guardar cada práctica automáticamente<small>Si lo desactivas, podrás guardar cada resultado a mano.</small></span></label>
         <div class="field"><span class="rlabel">Ajuste de latencia <output id="offsetOut"></output></span><input type="range" id="offset" min="-150" max="250" step="5" aria-label="Ajuste de latencia"></div>
         <p class="hint">Si siempre te marca «tarde» aunque vayas a tiempo (pasa con auriculares Bluetooth), sube este valor, o usa «Medir latencia» junto a la zona de toque para calcularlo automáticamente.</p>
@@ -220,6 +221,8 @@
     </div>
   </section>
 </div>
+
+<button type="button" class="fab" id="tapFab" hidden aria-label="Tocar"><span class="fab-main" id="fabMain">Toca aquí</span></button>
 
 <script>
 (() => {
@@ -333,12 +336,15 @@ const REST_KEYS = RESTS.map(r=>r.k);
 // Silencios activos: lista (práctica libre y niveles); acepta el booleano antiguo (= silencios de las figuras elegidas)
 function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.figs.filter(k=>REST_KEYS.includes(k)) : []); }
 
-const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:true, cursor:true, loop:false,
+const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:false, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
-  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, ties:false, tapSound:false, tapVol:0.6, grp:{}};
+  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, sv:2};
 let set = load();
 function load(){
-  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; s.rests=restList(s).filter(k=>REST_KEYS.includes(k)); return s; } }catch(e){}
+  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; s.rests=restList(s).filter(k=>REST_KEYS.includes(k));
+    // sv 2: «Escuchar el ritmo» pasa a aplicarse solo a la práctica (apagado) y «Oír mis toques» viene activado
+    if((o.sv|0)<2){ s.sound=false; s.tapSound=true; s.sv=2; }
+    return s; } }catch(e){}
   return {...DEFAULTS, figs:[...DEFAULTS.figs], rests:[...DEFAULTS.rests], grp:{}};
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(set)); }catch(e){} }
@@ -634,7 +640,7 @@ function setBpm(v, fromUser=true){
   if(fromUser){ save(); if(S.running && S.mode!=='metro') stop(); }
 }
 function syncControls(){
-  ['ties','sound','cursor','loop','metro','accent','tapSound'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
+  ['ties','sound','cursor','loop','metro','accent','tapSound','fab'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
   $('#timbre').value=set.timbre; $('#sub').value=set.sub; $('#countIn').value=set.countIn;
   $('#rhythmVol').value=set.rhythmVol; $('#metroVol').value=set.metroVol; $('#tapVol').value=set.tapVol; syncTapVol(); $('#offset').value=set.offset;
   $('#bars').textContent=set.bars;
@@ -743,7 +749,8 @@ function barClicks(tb,spt,countIn,force){
 function schedulePass(p){
   const base=S.passStart+p*S.passDur;
   for(let b=0;b<score.bars;b++) barClicks(base+b*score.L*S.spt,S.spt,false,false);
-  if(set.sound) score.flat.forEach(e=>{ if(!e.rest && !e.tie) noteSound(S.bus,base+e.abs*S.spt,e.len*S.spt); });
+  // «Reproducir» siempre hace sonar el ritmo; en la práctica depende de «Escuchar el ritmo al practicar»
+  if(S.mode==='play' || set.sound) score.flat.forEach(e=>{ if(!e.rest && !e.tie) noteSound(S.bus,base+e.abs*S.spt,e.len*S.spt); });
 }
 function start(mode){
   stop(); ensureAudio();
@@ -797,7 +804,7 @@ function followScore(i){
   const el=evEls[i], sys=el && el.closest('svg.sys'); if(!sys || sys===S.sysEl) return;
   S.sysEl=sys;
   const nxt=sys.nextElementSibling, top=sys.getBoundingClientRect().top, bottom=(nxt||sys).getBoundingClientRect().bottom;
-  if(top<8 || bottom>innerHeight-8) scrollTo({top:scrollY+top-16, behavior:'smooth'});
+  if(top<8 || bottom>innerHeight-fabReserve()) scrollTo({top:scrollY+top-16, behavior:'smooth'});
 }
 function setLight(i){
   if(i===S.light) return;
@@ -807,6 +814,7 @@ function setLight(i){
   if(i>=0 && ls[i]) ls[i].classList.add('on');
 }
 function showCount(c){
+  const fm=$('#fabMain'), ft=c?String(c):'Toca aquí'; if(fm.textContent!==ft){ fm.textContent=ft; fm.classList.toggle('count',!!c); }
   const el=$('#padCount');
   if(c){ el.textContent=c; el.hidden=false; } else el.hidden=true;
 }
@@ -850,10 +858,11 @@ function finish(){
   const wasPractice=S.mode==='practice';
   const notes=S.notes, holds=S.hold?[...S.holds.values()]:null, endT=ctx?ctx.currentTime:0;
   stop();
-  $('#pad').classList.remove('held');
+  setHeld(false);
   if(wasPractice) showResults(notes, holds, endT);
 }
 function updateTransport(){
+  updateFab();
   const r=S.running, m=S.mode;
   $('#bStop').disabled=!r;
   $('#bPlay').classList.toggle('active',r&&m==='play');
@@ -863,13 +872,15 @@ function updateTransport(){
 }
 
 /* ---------- Práctica ---------- */
+const tapZones=()=>[$('#pad'),$('#tapFab')];
 function flashPad(cls){
-  const p=$('#pad'); p.classList.remove('hit','miss'); void p.offsetWidth; p.classList.add(cls);
+  tapZones().forEach(p=>{ p.classList.remove('hit','miss'); void p.offsetWidth; p.classList.add(cls); });
 }
+function setHeld(on){ tapZones().forEach(p=>p.classList.toggle('held',on)); }
 function tap(src){
   if(S.running && S.mode==='calib'){ calibTap(); return; }
   tapSoundOn(src||'x');
-  if(S.running && S.mode==='practice' && S.hold){ S.holds.set(src||'x',{note:null,t:ctx.currentTime}); $('#pad').classList.add('held'); }
+  if(S.running && S.mode==='practice' && S.hold){ S.holds.set(src||'x',{note:null,t:ctx.currentTime}); setHeld(true); }
   if(!S.running || S.mode!=='practice'){ flashPad('hit'); return; }
   const now=ctx.currentTime;
   if(now < S.passStart+S.lat-0.25) return; // durante la cuenta
@@ -900,7 +911,7 @@ function release(src){
   if(!S.running || S.mode!=='practice' || !S.hold) return;
   const h=S.holds.get(src||'x'); if(!h) return;
   S.holds.delete(src||'x');
-  if(!S.holds.size) $('#pad').classList.remove('held');
+  if(!S.holds.size) setHeld(false);
   if(h.note) judgeRelease(h.note, h.t, ctx.currentTime);
 }
 function judgeRelease(n, tPress, tRel){
@@ -959,14 +970,32 @@ function showResults(notes, holds, endT){
 /* ---------- Medición de latencia ---------- */
 const K_BPM=90, K_LEAD=4, K_N=16;
 let K={suggest:null};
+// Botón flotante: solo en pantallas táctiles (móvil, tableta) y si el ajuste está activo
+const touchMQ = matchMedia('(any-pointer: coarse)');
+const fabWanted = () => !!set.fab && touchMQ.matches;
+// En reposo el botón dice «Practicar» (solo si la partitura está a la vista); durante la práctica o la medición, «Toca aquí»
+let padInView=false;
+function updateFab(){
+  const f=$('#tapFab'), fm=$('#fabMain'), live=S.running && (S.mode==='practice'||S.mode==='calib');
+  const on=fabWanted() && (live || (!S.running && padInView));
+  f.hidden=!on; document.body.classList.toggle('fab-on',on); f.classList.toggle('idle',on && !live);
+  f.setAttribute('aria-label', live ? 'Tocar' : 'Practicar');
+  if(on && !live){ fm.textContent='Practicar'; fm.classList.remove('count'); }
+  else if(on && fm.textContent==='Practicar') fm.textContent='Toca aquí';
+}
+new IntersectionObserver(es=>{ padInView=es[es.length-1].isIntersecting; updateFab(); }).observe($('#pad'));
+// Alto de la parte inferior de la pantalla que tapa el botón flotante (para el seguimiento de la partitura)
+function fabReserve(){ const f=$('#tapFab'); return f.hidden ? 8 : innerHeight-f.getBoundingClientRect().top+12; }
 function showPad(){
+  updateFab();
   const p=$('#pad'), r=p.getBoundingClientRect();
   p.focus({preventScroll:true});
-  if(r.top<0 || r.bottom>innerHeight) p.scrollIntoView({block:r.height>innerHeight?'start':'center',behavior:'smooth'});
+  const room=innerHeight-fabReserve();
+  if(r.top<0 || r.bottom>room) p.scrollIntoView({block:r.height>room?'start':'center',behavior:'smooth'});
 }
 function padIdle(){
   $('#pad').classList.remove('live');
-  $('#padMain').textContent='Pulsa «Practicar» y toca sobre la partitura en cada nota';
+  $('#padMain').textContent='Toca la partitura (o «Practicar») para empezar, y luego toca sobre ella en cada nota';
   $('#padSub').textContent='También puedes usar el teclado evita la barra espaciadora. Antes de empezar suena la cuenta.';
 }
 function startCalib(){
@@ -1364,13 +1393,22 @@ $('#kApply').addEventListener('click',()=>{
   $('#kApply').disabled=true; $('#kApply').textContent='Corrección aplicada';
 });
 // La partitura es la zona de toque, pero solo durante la práctica o la medición: en reposo se puede desplazar y seleccionar con normalidad
-$('#pad').addEventListener('pointerdown',e=>{
-  if(!S.running || (S.mode!=='practice' && S.mode!=='calib')) return;
-  if(e.button>0) return;
-  e.preventDefault(); try{ $('#pad').setPointerCapture(e.pointerId); }catch(_){} tap('p'+e.pointerId);
-});
-['pointerup','pointercancel','lostpointercapture'].forEach(t=>$('#pad').addEventListener(t,e=>release('p'+e.pointerId)));
-$('#pad').addEventListener('contextmenu',e=>{ if(S.running) e.preventDefault(); });
+function bindTapZone(el,pre){
+  // En reposo, un clic (no un arrastre para desplazar la página) empieza la práctica. Se ignora el clic que
+  // cierra un toque empezado durante la práctica, para no volver a empezar al soltar después del final.
+  let downWhileRunning=false;
+  el.addEventListener('click',()=>{ if(!S.running && !downWhileRunning) start('practice'); downWhileRunning=false; });
+  el.addEventListener('pointerdown',e=>{
+    downWhileRunning=S.running;
+    if(!S.running || (S.mode!=='practice' && S.mode!=='calib')) return;
+    if(e.button>0) return;
+    e.preventDefault(); try{ el.setPointerCapture(e.pointerId); }catch(_){} tap(pre+e.pointerId);
+  });
+  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>el.addEventListener(t,e=>release(pre+e.pointerId)));
+  el.addEventListener('contextmenu',e=>{ if(S.running) e.preventDefault(); });
+}
+bindTapZone($('#pad'),'p'); bindTapZone($('#tapFab'),'f');
+$('#fab').addEventListener('change',e=>{ set.fab=e.target.checked; save(); updateFab(); });
 const isField=el=>el && (el.tagName==='INPUT'||el.tagName==='SELECT'||el.tagName==='TEXTAREA');
 document.addEventListener('keydown',e=>{
   if(e.metaKey||e.ctrlKey||e.altKey||e.repeat) return;

@@ -27,6 +27,10 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 
 **Zona de toque:** es la propia partitura. `#pad` envuelve `#score`, la cuenta previa (`#padCount`, superpuesta) y la línea de estado (`#padMain` / `#padSub`). Los toques de puntero solo cuentan mientras hay práctica o medición de latencia; en reposo la partitura no captura el puntero, para que se pueda desplazar la página. Al empezar, `showPad()` enfoca la partitura y la desplaza a la vista si hace falta.
 
+**Empezar tocando:** en reposo, un `click` en la partitura o en el botón flotante llama a `start('practice')` (se usa `click` y no `pointerdown` para que desplazar la página con el dedo no empiece nada; se ignora el clic que cierra un toque empezado durante la práctica).
+
+**Botón flotante (`#tapFab`):** en pantallas táctiles (`(any-pointer: coarse)`) y con `set.fab` activo (por defecto), `updateFab()` lo muestra fijo abajo: en reposo dice «Practicar» y solo aparece si la partitura está a la vista (`IntersectionObserver` → `padInView`); durante la práctica o la medición dice «Toca aquí». Se llama desde `showPad()` y `updateTransport()`. `bindTapZone(el, prefijo)` da a la partitura (`p…`) y al botón (`f…`) el mismo manejo de `pointerdown/up` → `tap`/`release`; `flashPad` y `setHeld` actúan sobre las dos zonas; `showCount` pone también la cuenta en el botón. `fabReserve()` es el alto que tapa el botón y lo descuentan `showPad` y `followScore` para que la línea actual y la siguiente queden por encima.
+
 **Capturas del README:** están en `docs/capturas/`, hechas con Playwright (Chromium) a 1200 px (y 390 px ×2 la de móvil), con datos de ejemplo y marcadores numerados añadidos al DOM solo para la captura. Si cambia la interfaz, conviene rehacerlas.
 
 ## Convenciones y decisiones
@@ -40,7 +44,9 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 - **Golpes de más:** restan 40 puntos cada uno si `set.penalize` está activo (activado por defecto); si no, solo se cuentan. Su posición se guarda en `extraTks` (ticks desde el inicio, con la misma corrección de latencia que las notas) y en los resultados se dibuja como un triángulo gris (`.mkextra`) en la fila de los marcadores, interpolado dentro de la figura donde cayó.
 - **Modo piano (`set.hold`):** además del ataque se evalúa cuándo se suelta respecto al final de la figura. Justa ±max(70 ms, 15 % de la duración), aceptable ±max(140 ms, 30 %), si no «antes» o «tarde». Puntos: 100 / 70 / 30. Cada nota vale 60 % ataque + 40 % duración.
 - **Latencia:** la hora esperada de cada nota suma `ctx.outputLatency` (o `baseLatency`) y la corrección del usuario (`set.offset`, en ms, positiva si el usuario llega tarde).
-- **Toque audible (`set.tapSound`, `set.tapVol`):** en modo piano suena un tono mientras se mantiene; en batería, un golpe corto. No suena durante la medición de latencia.
+- **Sonido del ritmo:** «Reproducir» siempre hace sonar el ritmo (`schedulePass`: `S.mode==='play' || set.sound`); la casilla «Escuchar el ritmo al practicar» (`set.sound`, apagada por defecto) solo afecta a la práctica.
+- **Toque audible (`set.tapSound`, activado por defecto, `set.tapVol`):** en modo piano suena un tono mientras se mantiene; en batería, un golpe corto. No suena durante la medición de latencia.
+- **Migración de ajustes (`set.sv`):** `load()` aplica cambios de valores por defecto a ajustes guardados antiguos una sola vez. `sv` 2: `sound=false`, `tapSound=true`.
 - **Campaña:** cada nivel tiene un `id` fijo (`L1`…); `prog.levels` y `set.levelId` usan ese id, así que se pueden insertar niveles en cualquier posición con un id nuevo. Un nivel ya superado sigue abierto aunque se inserte antes uno sin superar. 1 estrella = objetivo del nivel (70–80 %), 2 = objetivo + 12 (máx. 90 %), 3 = 95 %. Un nivel se desbloquea al conseguir al menos una estrella en el anterior. El tempo lo fija el nivel.
 - **Sesiones guardadas:** `{id, t, mode, lvl, lid, sig, grp, bars, bpm, pct, n, exact, good, near, miss, extra, mean, play, pen}`; se guardan como máximo 400. Las sesiones antiguas no tienen `lid`: su `lvl` equivale al id `L(lvl+1)` (`sessLevel`).
 

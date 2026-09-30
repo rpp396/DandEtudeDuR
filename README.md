@@ -29,14 +29,14 @@ Abre `index.html` en el navegador (junto a `styles.css`, en la misma carpeta). N
 3. **Tempo:** con − / +, escribiendo el número o marcándolo con toques.
 4. **Escuchar:** *Reproducir* toca el ritmo con el metrónomo para que lo oigas antes de practicarlo. *Nuevo ritmo* (o la tecla <kbd>N</kbd>) genera otro.
 5. **Partitura:** además de leerla, es donde tocas.
-6. **Practicar:** empieza la cuenta previa y la evaluación.
+6. **Practicar:** empieza la cuenta previa y la evaluación. También puedes empezar tocando directamente la partitura.
 7. **Batería / Piano:** en *Batería* solo cuenta cuándo tocas cada nota; en *Piano* también cuánto la mantienes pulsada.
 
 ### 2. Toca sobre la partitura
 
 ![Práctica en curso: la partitura se enmarca en azul y las notas tocadas se colorean](docs/capturas/2-practicando.png)
 
-Al pulsar *Practicar*, la partitura se enmarca en azul y suena la cuenta previa (el número aparece sobre la partitura). Después, **toca sobre la partitura en cada nota**: con el dedo, con el ratón o con la barra espaciadora (en realidad sirve cualquier tecla).
+Al pulsar *Practicar* (o tocar la partitura), la partitura se enmarca en azul y suena la cuenta previa (el número aparece sobre la partitura). Después, **toca sobre la partitura en cada nota**: con el dedo, con el ratón o con la barra espaciadora (en realidad sirve cualquier tecla). En móvil y tableta también puedes usar el botón flotante de abajo.
 
 1. **Pulso:** las luces siguen al metrónomo.
 2. **Nota actual:** el cursor marca la nota que suena; las que ya tocaste se colorean según tu precisión.
@@ -75,6 +75,6 @@ Resumen de tus prácticas, gráfica de precisión con la media de las últimas c
 
 <img src="docs/capturas/6-movil.png" alt="La app en un móvil durante la práctica" width="300">
 
-En pantallas pequeñas el panel de opciones pasa debajo. Al pulsar *Practicar*, la página se desplaza para que la partitura quede entera a la vista.
+En pantallas pequeñas el panel de opciones pasa debajo. En móvil y tableta aparece un **botón grande abajo de la pantalla** mientras la partitura está a la vista. En reposo dice *Practicar* y empieza la práctica; durante la práctica dice *Toca aquí* y es donde tocas: no se mueve cuando la partitura cambia de línea, así no tocas fuera por error (también muestra la cuenta previa y, en modo piano, se mantiene pulsado). Si prefieres tocar sobre la partitura, desactívalo en *Práctica → Botón flotante para tocar*.
 
 Para el detalle técnico, consulta [`CLAUDE.md`](CLAUDE.md).
