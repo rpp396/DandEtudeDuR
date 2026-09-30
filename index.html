@@ -1164,6 +1164,16 @@ function selectLevel(i){
   if(i<0||i>=LEVELS.length||!unlocked(i)) return;
   stop(); levelIdx=i; set.level=i; set.levelId=LEVELS[i].id; save();
   renderLevelBar(); renderCampMap(); showTempo(); generate();
+  requestAnimationFrame(centerScore);
+}
+// Centra la partitura en la parte visible (descontando el botón flotante en móvil) si no se ve entera
+function centerScore(){
+  const r=$('.score-card').getBoundingClientRect();
+  // el botón flotante en reposo aparece al quedar la partitura a la vista: se reserva su sitio aunque aún esté oculto
+  const reserve = fabWanted() ? Math.max(fabReserve(), 100) : 8, room=innerHeight-reserve;
+  if(r.top>=8 && r.bottom<=room) return;
+  const top = r.height<room-16 ? r.top-(room-r.height)/2 : r.top-8;
+  scrollTo({top:scrollY+top, behavior:'smooth'});
 }
 function applyStageMode(){
   const camp=stageMode==='campana';
