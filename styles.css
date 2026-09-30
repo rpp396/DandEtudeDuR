@@ -273,7 +273,20 @@ td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabu
 .confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
 @media (max-width:520px){ .tabs{width:100%} .tab{flex:1 1 auto;justify-content:center;padding:8px 6px;font-size:14px} .tab svg{display:none} .tiles{grid-template-columns:repeat(2,minmax(0,1fr))} .tile .big{font-size:28px} }
 @media (max-width:560px){ .level-bar{grid-template-columns:auto minmax(0,1fr) auto;gap:8px;padding:12px} .level-bar h2{font-size:21px} }
+/* botón flotante para tocar (móvil y tableta) */
+.fab{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;width:min(440px,calc(100vw - 32px));height:96px;border:0;border-radius:22px;background:var(--accent);color:var(--accent-ink);font:700 22px/1 var(--sans);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 28px rgba(20,24,33,.28),inset 0 -4px 0 rgba(0,0,0,.18);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.fab-main{font-family:var(--serif);font-weight:400;font-size:26px;letter-spacing:.01em;pointer-events:none}
+.fab-main.count{font-size:52px}
+.fab.idle{height:72px;background:var(--ink);color:var(--paper)}
+.fab.idle .fab-main{font-family:var(--sans);font-weight:700;font-size:20px}
+#pad:not(.live){cursor:pointer}
+.fab.held{box-shadow:0 4px 12px rgba(20,24,33,.25),inset 0 0 0 4px rgba(255,255,255,.55);filter:brightness(1.12)}
+.fab.hit{animation:fabhit .16s ease-out}
+.fab.miss{animation:fabmiss .22s ease-out}
+@keyframes fabhit{from{transform:translateX(-50%) scale(.965)}to{transform:translateX(-50%) scale(1)}}
+@keyframes fabmiss{from{background:var(--bad)}to{background:var(--accent)}}
+body.fab-on{padding-bottom:140px}
 @media (prefers-reduced-motion: reduce){
-  .pad.hit,.pad.miss{animation:none}
+  .pad.hit,.pad.miss,.fab.hit,.fab.miss{animation:none}
   .light,.btn,.track,.track::after{transition:none}
 }

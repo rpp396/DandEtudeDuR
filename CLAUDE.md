@@ -27,6 +27,10 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 
 **Zona de toque:** es la propia partitura. `#pad` envuelve `#score`, la cuenta previa (`#padCount`, superpuesta) y la línea de estado (`#padMain` / `#padSub`). Los toques de puntero solo cuentan mientras hay práctica o medición de latencia; en reposo la partitura no captura el puntero, para que se pueda desplazar la página. Al empezar, `showPad()` enfoca la partitura y la desplaza a la vista si hace falta.
 
+**Empezar tocando:** en reposo, un `click` en la partitura o en el botón flotante llama a `start('practice')` (se usa `click` y no `pointerdown` para que desplazar la página con el dedo no empiece nada; se ignora el clic que cierra un toque empezado durante la práctica).
+
+**Botón flotante (`#tapFab`):** en pantallas táctiles (`(any-pointer: coarse)`) y con `set.fab` activo (por defecto), `updateFab()` lo muestra fijo abajo: en reposo dice «Practicar» y solo aparece si la partitura está a la vista (`IntersectionObserver` → `padInView`); durante la práctica o la medición dice «Toca aquí». Se llama desde `showPad()` y `updateTransport()`. `bindTapZone(el, prefijo)` da a la partitura (`p…`) y al botón (`f…`) el mismo manejo de `pointerdown/up` → `tap`/`release`; `flashPad` y `setHeld` actúan sobre las dos zonas; `showCount` pone también la cuenta en el botón. `fabReserve()` es el alto que tapa el botón y lo descuentan `showPad` y `followScore` para que la línea actual y la siguiente queden por encima.
+
 **Capturas del README:** están en `docs/capturas/`, hechas con Playwright (Chromium) a 1200 px (y 390 px ×2 la de móvil), con datos de ejemplo y marcadores numerados añadidos al DOM solo para la captura. Si cambia la interfaz, conviene rehacerlas.
 
 ## Convenciones y decisiones
