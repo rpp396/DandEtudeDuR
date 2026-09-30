@@ -31,6 +31,10 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 
 **Botón flotante (`#tapFab`):** en pantallas táctiles (`(any-pointer: coarse)`) y con `set.fab` activo (por defecto), `updateFab()` lo muestra fijo abajo: en reposo dice «Practicar» y solo aparece si la partitura está a la vista (`IntersectionObserver` → `padInView`); durante la práctica o la medición dice «Toca aquí». Se llama desde `showPad()` y `updateTransport()`. `bindTapZone(el, prefijo)` da a la partitura (`p…`) y al botón (`f…`) el mismo manejo de `pointerdown/up` → `tap`/`release`; `flashPad` y `setHeld` actúan sobre las dos zonas; `showCount` pone también la cuenta en el botón. `fabReserve()` es el alto que tapa el botón y lo descuentan `showPad` y `followScore` para que la línea actual y la siguiente queden por encima.
 
+**Cambio de nivel:** `selectLevel` llama a `centerScore()`, que centra la tarjeta de la partitura en la parte visible (reservando el sitio del botón flotante en móvil) si no se ve entera; si es más alta que el espacio, la deja arriba.
+
+**Resultados:** los botones (`#resActions`: «Siguiente nivel» `#rcNext`, «Repetir práctica», «Nuevo ritmo», «Guardar resultado») van arriba, antes del porcentaje, para que queden junto a la partitura; «Siguiente nivel» solo aparece al superar un nivel de la campaña y entonces «Repetir» deja de ser el botón principal. Al mostrar los resultados, la página se desplaza lo justo para que esos botones se vean (descontando `fabReserve()`).
+
 **Capturas del README:** están en `docs/capturas/`, hechas con Playwright (Chromium) a 1200 px (y 390 px ×2 la de móvil), con datos de ejemplo y marcadores numerados añadidos al DOM solo para la captura. Si cambia la interfaz, conviene rehacerlas.
 
 ## Convenciones y decisiones
