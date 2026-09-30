@@ -159,7 +159,7 @@
 
       <div class="sec">
         <h2>Reproducción</h2>
-        <label class="sw"><input type="checkbox" id="sound"><span class="track"></span><span>Escuchar el ritmo<small>Desactívalo para solo ver la partitura con el cursor y el metrónomo.</small></span></label>
+        <label class="sw"><input type="checkbox" id="sound"><span class="track"></span><span>Escuchar el ritmo al practicar<small>«Reproducir» siempre hace sonar el ritmo. Actívalo si quieres oírlo también mientras practicas.</small></span></label>
         <label class="sw"><input type="checkbox" id="cursor"><span class="track"></span><span>Resaltar la nota actual</span></label>
         <label class="sw"><input type="checkbox" id="loop"><span class="track"></span><span>Repetir en bucle<small>Solo al reproducir</small></span></label>
         <div class="field"><label for="timbre">Sonido de las notas</label>
@@ -336,12 +336,15 @@ const REST_KEYS = RESTS.map(r=>r.k);
 // Silencios activos: lista (práctica libre y niveles); acepta el booleano antiguo (= silencios de las figuras elegidas)
 function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.figs.filter(k=>REST_KEYS.includes(k)) : []); }
 
-const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:true, cursor:true, loop:false,
+const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:false, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
-  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, ties:false, tapSound:false, tapVol:0.6, grp:{}, fab:true};
+  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, sv:2};
 let set = load();
 function load(){
-  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; s.rests=restList(s).filter(k=>REST_KEYS.includes(k)); return s; } }catch(e){}
+  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; s.rests=restList(s).filter(k=>REST_KEYS.includes(k));
+    // sv 2: «Escuchar el ritmo» pasa a aplicarse solo a la práctica (apagado) y «Oír mis toques» viene activado
+    if((o.sv|0)<2){ s.sound=false; s.tapSound=true; s.sv=2; }
+    return s; } }catch(e){}
   return {...DEFAULTS, figs:[...DEFAULTS.figs], rests:[...DEFAULTS.rests], grp:{}};
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(set)); }catch(e){} }
@@ -746,7 +749,8 @@ function barClicks(tb,spt,countIn,force){
 function schedulePass(p){
   const base=S.passStart+p*S.passDur;
   for(let b=0;b<score.bars;b++) barClicks(base+b*score.L*S.spt,S.spt,false,false);
-  if(set.sound) score.flat.forEach(e=>{ if(!e.rest && !e.tie) noteSound(S.bus,base+e.abs*S.spt,e.len*S.spt); });
+  // «Reproducir» siempre hace sonar el ritmo; en la práctica depende de «Escuchar el ritmo al practicar»
+  if(S.mode==='play' || set.sound) score.flat.forEach(e=>{ if(!e.rest && !e.tie) noteSound(S.bus,base+e.abs*S.spt,e.len*S.spt); });
 }
 function start(mode){
   stop(); ensureAudio();
