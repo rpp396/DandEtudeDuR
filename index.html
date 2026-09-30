@@ -94,9 +94,21 @@
       </section>
 
       <section class="results" id="results" hidden>
+        <!-- acciones arriba, junto a la partitura; «Siguiente nivel» solo al superar un nivel de la campaña -->
+        <div class="res-actions" id="resActions">
+          <button class="btn primary" id="rcNext" type="button" hidden>Siguiente nivel</button>
+          <button class="btn primary" id="rAgain" type="button">Repetir práctica</button>
+          <button class="btn" id="rNew" type="button">Nuevo ritmo</button>
+          <button class="btn" id="rSave" type="button" hidden>Guardar resultado</button>
+          <span class="saved-note" id="rSaved" hidden></span>
+        </div>
         <div class="res-top">
           <div class="pct" id="rPct">0%</div>
           <div><h3 id="rHead"></h3><p id="rTrend"></p></div>
+        </div>
+        <div class="res-camp" id="rCamp" hidden>
+          <span class="stars" id="rcStars"></span>
+          <p id="rcText"></p>
         </div>
         <ul class="counts">
           <li><span class="sw-dot" style="background:var(--good)"></span>Exacto (±40 ms)<span class="n" id="cExact">0</span></li>
@@ -111,18 +123,7 @@
           <li><span class="sw-dot" style="background:var(--near)"></span>Soltaste antes<span class="n" id="dShort">0</span></li>
           <li><span class="sw-dot" style="background:var(--near)"></span>Soltaste tarde<span class="n" id="dLong">0</span></li>
         </ul>
-        <div class="res-camp" id="rCamp" hidden>
-          <span class="stars" id="rcStars"></span>
-          <p id="rcText"></p>
-          <button class="btn primary" id="rcNext" type="button">Siguiente nivel</button>
-        </div>
         <p class="res-note">Los puntos bajo cada nota muestran tu desvío: a la izquierda de la rayita tocaste antes, a la derecha tocaste tarde. Los triángulos grises marcan dónde tocaste sin que hubiera nota (golpes de más).<span id="durNote" hidden> En modo piano, la barra de debajo compara cuánto mantuviste la nota (color) con lo que debía durar (gris); la rayita marca dónde tenías que soltar.</span></p>
-        <div class="res-actions">
-          <button class="btn primary" id="rAgain" type="button">Repetir práctica</button>
-          <button class="btn" id="rNew" type="button">Nuevo ritmo</button>
-          <button class="btn" id="rSave" type="button" hidden>Guardar resultado</button>
-          <span class="saved-note" id="rSaved" hidden></span>
-        </div>
       </section>
     </section>
 
@@ -965,6 +966,9 @@ function showResults(notes, holds, endT){
     lvl: stageMode==='campana'?levelIdx:null, lid: stageMode==='campana'?LEVELS[levelIdx].id:null, sig:score.key, grp:score.grp, bars:score.bars, bpm:curBpm(), pct, n:N,
     exact:c.exact, good:c.good, near:c.near, miss:c.miss, extra:extras, mean, play:holdMode?'piano':'bateria', pen:!!set.penalize});
   $('#results').hidden=false;
+  // que los botones de los resultados queden a la vista (sin tapar la partitura más de lo necesario)
+  const ab=$('#resActions').getBoundingClientRect(), room=innerHeight-fabReserve();
+  if(ab.bottom>room) scrollTo({top:scrollY+ab.bottom-room+12, behavior:'smooth'});
 }
 
 /* ---------- Medición de latencia ---------- */
@@ -1259,7 +1263,8 @@ function afterPractice(r){
       next.hidden=true;
     }
     renderLevelBar(); renderCampMap();
-  } else rc.hidden=true;
+  } else { rc.hidden=true; $('#rcNext').hidden=true; }
+  $('#rAgain').classList.toggle('primary', $('#rcNext').hidden);
   if(set.autosave){ saveSession(r); save.hidden=true; saved.hidden=false; saved.textContent='Guardado en «Mi progreso».'; }
   else { if(r.mode==='campana') commitProg(); save.hidden=false; save.disabled=false; save.textContent='Guardar resultado'; saved.hidden=true; }
 }
