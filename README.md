@@ -25,6 +25,15 @@ Abre `index.html` en el navegador (junto a `styles.css`, en la misma carpeta). N
 
 ### 1. La pantalla principal
 
+La primera vez, una tarjeta explica cómo se practica:
+
+![Tarjeta de bienvenida de la primera vez](docs/capturas/bienvenida.png)
+
+1. **Medir latencia ahora:** empieza la medición (recomendable con auriculares Bluetooth).
+2. **Entendido:** cierra la tarjeta. También se cierra sola al terminar la primera práctica.
+
+Después, la pantalla principal queda así:
+
 ![Pantalla principal con las partes numeradas](docs/capturas/1-pantalla-principal.png)
 
 1. **Modo:** *Práctica libre* (tú eliges todo), *Campaña* (niveles guiados) o *Mi progreso*.
@@ -59,6 +68,8 @@ El resumen encima de la partitura recuerda siempre qué está activo. Un ejemplo
 
 <img src="docs/capturas/opciones-sonido.png" alt="Opciones de reproducción, metrónomo y práctica" width="340">
 
+Las tres secciones se pliegan y despliegan pulsando su título (en el móvil empiezan plegadas); la app recuerda cómo las dejaste.
+
 1. **Reproducción:** *Reproducir* siempre hace sonar el ritmo; *Escuchar el ritmo al practicar* lo hace sonar también mientras practicas (viene apagada, para que lo leas tú). También: resaltar la nota actual, repetir en bucle, sonido de las notas (tono sostenido o golpe) y volumen.
 2. **Metrónomo:** tempo, marcar el tempo con toques, sonar durante el ritmo, acento en el primer tiempo, subdivisión, compases de cuenta previa y volumen.
 3. **Práctica:**
@@ -69,6 +80,7 @@ El resumen encima de la partitura recuerda siempre qué está activo. Un ejemplo
    - *Vibrar al tocar:* solo en pantallas táctiles que lo admiten.
    - *Guardar cada práctica automáticamente* en *Mi progreso*.
    - *Ajuste de latencia:* la corrección manual; *Medir latencia* la calcula por ti.
+4. **Restablecer ajustes:** vuelve a las opciones iniciales (pide confirmación). Conserva tu progreso y la corrección de latencia.
 
 ### 4. Toca sobre la partitura
 
@@ -94,7 +106,9 @@ Los botones para repetir la práctica o pedir un nuevo ritmo quedan arriba, junt
 4. **Recuento:** exactas, bien, cerca, sin tocar y golpes de más.
 5. **Golpe de más:** un triángulo gris marca dónde tocaste sin que hubiera nota (en un silencio, en la parte sostenida de una figura larga o en una nota ligada).
 
-Si el ritmo tiene varios compases y alguno baja del 90 %, el resultado indica **el compás más flojo** y ofrece *Practicar el compás N*: se practica solo ese compás, tal cual, hasta que salga. *Ritmo completo* (junto a *Nuevo ritmo*) vuelve al ritmo entero. En la campaña, practicar un compás suelto no cuenta para las estrellas del nivel.
+![Resultado con el compás más flojo y el botón para practicarlo](docs/capturas/compas-flojo.png)
+
+1. **Compás más flojo:** si el ritmo tiene varios compases y alguno baja del 90 %, el resultado lo indica y ofrece *Practicar el compás N*: se practica solo ese compás, tal cual, hasta que salga. *Ritmo completo* (junto a *Nuevo ritmo*) vuelve al ritmo entero. En la campaña, practicar un compás suelto no cuenta para las estrellas del nivel.
 
 #### En modo piano
 
