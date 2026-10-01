@@ -415,7 +415,7 @@ function genMeasure(sig, L){
           if(c.wholeBar && !(gi===0 && L===clen)) return;
           // en 4/4, 2/2 y 3/2 las blancas empiezan en tiempo impar (1, 3, 5); en 3/2 también la blanca con puntillo
           if(len===12 && (L===48 || sig.click===24) && gi%2 && (clen===24 || (L===72 && clen===36))) return;
-          cands.push({c,span,w:c.rest?0.4:0.9});
+          cands.push({c,span,w:c.rest?(c.wholeBar?0.12:0.4):0.9});
         });
       }
       let pick;
@@ -425,14 +425,31 @@ function genMeasure(sig, L){
       cid++; gi+=pick.span;
     }
     last={evs,fb};
-    if(evs.some(e=>!e.rest)) return last;
+    // un compás sin notas solo vale si es el silencio de redonda que lo llena (generate exige alguna nota en el ritmo)
+    if(evs.some(e=>!e.rest) || (!fb && evs.length===1 && evs[0].dur===48)) return last;
   }
   return last;
 }
+// Figuras escritas en un ritmo: clave de FIGS para las notas y 'r' + clave de RESTS para los silencios
+function figsUsed(measures){ const k=new Set(); measures.forEach(evs=>evs.forEach(e=>k.add((e.rest?'r':'')+DUR2K[e.dur]))); return k; }
+const hasNote = ms => ms.some(m=>m.evs.some(e=>!e.rest));
 function generate(){
   const C=cfg(), sig=sigOf(C), L=sum(sig.groups);
-  const measures=[]; let fb=false;
-  for(let m=0;m<C.bars;m++){ const r=genMeasure(sig,L); fb=fb||r.fb; measures.push(r.evs); }
+  const newBars=()=>Array.from({length:C.bars},()=>genMeasure(sig,L));
+  let ms=newBars();
+  for(let a=0; a<50 && !hasNote(ms); a++) ms=newBars();
+  // En la campaña el ritmo debe usar todas las figuras y silencios del nivel: se cambia un compás al azar
+  // y el cambio se queda si no pierde ninguna (si alguna no puede salir en ese compás, se queda lo logrado)
+  const want = stageMode==='campana' ? [...C.figs, ...restList(C).map(k=>'r'+k)] : [];
+  const cover = t => { const u=figsUsed(t.map(m=>m.evs)); return want.filter(k=>u.has(k)).length; };
+  let n=cover(ms);
+  for(let it=0; it<3000 && n<want.length; it++){
+    const r=genMeasure(sig,L); if(r.fb) continue;
+    const t=ms.slice(); t[Math.floor(Math.random()*t.length)]=r;
+    const tn=cover(t);
+    if(tn>=n && hasNote(t)){ ms=t; n=tn; }
+  }
+  const measures=ms.map(m=>m.evs), fb=ms.some(m=>m.fb);
   const flat=[];
   measures.forEach((evs,mi)=>evs.forEach(e=>{ e.m=mi; e.abs=mi*L+e.start; e.i=flat.length; flat.push(e); }));
   if(C.ties) addTies(flat);
