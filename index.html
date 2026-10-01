@@ -260,6 +260,7 @@
 </div>
 
 <button type="button" class="fab" id="tapFab" hidden aria-label="Tocar"><span class="fab-main" id="fabMain">Toca aquí</span></button>
+<button type="button" class="fab-restart" id="fabRestart" hidden aria-label="Reiniciar: mantén pulsado medio segundo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg><span>Reiniciar</span></button>
 <div class="fab fab-post" id="postFab" role="group" aria-label="Después de la práctica" hidden>
   <button type="button" id="pfAgain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg>Repetir</button>
   <button type="button" id="pfNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7h3.2c2 0 3.2.9 4.3 2.6l2.6 4.6c1 1.8 2.3 2.8 4.3 2.8h4.6"/><path d="M2.5 17h3.2c1.3 0 2.2-.4 3-1.1"/><path d="M14.4 8.1c.8-.7 1.7-1.1 3-1.1h4.1"/><path d="M18.5 4l3 3-3 3"/><path d="M18.5 14l3 3-3 3"/></svg>Nuevo ritmo</button>
@@ -960,6 +961,8 @@ function updateTransport(){
   $('#bStop').disabled=!r;
   $('#bPlay').classList.toggle('active',r&&m==='play');
   $('#bPractice').classList.toggle('active',r&&m==='practice');
+  // en pantallas táctiles «Practicar» no responde mientras se practica o se mide (un toque desviado la reiniciaría)
+  $('#bPractice').disabled = touchMQ.matches && r && (m==='practice'||m==='calib');
   $('#bCalib').classList.toggle('active',r&&m==='calib');
   $('#bMetro').setAttribute('aria-pressed',String(r&&m==='metro'));
 }
@@ -1095,6 +1098,8 @@ function updateFab(){
   const on=fabWanted() && !post && (live || (!S.running && padInView));
   if(post){ if(pf.hidden){ pf.hidden=false; postSince=performance.now(); } syncPostFab(); } else pf.hidden=true;
   f.hidden=!on; document.body.classList.toggle('fab-on',on||post); f.classList.toggle('idle',on && !live);
+  f.classList.toggle('split',on && live); $('#fabRestart').hidden=!(on && live);
+  if(!(on && live)) restartCancel();
   f.setAttribute('aria-label', live ? 'Tocar' : 'Practicar');
   if(on && !live){ fm.textContent='Practicar'; fm.classList.remove('count'); }
   else if(on && fm.textContent==='Practicar') fm.textContent='Toca aquí';
@@ -1554,6 +1559,22 @@ function bindTapZone(el,pre){
   el.addEventListener('contextmenu',e=>{ if(S.running) e.preventDefault(); });
 }
 bindTapZone($('#pad'),'p'); bindTapZone($('#tapFab'),'f');
+// «Reiniciar» del botón flotante: hay que mantenerlo pulsado medio segundo (la animación dura lo mismo)
+let restartTimer=0;
+function restartCancel(){ clearTimeout(restartTimer); restartTimer=0; $('#fabRestart').classList.remove('arming'); }
+$('#fabRestart').addEventListener('pointerdown',e=>{
+  e.preventDefault(); if(!S.running || e.button>0) return;
+  try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(_){}
+  restartCancel(); void e.currentTarget.offsetWidth; e.currentTarget.classList.add('arming');
+  restartTimer=setTimeout(()=>{
+    restartTimer=0; const m=S.running && S.mode;
+    if(m==='practice'){ start('practice'); say('Práctica reiniciada'); }
+    else if(m==='calib'){ startCalib(); say('Medición reiniciada'); }
+    restartCancel();
+  },500);
+});
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>$('#fabRestart').addEventListener(t,restartCancel));
+$('#fabRestart').addEventListener('contextmenu',e=>e.preventDefault());
 // Botón de tres partes tras la práctica. Se ignoran los toques del primer instante: puede ser el dedo que seguía tocando al terminar
 const postOk=()=>performance.now()-postSince>700;
 $('#pfAgain').addEventListener('click',()=>{ if(postOk()) start('practice'); });

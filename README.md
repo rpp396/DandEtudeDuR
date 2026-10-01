@@ -164,6 +164,7 @@ En pantallas pequeñas el panel de opciones pasa debajo de la partitura. En móv
 
 - **En reposo** dice *Practicar* y empieza la práctica (izquierda).
 - **Durante la práctica** dice *Toca aquí* y es donde tocas (centro): no se mueve cuando la partitura cambia de línea, así no tocas fuera por error. Muestra la cuenta previa y, en modo piano, se mantiene pulsado.
+- **Mientras practicas o mides la latencia**, el tercio izquierdo del botón es *Reiniciar*: mantenlo pulsado medio segundo (se va llenando) para empezar de nuevo sin ver resultados. Un toque corto no hace nada, así que no reinicias por error. El botón *Practicar* de la página queda deshabilitado mientras tanto.
 - **Al terminar** se divide en tres (derecha): *Repetir*, *Nuevo ritmo* y, a la derecha, *Siguiente* en la campaña (lleva al siguiente nivel; aparece apagado si no lo has superado) o *Listo* en práctica libre (cierra los resultados y limpia las marcas de la partitura).
 
 Si prefieres tocar sobre la partitura, desactívalo en *Práctica → Botón flotante para tocar*.
