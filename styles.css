@@ -305,13 +305,21 @@ td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabu
 @keyframes fabhit{from{transform:translateX(-50%) scale(.965)}to{transform:translateX(-50%) scale(1)}}
 @keyframes fabmiss{from{background:var(--bad)}to{background:var(--accent)}}
 body.fab-on{padding-bottom:140px}
+/* durante la práctica o la medición: «Reiniciar» tapa el tercio izquierdo y se toca en los dos tercios derechos */
+.fab.split{padding-left:calc(100% / 3)}
+.fab-restart{position:fixed;z-index:51;bottom:calc(14px + env(safe-area-inset-bottom));left:calc(50% - min(440px,calc(100vw - 32px)) / 2);width:calc(min(440px,calc(100vw - 32px)) / 3);height:96px;border:0;border-radius:22px 0 0 22px;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:700 14px/1 var(--sans);overflow:hidden;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.fab-restart > *{position:relative}
+.fab-restart svg{width:30px;height:30px}
+/* hay que mantenerlo pulsado medio segundo: se va llenando y la flecha gira */
+.fab-restart::before{content:"";position:absolute;inset:0;background:color-mix(in srgb,var(--paper) 30%,transparent);transform:scaleX(0);transform-origin:left}
+.fab-restart.arming::before{transform:scaleX(1);transition:transform .5s linear}
+.fab-restart.arming svg{transform:rotate(-360deg);transition:transform .5s ease-in}
 /* tras la práctica: Repetir · Nuevo ritmo · Siguiente (campaña) o Listo (práctica libre) */
 .fab-post{display:grid;grid-template-columns:repeat(3,1fr);align-items:stretch;justify-content:stretch;overflow:hidden;cursor:default;touch-action:manipulation;animation:fabin .2s ease-out}
 .fab-post button{appearance:none;border:0;margin:0;background:transparent;color:inherit;font:700 14px/1.1 var(--sans);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .fab-post button+button{border-left:1px solid color-mix(in srgb,var(--accent-ink) 30%,transparent)}
 .fab-post svg{width:34px;height:34px}
 .fab-post button:active{background:color-mix(in srgb,var(--accent-ink) 22%,transparent)}
-.fab-post button.hi{background:color-mix(in srgb,var(--accent-ink) 16%,transparent)}
 .fab-post button:disabled{opacity:.38;cursor:default;background:transparent}
 .fab-post button:focus-visible{outline:3px solid var(--accent-ink);outline-offset:-6px;border-radius:16px}
 @keyframes fabin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%)}}
