@@ -43,7 +43,7 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 
 **Panel:** Reproducción, Metrónomo y Práctica son `<details class="fold" data-fold="…">`. Abiertos por defecto en pantallas de más de 920 px y plegados en las estrechas; `set.folds` solo guarda lo que el usuario cambia respecto a ese valor por defecto. «Restablecer ajustes» vuelve a `freshSettings()` conservando `offset`, `view`, `level`, `levelId` y `seen`. En pantallas táctiles, `.step` mide 44 px y `set.vibrate` (si existe `navigator.vibrate`) vibra 12 ms en cada toque de puntero durante la práctica o la medición. Sin puntero fino se ocultan los atajos de teclado (`.keys`, `.kb`). En la campaña, `#tLock` («Fijado por el nivel») acompaña al tempo deshabilitado.
 
-**Capturas del README:** están en `docs/capturas/` (las seis numeradas de la pantalla principal y los modos, y las descriptivas de opciones, ejemplo de ritmo, modo piano, latencia, nivel superado y móvil en reposo), hechas con Playwright (Chromium) a 1200 px (y 390 px ×2 las de móvil), con datos de ejemplo y marcadores numerados añadidos al DOM solo para la captura. Si cambia la interfaz, conviene rehacerlas.
+**Capturas del README:** están en `docs/capturas/` (las seis numeradas de la pantalla principal y los modos, y las descriptivas de bienvenida, opciones, ejemplo de ritmo, compás más flojo, modo piano, latencia, nivel superado y móvil en reposo; todas salvo la de bienvenida con `seen:true` para que no salga la tarjeta), hechas con Playwright (Chromium) a 1200 px (y 390 px ×2 las de móvil), con datos de ejemplo y marcadores numerados añadidos al DOM solo para la captura. Si cambia la interfaz, conviene rehacerlas.
 
 ## Convenciones y decisiones
 
@@ -74,4 +74,3 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 - Separar el JS en scripts clásicos (`audio.js`, `notation.js`, `scoring.js`…) si crece más de ~2500 líneas. Evitar módulos ES: rompen la apertura directa con `file://`.
 - Más compases (6/4, 10/8…) y niveles; síncopas dentro del compás compuesto.
 - Exportar el historial (CSV), «ver todo» el historial y puntos de la gráfica accesibles con teclado.
-- Rehacer las capturas del README con la tarjeta de bienvenida, los paneles plegables y el compás más flojo.
