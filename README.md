@@ -66,6 +66,7 @@ El resumen encima de la partitura recuerda siempre qué está activo. Un ejemplo
    - *Modo piano:* igual que el selector Batería / Piano.
    - *Oír mis toques* (activado por defecto) y su volumen: en modo piano suena mientras mantienes.
    - *Botón flotante para tocar:* en móvil y tableta (ver más abajo).
+   - *Vibrar al tocar:* solo en pantallas táctiles que lo admiten.
    - *Guardar cada práctica automáticamente* en *Mi progreso*.
    - *Ajuste de latencia:* la corrección manual; *Medir latencia* la calcula por ti.
 
@@ -73,7 +74,7 @@ El resumen encima de la partitura recuerda siempre qué está activo. Un ejemplo
 
 ![Práctica en curso: la partitura se enmarca en azul y las notas tocadas se colorean](docs/capturas/2-practicando.png)
 
-Al pulsar *Practicar* (o tocar la partitura), la partitura se enmarca en azul y suena la cuenta previa (el número aparece sobre la partitura). Después, **toca en cada nota**: sobre la partitura con el dedo o el ratón, o con cualquier tecla del teclado.
+Al pulsar *Practicar* (o tocar la partitura), la partitura se enmarca en azul y suena la cuenta previa (el número aparece sobre la partitura). Después, **toca en cada nota**: sobre la partitura con el dedo o el ratón, o con la barra espaciadora o cualquier tecla menos <kbd>Esc</kbd>, que termina la práctica. Mientras practicas, <kbd>P</kbd>, <kbd>R</kbd> y <kbd>N</kbd> también cuentan como toques; solo funcionan como atajos fuera de la práctica.
 
 1. **Pulso:** las luces siguen al metrónomo.
 2. **Nota actual:** el cursor marca la nota que suena; las que ya tocaste se colorean según tu precisión.
@@ -92,6 +93,8 @@ Los botones para repetir la práctica o pedir un nuevo ritmo quedan arriba, junt
 3. **Precisión:** la nota global, con un consejo (si tiendes a adelantarte o atrasarte).
 4. **Recuento:** exactas, bien, cerca, sin tocar y golpes de más.
 5. **Golpe de más:** un triángulo gris marca dónde tocaste sin que hubiera nota (en un silencio, en la parte sostenida de una figura larga o en una nota ligada).
+
+Si el ritmo tiene varios compases y alguno baja del 90 %, el resultado indica **el compás más flojo** y ofrece *Practicar el compás N*: se practica solo ese compás, tal cual, hasta que salga. *Ritmo completo* (junto a *Nuevo ritmo*) vuelve al ritmo entero. En la campaña, practicar un compás suelto no cuenta para las estrellas del nivel.
 
 #### En modo piano
 
@@ -117,7 +120,7 @@ Si siempre te marca «tarde» aunque vayas a tiempo (pasa a menudo con auricular
 
 ![Campaña: ficha del nivel y mapa de niveles con estrellas](docs/capturas/4-campana.png)
 
-1. **Nivel actual:** qué se practica, compás, tempo fijo y la precisión necesaria para 1, 2 y 3 estrellas.
+1. **Nivel actual:** qué se practica, compás, tempo fijo (el control de tempo muestra «Fijado por el nivel») y la precisión necesaria para 1, 2 y 3 estrellas.
 2. **Mapa de niveles:** 29 niveles en 6 capítulos (El pulso, Corcheas, Semicorcheas y tresillos, Compases compuestos, Síncopas y ligaduras, Desafíos). Cada nivel se desbloquea al conseguir al menos una estrella en el anterior. Los silencios se introducen poco a poco y en *Desafíos* hay niveles de 5/8, 7/8 y 8/8 con distintas agrupaciones y de 3/2.
 
 Al cambiar de nivel, la partitura se centra en la pantalla.
@@ -150,7 +153,20 @@ Si prefieres tocar sobre la partitura, desactívalo en *Práctica → Botón flo
 
 ### Teclado
 
+- <kbd>P</kbd>: practicar (también <kbd>Espacio</kbd> o <kbd>Enter</kbd> con la partitura enfocada).
+- <kbd>R</kbd>: reproducir.
+- <kbd>Esc</kbd>: detener (en la práctica, termina y muestra el resultado).
 - <kbd>Espacio</kbd> o cualquier tecla: tocar durante la práctica o la medición de latencia.
 - <kbd>N</kbd>: nuevo ritmo.
+- En las pestañas, <kbd>←</kbd> <kbd>→</kbd>, <kbd>Inicio</kbd> y <kbd>Fin</kbd> cambian de sección.
+
+La app anuncia a los lectores de pantalla el inicio de la práctica, el resultado y la medición de latencia, y al terminar lleva el foco a los resultados.
+
+### Otros detalles
+
+- **Primera vez:** una tarjeta explica cómo se practica y ofrece medir la latencia. Desaparece al pulsar *Entendido* o al terminar la primera práctica.
+- **Opciones plegables:** *Reproducción*, *Metrónomo* y *Práctica* se pliegan (en el móvil empiezan plegadas) y la app recuerda cómo las dejaste. Al final del panel, *Restablecer ajustes* vuelve a las opciones iniciales sin tocar tu progreso ni la corrección de latencia.
+- **Avisos:** si el navegador no deja guardar datos (modo privado, almacenamiento lleno) o no puede reproducir audio, aparece un aviso arriba.
+- **En pantallas táctiles** los botones redondos miden 44 px y, si el dispositivo lo permite, cada toque vibra (*Práctica → Vibrar al tocar*).
 
 Para el detalle técnico, consulta [`CLAUDE.md`](CLAUDE.md).

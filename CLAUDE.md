@@ -21,7 +21,7 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 | Campaña | `CHAPTERS`, `LEVELS` (29 niveles en 6 capítulos), estrellas, desbloqueo, mapa de niveles y ficha del nivel. |
 | Guardado del progreso | `prog = {levels, sessions}`; se guarda en `localStorage` (`solfeo-ritmico-progreso-v1`) y, si está disponible, en el `db` de claude.ai (`data/users/<id>/progress`). `mergeProg` une ambas fuentes. |
 | Vista de progreso | Resumen, gráfica SVG de precisión con media móvil de 5, historial de las últimas 30 prácticas, borrar historial. |
-| Eventos / Inicio | Conexión de controles, teclado (Espacio / cualquier tecla para tocar, N = nuevo ritmo), `pointerdown/up` en la zona de toque. |
+| Eventos / Inicio | Conexión de controles, teclado (Espacio / cualquier tecla para tocar, P = practicar, R = reproducir, Esc = detener o terminar la práctica, N = nuevo ritmo; P/R/N solo con la vista de práctica visible), flechas/Inicio/Fin en las pestañas, `pointerdown/up` en la zona de toque, bienvenida, paneles plegables y «Restablecer ajustes». |
 
 **Seguimiento de la partitura:** al reproducir o practicar, cuando la nota actual pasa a otro sistema, `followScore` desplaza la página si ese sistema o el siguiente no se ven enteros (los deja arriba).
 
@@ -34,6 +34,14 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 **Cambio de nivel:** `selectLevel` llama a `centerScore()`, que centra la tarjeta de la partitura en la parte visible (reservando el sitio del botón flotante en móvil) si no se ve entera; si es más alta que el espacio, la deja arriba.
 
 **Resultados:** los botones (`#resActions`: «Siguiente nivel» `#rcNext`, «Repetir práctica», «Nuevo ritmo», «Guardar resultado») van arriba, antes del porcentaje, para que queden junto a la partitura; «Siguiente nivel» solo aparece al superar un nivel de la campaña y entonces «Repetir» deja de ser el botón principal. Al mostrar los resultados, la página se desplaza lo justo para que esos botones se vean (descontando `fabReserve()`).
+
+**Compás más flojo:** `showResults` suma los puntos por compás (`mp`, con los golpes de más restados en su compás si `penalize`) y, si hay varios compases y el peor baja del 90 %, muestra `#rWeak` con «Practicar el compás N». `measureExcerpt(mi)` copia ese compás tal cual como partitura de un compás (`score.part = mi+1`; se quita la ligadura que venía del anterior y `chainTies` recalcula `len`/`head`) y guarda el ritmo entero en `fullScore`; `#bFull` («Ritmo completo») llama a `backToFull()`. `generate()` borra `fullScore`. Las sesiones de un compás suelto llevan `part:true` y no cuentan para las estrellas de la campaña.
+
+**Accesibilidad:** `say(texto)` escribe en `#srLive` (`aria-live`, oculto con `.sr-only`) el inicio de la práctica y de la medición, el resultado, la latencia sugerida, el cambio de nivel y las confirmaciones. Al terminar, el foco va a `#results` o `#calib` (`tabindex=-1`, sin aro). Las pestañas siguen el patrón ARIA (`tabindex` itinerante, `aria-controls`, `role=tabpanel`). Al pedir confirmación (borrar historial, restablecer) el foco va a «Cancelar» y luego vuelve al botón original.
+
+**Avisos y primera vez:** `appWarn('store'|'audio')` muestra `#appWarn` si `localStorage.setItem` falla (en `save()` y `commitProg()`) o si no se puede crear el `AudioContext` (`ensureAudio()` devuelve `false` y `start`/`startCalib` no siguen). La tarjeta `#welcome` sale si `!set.seen` y no hay sesiones; se cierra con «Entendido», «Medir latencia ahora» o al terminar la primera práctica (`dismissWelcome`).
+
+**Panel:** Reproducción, Metrónomo y Práctica son `<details class="fold" data-fold="…">`. Abiertos por defecto en pantallas de más de 920 px y plegados en las estrechas; `set.folds` solo guarda lo que el usuario cambia respecto a ese valor por defecto. «Restablecer ajustes» vuelve a `freshSettings()` conservando `offset`, `view`, `level`, `levelId` y `seen`. En pantallas táctiles, `.step` mide 44 px y `set.vibrate` (si existe `navigator.vibrate`) vibra 12 ms en cada toque de puntero durante la práctica o la medición. Sin puntero fino se ocultan los atajos de teclado (`.keys`, `.kb`). En la campaña, `#tLock` («Fijado por el nivel») acompaña al tempo deshabilitado.
 
 **Capturas del README:** están en `docs/capturas/` (las seis numeradas de la pantalla principal y los modos, y las descriptivas de opciones, ejemplo de ritmo, modo piano, latencia, nivel superado y móvil en reposo), hechas con Playwright (Chromium) a 1200 px (y 390 px ×2 las de móvil), con datos de ejemplo y marcadores numerados añadidos al DOM solo para la captura. Si cambia la interfaz, conviene rehacerlas.
 
@@ -53,7 +61,7 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 - **Toque audible (`set.tapSound`, activado por defecto, `set.tapVol`):** en modo piano suena un tono mientras se mantiene; en batería, un golpe corto. No suena durante la medición de latencia.
 - **Migración de ajustes (`set.sv`):** `load()` aplica cambios de valores por defecto a ajustes guardados antiguos una sola vez. `sv` 2: `sound=false`, `tapSound=true`.
 - **Campaña:** cada nivel tiene un `id` fijo (`L1`…); `prog.levels` y `set.levelId` usan ese id, así que se pueden insertar niveles en cualquier posición con un id nuevo. Un nivel ya superado sigue abierto aunque se inserte antes uno sin superar. 1 estrella = objetivo del nivel (70–80 %), 2 = objetivo + 12 (máx. 90 %), 3 = 95 %. Un nivel se desbloquea al conseguir al menos una estrella en el anterior. El tempo lo fija el nivel.
-- **Sesiones guardadas:** `{id, t, mode, lvl, lid, sig, grp, bars, bpm, pct, n, exact, good, near, miss, extra, mean, play, pen}`; se guardan como máximo 400. Las sesiones antiguas no tienen `lid`: su `lvl` equivale al id `L(lvl+1)` (`sessLevel`).
+- **Sesiones guardadas:** `{id, t, mode, lvl, lid, sig, grp, bars, bpm, pct, n, exact, good, near, miss, extra, mean, play, pen, part?}` (`part` solo en las de un compás suelto); se guardan como máximo 400. Las sesiones antiguas no tienen `lid`: su `lvl` equivale al id `L(lvl+1)` (`sessLevel`).
 
 ## Diseño
 
@@ -65,4 +73,5 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 
 - Separar el JS en scripts clásicos (`audio.js`, `notation.js`, `scoring.js`…) si crece más de ~2500 líneas. Evitar módulos ES: rompen la apertura directa con `file://`.
 - Más compases (6/4, 10/8…) y niveles; síncopas dentro del compás compuesto.
-- Exportar el historial (CSV).
+- Exportar el historial (CSV), «ver todo» el historial y puntos de la gráfica accesibles con teclado.
+- Rehacer las capturas del README con la tarjeta de bienvenida, los paneles plegables y el compás más flojo.
