@@ -305,6 +305,16 @@ td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabu
 @keyframes fabhit{from{transform:translateX(-50%) scale(.965)}to{transform:translateX(-50%) scale(1)}}
 @keyframes fabmiss{from{background:var(--bad)}to{background:var(--accent)}}
 body.fab-on{padding-bottom:140px}
+/* tras la práctica: Repetir · Nuevo ritmo · Siguiente (campaña) o Listo (práctica libre) */
+.fab-post{display:grid;grid-template-columns:repeat(3,1fr);align-items:stretch;justify-content:stretch;overflow:hidden;cursor:default;touch-action:manipulation;animation:fabin .2s ease-out}
+.fab-post button{appearance:none;border:0;margin:0;background:transparent;color:inherit;font:700 14px/1.1 var(--sans);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.fab-post button+button{border-left:1px solid color-mix(in srgb,var(--accent-ink) 30%,transparent)}
+.fab-post svg{width:34px;height:34px}
+.fab-post button:active{background:color-mix(in srgb,var(--accent-ink) 22%,transparent)}
+.fab-post button.hi{background:color-mix(in srgb,var(--accent-ink) 16%,transparent)}
+.fab-post button:disabled{opacity:.38;cursor:default;background:transparent}
+.fab-post button:focus-visible{outline:3px solid var(--accent-ink);outline-offset:-6px;border-radius:16px}
+@keyframes fabin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%)}}
 /* sin ratón ni trackpad (móvil, tableta sin teclado) no se muestran los atajos de teclado */
 @media not all and (any-pointer: fine){ .keys,.kb{display:none} }
 /* objetivos táctiles de al menos 44 px */
@@ -313,6 +323,6 @@ body.fab-on{padding-bottom:140px}
   .tempo{gap:6px}
 }
 @media (prefers-reduced-motion: reduce){
-  .pad.hit,.pad.miss,.fab.hit,.fab.miss{animation:none}
+  .pad.hit,.pad.miss,.fab.hit,.fab.miss,.fab-post{animation:none}
   .light,.btn,.track,.track::after,.fold summary::after{transition:none}
 }

@@ -156,12 +156,15 @@ Resumen de tus prácticas, gráfica de precisión con la media de las últimas c
   <img src="docs/capturas/movil-reposo.png" alt="Móvil en reposo con el botón flotante Practicar" width="260">
   &nbsp;
   <img src="docs/capturas/6-movil.png" alt="Móvil durante la práctica con el botón flotante Toca aquí" width="260">
+  &nbsp;
+  <img src="docs/capturas/movil-resultado.png" alt="Móvil al terminar la práctica con el botón de tres partes: Repetir, Nuevo ritmo y Siguiente" width="260">
 </p>
 
 En pantallas pequeñas el panel de opciones pasa debajo de la partitura. En móvil y tableta aparece un **botón grande abajo de la pantalla** mientras la partitura está a la vista:
 
 - **En reposo** dice *Practicar* y empieza la práctica (izquierda).
-- **Durante la práctica** dice *Toca aquí* y es donde tocas (derecha): no se mueve cuando la partitura cambia de línea, así no tocas fuera por error. Muestra la cuenta previa y, en modo piano, se mantiene pulsado.
+- **Durante la práctica** dice *Toca aquí* y es donde tocas (centro): no se mueve cuando la partitura cambia de línea, así no tocas fuera por error. Muestra la cuenta previa y, en modo piano, se mantiene pulsado.
+- **Al terminar** se divide en tres (derecha): *Repetir*, *Nuevo ritmo* y, a la derecha, *Siguiente* en la campaña (lleva al siguiente nivel; aparece apagado si no lo has superado) o *Listo* en práctica libre (cierra los resultados y limpia las marcas de la partitura).
 
 Si prefieres tocar sobre la partitura, desactívalo en *Práctica → Botón flotante para tocar*.
 
