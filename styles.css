@@ -311,7 +311,6 @@ body.fab-on{padding-bottom:140px}
 .fab-post button+button{border-left:1px solid color-mix(in srgb,var(--accent-ink) 30%,transparent)}
 .fab-post svg{width:34px;height:34px}
 .fab-post button:active{background:color-mix(in srgb,var(--accent-ink) 22%,transparent)}
-.fab-post button.hi{background:color-mix(in srgb,var(--accent-ink) 16%,transparent)}
 .fab-post button:disabled{opacity:.38;cursor:default;background:transparent}
 .fab-post button:focus-visible{outline:3px solid var(--accent-ink);outline-offset:-6px;border-radius:16px}
 @keyframes fabin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%)}}

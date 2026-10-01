@@ -1104,7 +1104,6 @@ function syncPostFab(){
   const camp=stageMode==='campana', b=$('#pfNext');
   $('#pfNextLbl').textContent=camp?'Siguiente':'Listo';
   b.disabled = camp && $('#rcNext').hidden;
-  b.classList.toggle('hi', camp && !b.disabled);
   b.setAttribute('aria-label', camp ? 'Siguiente nivel' : 'Listo: cerrar los resultados');
 }
 // Cierra los resultados y limpia las marcas de la partitura
