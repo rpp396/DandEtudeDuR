@@ -260,6 +260,11 @@
 </div>
 
 <button type="button" class="fab" id="tapFab" hidden aria-label="Tocar"><span class="fab-main" id="fabMain">Toca aquí</span></button>
+<div class="fab fab-post" id="postFab" role="group" aria-label="Después de la práctica" hidden>
+  <button type="button" id="pfAgain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg>Repetir</button>
+  <button type="button" id="pfNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7h3.2c2 0 3.2.9 4.3 2.6l2.6 4.6c1 1.8 2.3 2.8 4.3 2.8h4.6"/><path d="M2.5 17h3.2c1.3 0 2.2-.4 3-1.1"/><path d="M14.4 8.1c.8-.7 1.7-1.1 3-1.1h4.1"/><path d="M18.5 4l3 3-3 3"/><path d="M18.5 14l3 3-3 3"/></svg>Nuevo ritmo</button>
+  <button type="button" id="pfNext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg><span id="pfNextLbl">Listo</span></button>
+</div>
 
 <script>
 (() => {
@@ -457,7 +462,7 @@ function generate(){
   fullScore=null;
   score={key:C.sig,grp:sig.grp,bars:C.bars,sig,L,measures,flat,fb};
   judg=[]; extras=0; extraTks=[]; $('#results').hidden=true;
-  renderScore(); renderSummary(); renderLights(); renderTempoGlyph();
+  renderScore(); renderSummary(); renderLights(); renderTempoGlyph(); updateFab();
 }
 // e.len = duración que suena (la nota ligada suma las que le siguen); e.head = nota que se toca
 function chainTies(flat){ flat.forEach(e=>{ e.len=e.dur; e.head=e.i; if(e.tie){ const h=flat[flat[e.i-1].head]; e.head=h.i; h.len+=e.dur; } }); }
@@ -471,13 +476,13 @@ function measureExcerpt(mi){
   fullScore=src;
   score={...src, bars:1, measures:[evs], flat:evs, fb:false, part:mi+1};
   judg=[]; extras=0; extraTks=[]; $('#results').hidden=true;
-  renderScore(); renderSummary();
+  renderScore(); renderSummary(); updateFab();
 }
 function backToFull(){
   if(!fullScore) return;
   stop(); score=fullScore; fullScore=null;
   judg=[]; extras=0; extraTks=[]; $('#results').hidden=true;
-  renderScore(); renderSummary();
+  renderScore(); renderSummary(); updateFab();
 }
 
 // Liga la última nota de una celda con la primera de la siguiente (también a través de la barra de compás).
@@ -1066,6 +1071,7 @@ function showResults(notes, holds, endT){
     $('#rWeakBtn').textContent=`Practicar el compás ${weakM+1}`;
   }
   $('#results').hidden=false;
+  updateFab();
   if(!set.seen) dismissWelcome();
   say(`Resultado: ${pct}%. ${$('#rHead').textContent}. ${$('#rCamp').hidden?'':$('#rcText').textContent+' '}${trend}${showWeak?` El compás ${weakM+1} fue el más flojo.`:''}`);
   $('#results').focus({preventScroll:true});
@@ -1081,18 +1087,31 @@ let K={suggest:null};
 const touchMQ = matchMedia('(any-pointer: coarse)');
 const fabWanted = () => !!set.fab && touchMQ.matches;
 // En reposo el botón dice «Practicar» (solo si la partitura está a la vista); durante la práctica o la medición, «Toca aquí»
-let padInView=false;
+// Con los resultados a la vista pasa a ser el botón de tres partes (#postFab)
+let padInView=false, postSince=0;
 function updateFab(){
-  const f=$('#tapFab'), fm=$('#fabMain'), live=S.running && (S.mode==='practice'||S.mode==='calib');
-  const on=fabWanted() && (live || (!S.running && padInView));
-  f.hidden=!on; document.body.classList.toggle('fab-on',on); f.classList.toggle('idle',on && !live);
+  const f=$('#tapFab'), fm=$('#fabMain'), pf=$('#postFab'), live=S.running && (S.mode==='practice'||S.mode==='calib');
+  const post=fabWanted() && !S.running && !$('#results').hidden && !$('#stageView').hidden;
+  const on=fabWanted() && !post && (live || (!S.running && padInView));
+  if(post){ if(pf.hidden){ pf.hidden=false; postSince=performance.now(); } syncPostFab(); } else pf.hidden=true;
+  f.hidden=!on; document.body.classList.toggle('fab-on',on||post); f.classList.toggle('idle',on && !live);
   f.setAttribute('aria-label', live ? 'Tocar' : 'Practicar');
   if(on && !live){ fm.textContent='Practicar'; fm.classList.remove('count'); }
   else if(on && fm.textContent==='Practicar') fm.textContent='Toca aquí';
 }
+// En la campaña el tick lleva al siguiente nivel (apagado si no se superó); en práctica libre dice «Listo»
+function syncPostFab(){
+  const camp=stageMode==='campana', b=$('#pfNext');
+  $('#pfNextLbl').textContent=camp?'Siguiente':'Listo';
+  b.disabled = camp && $('#rcNext').hidden;
+  b.classList.toggle('hi', camp && !b.disabled);
+  b.setAttribute('aria-label', camp ? 'Siguiente nivel' : 'Listo: cerrar los resultados');
+}
+// Cierra los resultados y limpia las marcas de la partitura
+function closeResults(){ $('#results').hidden=true; judg=[]; extras=0; extraTks=[]; renderScore(); updateFab(); }
 new IntersectionObserver(es=>{ padInView=es[es.length-1].isIntersecting; updateFab(); }).observe($('#pad'));
 // Alto de la parte inferior de la pantalla que tapa el botón flotante (para el seguimiento de la partitura)
-function fabReserve(){ const f=$('#tapFab'); return f.hidden ? 8 : innerHeight-f.getBoundingClientRect().top+12; }
+function fabReserve(){ const f=[$('#tapFab'),$('#postFab')].find(x=>!x.hidden); return f ? innerHeight-f.getBoundingClientRect().top+12 : 8; }
 function showPad(){
   updateFab();
   const p=$('#pad'), r=p.getBoundingClientRect();
@@ -1298,6 +1317,7 @@ function setView(v){
   document.querySelectorAll('.tab').forEach(t=>{ const on=t.dataset.view===v; t.setAttribute('aria-selected',String(on)); t.tabIndex=on?0:-1; });
   if(v!=='progreso') $('#stageView').setAttribute('aria-labelledby','tab-'+v);
   $('#stageView').hidden = v==='progreso'; $('#progView').hidden = v!=='progreso';
+  updateFab();
   if(v==='progreso'){ renderProgress(); return; }
   set.view=v; save();
   if(v!==stageMode || !score){ stageMode=v; applyStageMode(); }
@@ -1535,6 +1555,15 @@ function bindTapZone(el,pre){
   el.addEventListener('contextmenu',e=>{ if(S.running) e.preventDefault(); });
 }
 bindTapZone($('#pad'),'p'); bindTapZone($('#tapFab'),'f');
+// Botón de tres partes tras la práctica. Se ignoran los toques del primer instante: puede ser el dedo que seguía tocando al terminar
+const postOk=()=>performance.now()-postSince>700;
+$('#pfAgain').addEventListener('click',()=>{ if(postOk()) start('practice'); });
+$('#pfNew').addEventListener('click',()=>{ if(postOk()) generate(); });
+$('#pfNext').addEventListener('click',()=>{
+  if(!postOk()) return;
+  if(stageMode!=='campana') closeResults();
+  else if(!$('#rcNext').hidden) selectLevel(levelIdx+1);
+});
 $('#fab').addEventListener('change',e=>{ set.fab=e.target.checked; save(); updateFab(); });
 const isField=el=>el && (el.tagName==='INPUT'||el.tagName==='SELECT'||el.tagName==='TEXTAREA');
 document.addEventListener('keydown',e=>{
