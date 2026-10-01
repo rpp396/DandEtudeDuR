@@ -74,7 +74,7 @@ El resumen encima de la partitura recuerda siempre qué está activo. Un ejemplo
 
 ![Práctica en curso: la partitura se enmarca en azul y las notas tocadas se colorean](docs/capturas/2-practicando.png)
 
-Al pulsar *Practicar* (o tocar la partitura), la partitura se enmarca en azul y suena la cuenta previa (el número aparece sobre la partitura). Después, **toca en cada nota**: sobre la partitura con el dedo o el ratón, o con cualquier tecla del teclado.
+Al pulsar *Practicar* (o tocar la partitura), la partitura se enmarca en azul y suena la cuenta previa (el número aparece sobre la partitura). Después, **toca en cada nota**: sobre la partitura con el dedo o el ratón, o con la barra espaciadora o cualquier tecla menos <kbd>Esc</kbd>, que termina la práctica. Mientras practicas, <kbd>P</kbd>, <kbd>R</kbd> y <kbd>N</kbd> también cuentan como toques; solo funcionan como atajos fuera de la práctica.
 
 1. **Pulso:** las luces siguen al metrónomo.
 2. **Nota actual:** el cursor marca la nota que suena; las que ya tocaste se colorean según tu precisión.

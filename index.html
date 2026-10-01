@@ -1086,7 +1086,7 @@ function showPad(){
 function padIdle(){
   $('#pad').classList.remove('live');
   $('#padMain').textContent='Toca la partitura (o «Practicar») para empezar, y luego toca sobre ella en cada nota';
-  $('#padSub').textContent='Con teclado: P para empezar y la barra espaciadora para tocar. Antes de empezar suena la cuenta.';
+  $('#padSub').textContent='Con teclado: P empieza y, tras la cuenta, tocas con la barra espaciadora o cualquier tecla menos Esc, que detiene. Fuera de la práctica, P, R y N son atajos (practicar, reproducir, nuevo ritmo).';
 }
 function startCalib(){
   stop(); if(!ensureAudio()) return;
