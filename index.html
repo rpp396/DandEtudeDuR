@@ -155,7 +155,8 @@
         <h2 class="sub">Silencios</h2>
         <div class="fig-grid" id="restFigs"></div>
         <p class="hint">Elige qué silencios pueden salir, igual que las figuras. Sin ninguno, el ritmo no tendrá silencios.</p>
-        <label class="sw"><input type="checkbox" id="ties"><span class="track"></span><span>Síncopas y ligaduras<small>Notas ligadas entre tiempos y compases, y síncopas como corchea-negra-corchea. La nota ligada no se vuelve a tocar.</small></span></label>
+        <label class="sw"><input type="checkbox" id="sync"><span class="track"></span><span>Síncopas<small>Figuras que empiezan entre dos tiempos y siguen sonando sobre el pulso, como corchea-negra-corchea o negra-blanca-negra.</small></span></label>
+        <label class="sw"><input type="checkbox" id="ties"><span class="track"></span><span>Ligaduras<small>Notas ligadas entre tiempos y sobre la barra de compás. La nota ligada no se vuelve a tocar.</small></span></label>
       </div>
 
       <div class="sec">
@@ -339,11 +340,12 @@ function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.fig
 
 const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:false, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
-  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, sv:2};
+  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, sv:2};
 let set = load();
 function load(){
   try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; s.rests=restList(s).filter(k=>REST_KEYS.includes(k));
     // sv 2: «Escuchar el ritmo» pasa a aplicarse solo a la práctica (apagado) y «Oír mis toques» viene activado
+    if(o.sync===undefined) s.sync=!!s.ties;
     if((o.sv|0)<2){ s.sound=false; s.tapSound=true; s.sv=2; }
     return s; } }catch(e){}
   return {...DEFAULTS, figs:[...DEFAULTS.figs], rests:[...DEFAULTS.rests], grp:{}};
@@ -353,7 +355,7 @@ function save(){ try{ localStorage.setItem(KEY, JSON.stringify(set)); }catch(e){
 /* ---------- Generación ---------- */
 let score = null, judg = [], extras = 0, extraTks = []; // extraTks: posición (en ticks) de cada golpe de más
 const sum = a => a.reduce((s,x)=>s+x,0);
-function allowed(c){ const C=cfg(), R=restList(C); if(c.sync && !C.ties) return false; return c.req.every(k=>C.figs.includes(k)) && c.rreq.every(k=>R.includes(k)); }
+function allowed(c){ const C=cfg(), R=restList(C); if(c.sync && !C.sync) return false; return c.req.every(k=>C.figs.includes(k)) && c.rreq.every(k=>R.includes(k)); }
 function weighted(a){ const t=sum(a.map(x=>x.w)); let r=Math.random()*t; for(const x of a){ r-=x.w; if(r<=0) return x; } return a[a.length-1]; }
 function genMeasure(sig, L){
   const G = sig.groups; let last = null;
@@ -600,7 +602,7 @@ function renderSummary(){
   const rn=RESTS.filter(r=>restList(C).includes(r.k)).map(r=>r.short);
   const rtxt = !rn.length ? '' : ' · silencios de '+(rn.length>1 ? rn.slice(0,-1).join(', ')+' y '+rn[rn.length-1] : rn[0]);
   const g=sigOf(C).grp;
-  $('#summary').innerHTML=`<b>${C.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${C.bars} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${rtxt}${C.ties?' · con ligaduras':''}`;
+  $('#summary').innerHTML=`<b>${C.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${C.bars} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${rtxt}${C.sync?' · con síncopas':''}${C.ties?' · con ligaduras':''}`;
   const n=$('#notice');
   const sig=SIGS[C.sig];
   const warnT = C.figs.includes('t') && sig.kind!=='simple';
@@ -641,7 +643,7 @@ function setBpm(v, fromUser=true){
   if(fromUser){ save(); if(S.running && S.mode!=='metro') stop(); }
 }
 function syncControls(){
-  ['ties','sound','cursor','loop','metro','accent','tapSound','fab'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
+  ['sync','ties','sound','cursor','loop','metro','accent','tapSound','fab'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
   $('#timbre').value=set.timbre; $('#sub').value=set.sub; $('#countIn').value=set.countIn;
   $('#rhythmVol').value=set.rhythmVol; $('#metroVol').value=set.metroVol; $('#tapVol').value=set.tapVol; syncTapVol(); $('#offset').value=set.offset;
   $('#bars').textContent=set.bars;
@@ -1106,9 +1108,9 @@ const LEVELS = [
   {id:'L14',ch:3,title:'El 6/8',desc:'Dos pulsos de negra con puntillo, cada uno dividido en tres corcheas.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:[],bpm:50,goal:72},
   {id:'L15',ch:3,title:'6/8 con silencios',desc:'Silencios y semicorcheas dentro del compás compuesto.',sig:'6/8',bars:4,figs:['qd','q','e','s'],rests:['qd','q','e'],bpm:52,goal:74},
   {id:'L16',ch:3,title:'El 12/8',desc:'Cuatro pulsos ternarios, con blanca con puntillo.',sig:'12/8',bars:2,figs:['qd','q','e','hd'],rests:['qd','e'],bpm:56,goal:75},
-  {id:'L21',ch:4,title:'La síncopa',desc:'Corchea, negra, corchea: la negra empieza entre dos tiempos. Tócala en el «y» y deja que el pulso pase por debajo.',sig:'2/4',bars:4,figs:['q','e'],rests:[],ties:true,bpm:60,goal:70},
+  {id:'L21',ch:4,title:'La síncopa',desc:'Corchea, negra, corchea: la negra empieza entre dos tiempos. Tócala en el «y» y deja que el pulso pase por debajo.',sig:'2/4',bars:4,figs:['q','e'],rests:[],sync:true,bpm:60,goal:70},
   {id:'L22',ch:4,title:'Ligaduras de prolongación',desc:'La ligadura une dos notas: toca solo la primera y cuenta las dos. La segunda no se toca.',sig:'4/4',bars:4,figs:['q','h','e'],rests:[],ties:true,bpm:66,goal:72},
-  {id:'L23',ch:4,title:'Síncopas de semicorchea',desc:'Semicorchea, corchea, semicorchea y notas ligadas sobre el tiempo.',sig:'2/4',bars:4,figs:['q','e','s'],rests:['e','s'],ties:true,bpm:60,goal:72},
+  {id:'L23',ch:4,title:'Síncopas de semicorchea',desc:'Semicorchea, corchea, semicorchea y notas ligadas sobre el tiempo.',sig:'2/4',bars:4,figs:['q','e','s'],rests:['e','s'],sync:true,ties:true,bpm:60,goal:72},
   {id:'L24',ch:4,title:'Ligaduras en 6/8',desc:'Notas ligadas entre los dos pulsos de negra con puntillo y sobre la barra de compás.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:[],ties:true,bpm:50,goal:74},
   {id:'L17',ch:5,title:'Siete octavos',desc:'Compás irregular agrupado 2+2+3. El metrónomo marca cada corchea.',sig:'7/8',grp:'2+2+3',bars:4,figs:['q','e'],rests:[],bpm:150,goal:74},
   {id:'L28',ch:5,title:'Siete octavos: 3+2+2',desc:'El mismo compás con el grupo largo al principio. El metrónomo acentúa el inicio de cada grupo.',sig:'7/8',grp:'3+2+2',bars:4,figs:['q','qd','e'],rests:['e'],bpm:150,goal:75},
@@ -1368,7 +1370,7 @@ $('#figs').addEventListener('click',e=>{
 });
 $('#barsDown').addEventListener('click',()=>{ if(set.bars>1){ set.bars--; $('#bars').textContent=set.bars; rhythmChanged(); } });
 $('#barsUp').addEventListener('click',()=>{ if(set.bars<16){ set.bars++; $('#bars').textContent=set.bars; rhythmChanged(); } });
-$('#ties').addEventListener('change',e=>{ set.ties=e.target.checked; rhythmChanged(); });
+['sync','ties'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.checked; rhythmChanged(); }));
 $('#restFigs').addEventListener('click',e=>{
   const b=e.target.closest('.fig'); if(!b) return;
   const k=b.dataset.r, i=set.rests.indexOf(k);
