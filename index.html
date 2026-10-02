@@ -753,15 +753,24 @@ function updOutputs(){
 let ctx=null, master=null, noiseBuf=null;
 function ensureAudio(){
   if(!ctx){
+    // iOS (Safari 17+): sin esto Web Audio enmudece con el interruptor de silencio del iPhone
+    try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(e){}
     const AC=window.AudioContext||window.webkitAudioContext;
     try{ ctx=new AC({latencyHint:'interactive'}); }catch(e){ ctx=null; appWarn('audio'); return false; }
     master=ctx.createGain(); master.gain.value=0.9; master.connect(ctx.destination);
     noiseBuf=ctx.createBuffer(1, Math.floor(ctx.sampleRate*0.1), ctx.sampleRate);
     const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    // una llamada, Siri o bloquear la pantalla detienen el reloj del audio: la práctica o la medición en curso ya no valen
+    ctx.addEventListener('statechange',()=>{ if(ctx.state!=='running') stopTimed(); });
   }
-  if(ctx.state==='suspended') ctx.resume().catch(()=>{});
+  // iOS deja el contexto en 'interrupted' (no solo 'suspended') tras una interrupción
+  if(ctx.state!=='running') ctx.resume().catch(()=>{});
   return true;
 }
+function stopTimed(){ if(S.running && (S.mode==='practice'||S.mode==='calib')) stop(); }
+// Al salir de la página se corta la práctica o la medición; al volver, el audio se reanuda
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) stopTimed(); else if(ctx && ctx.state!=='running') ctx.resume().catch(()=>{}); });
+addEventListener('pageshow',()=>{ if(ctx && ctx.state!=='running') ctx.resume().catch(()=>{}); });
 const CLICK_F={accent:1760,beat:1250,weak:1040,sub:880}, CLICK_V={accent:1,beat:0.7,weak:0.45,sub:0.28};
 function click(bus,t,level,vol){
   const v=CLICK_V[level]*(vol==null?set.metroVol:vol); if(v<=0.001) return;
