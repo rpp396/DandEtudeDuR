@@ -15,6 +15,7 @@ Genera ritmos en partitura según el compás y las figuras que elijas, los repro
 - **Medición de latencia:** calcula la corrección para tu equipo, por ejemplo con auriculares Bluetooth.
 - **Campaña:** 29 niveles en 6 capítulos, del pulso en negras a las síncopas, las ligaduras y los compases de amalgama, con estrellas y desbloqueo progresivo.
 - **Mi progreso:** historial de prácticas, gráfica de precisión y comparación con las prácticas anteriores.
+- **Español e inglés:** la app arranca en el idioma del navegador y se puede cambiar en la bienvenida o con el selector ES / EN de la cabecera.
 - **Pensada también para el móvil:** la página sigue a la partitura mientras suena y, en pantallas táctiles, hay un botón flotante para tocar sin miedo a equivocarte de sitio.
 
 ## Uso
@@ -179,6 +180,10 @@ Si prefieres tocar sobre la partitura, desactívalo en *Práctica → Botón flo
 - En las pestañas, <kbd>←</kbd> <kbd>→</kbd>, <kbd>Inicio</kbd> y <kbd>Fin</kbd> cambian de sección.
 
 La app anuncia a los lectores de pantalla el inicio de la práctica, el resultado y la medición de latencia, y al terminar lleva el foco a los resultados.
+
+### Idioma
+
+La interfaz está en español y en inglés (en inglés se llama *Rhythm Reading*). La primera vez, la tarjeta de bienvenida trae el selector *Español / English* con el idioma del navegador ya elegido (si no es ninguno de los dos, inglés). Después se cambia en cualquier momento con **ES / EN** arriba a la derecha, y la app lo recuerda. También se puede abrir directamente en un idioma con el enlace `index.html?lang=en` o `?lang=es`, útil para compartirla.
 
 ### Otros detalles
 

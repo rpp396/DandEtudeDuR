@@ -14,18 +14,21 @@
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>Solfeo Rítmico</h1>
-      <p>Genera un ritmo, escúchalo con el metrónomo y luego tócalo tú: la app mide lo cerca que caes de cada nota.</p>
+      <h1 data-i18n="appTitle">Solfeo Rítmico</h1>
+      <p data-i18n="tagline">Genera un ritmo, escúchalo con el metrónomo y luego tócalo tú: la app mide lo cerca que caes de cada nota.</p>
     </div>
-    <div class="keys"><span><kbd>Espacio</kbd> tocar</span><span><kbd>P</kbd> practicar</span><span><kbd>R</kbd> reproducir</span><span><kbd>Esc</kbd> detener</span><span><kbd>N</kbd> nuevo ritmo</span></div>
+    <div class="top-side">
+      <div class="seg lang-seg" id="langTop" role="group" aria-label="Idioma / Language"><button type="button" data-lang="es" lang="es" title="Español">ES</button><button type="button" data-lang="en" lang="en" title="English">EN</button></div>
+      <div class="keys" data-i18n="keys"><span><kbd>Espacio</kbd> tocar</span><span><kbd>P</kbd> practicar</span><span><kbd>R</kbd> reproducir</span><span><kbd>Esc</kbd> detener</span><span><kbd>N</kbd> nuevo ritmo</span></div>
+    </div>
   </header>
 
   <p class="app-warn" id="appWarn" role="alert" hidden></p>
 
-  <nav class="tabs" role="tablist" aria-label="Secciones">
-    <button class="tab" role="tab" id="tab-libre" data-view="libre" aria-selected="true" aria-controls="stageView" type="button"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="8" r="2" fill="currentColor"/></svg>Práctica libre</button>
-    <button class="tab" role="tab" id="tab-campana" data-view="campana" aria-selected="false" aria-controls="stageView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M3 14V2.5M3 3h9l-2 3 2 3H3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Campaña</button>
-    <button class="tab" role="tab" id="tab-progreso" data-view="progreso" aria-selected="false" aria-controls="progView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M2 13l4-5 3 3 5-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>Mi progreso</button>
+  <nav class="tabs" role="tablist" data-i18n-attr="aria-label=tabsAria" aria-label="Secciones">
+    <button class="tab" role="tab" id="tab-libre" data-view="libre" aria-selected="true" aria-controls="stageView" type="button"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="8" r="2" fill="currentColor"/></svg><span data-i18n="tabFree">Práctica libre</span></button>
+    <button class="tab" role="tab" id="tab-campana" data-view="campana" aria-selected="false" aria-controls="stageView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M3 14V2.5M3 3h9l-2 3 2 3H3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span data-i18n="tabCamp">Campaña</span></button>
+    <button class="tab" role="tab" id="tab-progreso" data-view="progreso" aria-selected="false" aria-controls="progView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M2 13l4-5 3 3 5-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg><span data-i18n="tabProg">Mi progreso</span></button>
   </nav>
 
   <div class="sr-only" id="srLive" role="status" aria-live="polite"></div>
@@ -33,41 +36,42 @@
   <main class="layout" id="stageView" role="tabpanel" aria-labelledby="tab-libre">
     <section class="stage">
       <section class="welcome" id="welcome" aria-labelledby="welTitle" hidden>
-        <h2 id="welTitle">Cómo se practica</h2>
-        <ol>
+        <div class="wel-lang"><span id="welLangLbl">Idioma / Language</span><div class="seg lang-seg" id="langWel" role="group" aria-labelledby="welLangLbl"><button type="button" data-lang="es" lang="es">Español</button><button type="button" data-lang="en" lang="en">English</button></div></div>
+        <h2 id="welTitle" data-i18n="welTitle">Cómo se practica</h2>
+        <ol data-i18n="welSteps">
           <li>Pulsa <b>Reproducir</b> <span class="kb">(<kbd>R</kbd>)</span> para escuchar el ritmo con el metrónomo.</li>
           <li>Pulsa <b>Practicar</b> <span class="kb">(<kbd>P</kbd>)</span> o toca la partitura. Tras la cuenta previa, toca en cada nota: con el dedo, el ratón o la barra espaciadora.</li>
           <li>Al terminar verás tu precisión y, bajo cada nota, si llegaste antes o tarde.</li>
         </ol>
-        <p class="hint">Si usas auriculares Bluetooth o notas que siempre te marca «tarde», mide antes la latencia de tu equipo: tarda medio minuto.</p>
+        <p class="hint" data-i18n="welHint">Si usas auriculares Bluetooth o notas que siempre te marca «tarde», mide antes la latencia de tu equipo: tarda medio minuto.</p>
         <div class="res-actions">
-          <button class="btn primary" id="welCalib" type="button">Medir latencia ahora</button>
-          <button class="btn" id="welOk" type="button">Entendido</button>
+          <button class="btn primary" id="welCalib" type="button" data-i18n="welCalib">Medir latencia ahora</button>
+          <button class="btn" id="welOk" type="button" data-i18n="welOk">Entendido</button>
         </div>
       </section>
       <div class="level-bar" id="levelBar" hidden>
-        <button class="step" id="lvPrev" type="button" aria-label="Nivel anterior">‹</button>
+        <button class="step" id="lvPrev" type="button" data-i18n-attr="aria-label=lvPrev" aria-label="Nivel anterior">‹</button>
         <div>
           <div class="lv-top"><span class="lv-eyebrow" id="lvEyebrow"></span><span class="stars lv-stars" id="lvStars" aria-label=""></span></div>
           <h2 id="lvTitle"></h2>
           <p class="lv-desc" id="lvDesc"></p>
           <div class="lv-meta" id="lvMeta"></div>
         </div>
-        <button class="step" id="lvNext" type="button" aria-label="Nivel siguiente">›</button>
+        <button class="step" id="lvNext" type="button" data-i18n-attr="aria-label=lvNext" aria-label="Nivel siguiente">›</button>
       </div>
       <div class="transport">
         <div class="tbtns">
-          <button class="btn primary" id="bPlay" type="button"><svg viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>Reproducir</button>
-          <button class="btn" id="bStop" type="button" disabled><svg viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="currentColor"/></svg>Detener</button>
-          <button class="btn" id="bMetro" type="button" aria-pressed="false"><svg viewBox="0 0 16 16"><path d="M5.5 1.5h5l3 13h-11z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 11.5L11.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Solo metrónomo</button>
+          <button class="btn primary" id="bPlay" type="button"><svg viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg><span data-i18n="play">Reproducir</span></button>
+          <button class="btn" id="bStop" type="button" disabled><svg viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="currentColor"/></svg><span data-i18n="stop">Detener</span></button>
+          <button class="btn" id="bMetro" type="button" aria-pressed="false"><svg viewBox="0 0 16 16"><path d="M5.5 1.5h5l3 13h-11z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 11.5L11.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span data-i18n="metroOnly">Solo metrónomo</span></button>
         </div>
         <div class="tempo">
           <span class="glyph" id="tGlyph"></span><span class="eq">=</span>
-          <button class="step" id="bpmDown" type="button" aria-label="Bajar tempo">−</button>
-          <input id="bpm" type="number" min="30" max="240" aria-label="Pulsos por minuto">
-          <button class="step" id="bpmUp" type="button" aria-label="Subir tempo">+</button>
+          <button class="step" id="bpmDown" type="button" data-i18n-attr="aria-label=bpmDown" aria-label="Bajar tempo">−</button>
+          <input id="bpm" type="number" min="30" max="240" data-i18n-attr="aria-label=bpmAria" aria-label="Pulsos por minuto">
+          <button class="step" id="bpmUp" type="button" data-i18n-attr="aria-label=bpmUp" aria-label="Subir tempo">+</button>
           <span class="tmark" id="tMark"></span>
-          <span class="tlock" id="tLock" hidden>Fijado por el nivel</span>
+          <span class="tlock" id="tLock" hidden data-i18n="tLock">Fijado por el nivel</span>
         </div>
         <div class="lights" id="lights" aria-hidden="true"></div>
       </div>
@@ -78,11 +82,11 @@
             <div class="summary" id="summary"></div>
             <p class="notice" id="notice" hidden></p>
           </div>
-          <button class="btn" id="bFull" type="button" hidden>Ritmo completo</button>
+          <button class="btn" id="bFull" type="button" hidden data-i18n="fullRhythm">Ritmo completo</button>
           <button class="btn" id="bNew" type="button"><svg viewBox="0 0 16 16"><path d="M13 5.5A5.5 5.5 0 1 0 13.5 10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M13.8 1.8v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="bNewLbl">Nuevo ritmo</span></button>
         </div>
-        <div class="pad" id="pad" tabindex="0" role="button" aria-label="Partitura: toca sobre ella en cada nota">
-          <div id="score" aria-label="Partitura del ritmo"></div>
+        <div class="pad" id="pad" tabindex="0" role="button" data-i18n-attr="aria-label=padAria" aria-label="Partitura: toca sobre ella en cada nota">
+          <div id="score" data-i18n-attr="aria-label=scoreAria" aria-label="Partitura del ritmo"></div>
           <div class="pad-count" id="padCount" hidden></div>
           <div class="pad-status"><span class="pad-main" id="padMain"></span><span class="pad-sub" id="padSub"></span></div>
         </div>
@@ -90,35 +94,35 @@
 
       <div class="practice">
         <div class="p-actions">
-          <button class="btn primary big" id="bPractice" type="button"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>Practicar</button>
-          <button class="btn" id="bCalib" type="button"><svg viewBox="0 0 16 16"><circle cx="8" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9V5.8M6.5 1.8h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Medir latencia</button>
-          <div class="modeseg" id="modeSeg" role="group" aria-label="Forma de tocar">
-            <button type="button" data-hold="0" title="Solo cuenta el momento del golpe">Batería</button>
-            <button type="button" data-hold="1" title="También cuenta cuánto mantienes pulsada cada nota">Piano</button>
+          <button class="btn primary big" id="bPractice" type="button"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg><span data-i18n="practice">Practicar</span></button>
+          <button class="btn" id="bCalib" type="button"><svg viewBox="0 0 16 16"><circle cx="8" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9V5.8M6.5 1.8h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span data-i18n="calib">Medir latencia</span></button>
+          <div class="modeseg" id="modeSeg" role="group" data-i18n-attr="aria-label=modeAria" aria-label="Forma de tocar">
+            <button type="button" data-hold="0" data-i18n="modeDrum" data-i18n-attr="title=modeDrumTitle" title="Solo cuenta el momento del golpe">Batería</button>
+            <button type="button" data-hold="1" data-i18n="modePiano" data-i18n-attr="title=modePianoTitle" title="También cuenta cuánto mantienes pulsada cada nota">Piano</button>
           </div>
-          <span class="p-offset">Corrección actual: <b id="offsetNow">0 ms</b></span>
+          <span class="p-offset"><span data-i18n="offsetNow">Corrección actual:</span> <b id="offsetNow">0 ms</b></span>
         </div>
       </div>
 
-      <section class="calib" id="calib" tabindex="-1" aria-label="Medición de latencia" hidden>
+      <section class="calib" id="calib" tabindex="-1" data-i18n-attr="aria-label=calibAria" aria-label="Medición de latencia" hidden>
         <div class="calib-top">
           <div class="calib-val" id="kVal">+0 ms</div>
           <div><h3 id="kHead"></h3><p id="kText"></p></div>
         </div>
         <div class="calib-strip" id="kStrip" aria-hidden="true"></div>
         <div class="res-actions">
-          <button class="btn primary" id="kApply" type="button">Aplicar corrección</button>
-          <button class="btn" id="kAgain" type="button">Medir de nuevo</button>
+          <button class="btn primary" id="kApply" type="button" data-i18n="kApply">Aplicar corrección</button>
+          <button class="btn" id="kAgain" type="button" data-i18n="kAgain">Medir de nuevo</button>
         </div>
       </section>
 
-      <section class="results" id="results" tabindex="-1" aria-label="Resultados" hidden>
+      <section class="results" id="results" tabindex="-1" data-i18n-attr="aria-label=resultsAria" aria-label="Resultados" hidden>
         <!-- acciones arriba, junto a la partitura; «Siguiente nivel» solo al superar un nivel de la campaña -->
         <div class="res-actions" id="resActions">
-          <button class="btn primary" id="rcNext" type="button" hidden>Siguiente nivel</button>
-          <button class="btn primary" id="rAgain" type="button">Repetir práctica</button>
-          <button class="btn" id="rNew" type="button">Nuevo ritmo</button>
-          <button class="btn" id="rSave" type="button" hidden>Guardar resultado</button>
+          <button class="btn primary" id="rcNext" type="button" hidden data-i18n="nextLevel">Siguiente nivel</button>
+          <button class="btn primary" id="rAgain" type="button" data-i18n="again">Repetir práctica</button>
+          <button class="btn" id="rNew" type="button" data-i18n="newRhythm">Nuevo ritmo</button>
+          <button class="btn" id="rSave" type="button" hidden data-i18n="saveResult">Guardar resultado</button>
           <span class="saved-note" id="rSaved" hidden></span>
         </div>
         <div class="res-top">
@@ -134,102 +138,100 @@
           <button class="btn" id="rWeakBtn" type="button"></button>
         </div>
         <ul class="counts">
-          <li><span class="sw-dot" style="background:var(--good)"></span>Exacto (±40 ms)<span class="n" id="cExact">0</span></li>
-          <li><span class="sw-dot" style="background:var(--ok)"></span>Bien (±90 ms)<span class="n" id="cGood">0</span></li>
-          <li><span class="sw-dot" style="background:var(--near)"></span>Cerca<span class="n" id="cNear">0</span></li>
-          <li><span class="sw-dot" style="background:var(--bad)"></span>Sin tocar<span class="n" id="cMiss">0</span></li>
-          <li><span class="sw-dot tri" style="background:var(--muted)"></span>Golpes de más<span class="n" id="cExtra">0</span></li>
+          <li><span class="sw-dot" style="background:var(--good)"></span><span data-i18n="cExact">Exacto (±40 ms)</span><span class="n" id="cExact">0</span></li>
+          <li><span class="sw-dot" style="background:var(--ok)"></span><span data-i18n="cGood">Bien (±90 ms)</span><span class="n" id="cGood">0</span></li>
+          <li><span class="sw-dot" style="background:var(--near)"></span><span data-i18n="cNear">Cerca</span><span class="n" id="cNear">0</span></li>
+          <li><span class="sw-dot" style="background:var(--bad)"></span><span data-i18n="cMiss">Sin tocar</span><span class="n" id="cMiss">0</span></li>
+          <li><span class="sw-dot tri" style="background:var(--muted)"></span><span data-i18n="cExtra">Golpes de más</span><span class="n" id="cExtra">0</span></li>
         </ul>
         <ul class="counts" id="durCounts" hidden>
-          <li><span class="sw-dot" style="background:var(--good)"></span>Duración justa<span class="n" id="dExact">0</span></li>
-          <li><span class="sw-dot" style="background:var(--ok)"></span>Duración aceptable<span class="n" id="dOk">0</span></li>
-          <li><span class="sw-dot" style="background:var(--near)"></span>Soltaste antes<span class="n" id="dShort">0</span></li>
-          <li><span class="sw-dot" style="background:var(--near)"></span>Soltaste tarde<span class="n" id="dLong">0</span></li>
+          <li><span class="sw-dot" style="background:var(--good)"></span><span data-i18n="dExact">Duración justa</span><span class="n" id="dExact">0</span></li>
+          <li><span class="sw-dot" style="background:var(--ok)"></span><span data-i18n="dOk">Duración aceptable</span><span class="n" id="dOk">0</span></li>
+          <li><span class="sw-dot" style="background:var(--near)"></span><span data-i18n="dShort">Soltaste antes</span><span class="n" id="dShort">0</span></li>
+          <li><span class="sw-dot" style="background:var(--near)"></span><span data-i18n="dLong">Soltaste tarde</span><span class="n" id="dLong">0</span></li>
         </ul>
-        <p class="res-note">Los puntos bajo cada nota muestran tu desvío: a la izquierda de la rayita tocaste antes, a la derecha tocaste tarde. Los triángulos grises marcan dónde tocaste sin que hubiera nota (golpes de más).<span id="durNote" hidden> En modo piano, la barra de debajo compara cuánto mantuviste la nota (color) con lo que debía durar (gris); la rayita marca dónde tenías que soltar.</span></p>
+        <p class="res-note"><span data-i18n="resNote">Los puntos bajo cada nota muestran tu desvío: a la izquierda de la rayita tocaste antes, a la derecha tocaste tarde. Los triángulos grises marcan dónde tocaste sin que hubiera nota (golpes de más).</span><span id="durNote" hidden data-i18n="durNote"> En modo piano, la barra de debajo compara cuánto mantuviste la nota (color) con lo que debía durar (gris); la rayita marca dónde tenías que soltar.</span></p>
       </section>
     </section>
 
-    <aside class="panel" aria-label="Opciones">
+    <aside class="panel" data-i18n-attr="aria-label=panelAria" aria-label="Opciones">
       <div class="sec" id="secCamp" hidden>
-        <h2>Niveles</h2>
+        <h2 data-i18n="levels">Niveles</h2>
         <div class="camp-total" id="campTotal"></div>
         <div id="campMap" class="sec"></div>
-        <p class="hint">Supera un nivel con la precisión del objetivo para desbloquear el siguiente. En la campaña el tempo lo fija cada nivel.</p>
+        <p class="hint" data-i18n="campHint">Supera un nivel con la precisión del objetivo para desbloquear el siguiente. En la campaña el tempo lo fija cada nivel.</p>
       </div>
       <div class="sec" id="secSig">
-        <h2>Compás</h2>
+        <h2 data-i18n="secSig">Compás</h2>
         <div class="sig-grid" id="sigs"></div>
-        <div class="grp-row" id="grpRow" hidden><span class="rlabel">Agrupación de las corcheas</span><div class="seg" id="grpSeg" role="group" aria-label="Agrupación del compás"></div></div>
+        <div class="grp-row" id="grpRow" hidden><span class="rlabel" data-i18n="grpLbl">Agrupación de las corcheas</span><div class="seg" id="grpSeg" role="group" data-i18n-attr="aria-label=grpAria" aria-label="Agrupación del compás"></div></div>
         <div class="row">
-          <span>Número de compases</span>
+          <span data-i18n="barsLbl">Número de compases</span>
           <div class="stepper">
-            <button class="step" id="barsDown" type="button" aria-label="Menos compases">−</button>
+            <button class="step" id="barsDown" type="button" data-i18n-attr="aria-label=barsDown" aria-label="Menos compases">−</button>
             <output id="bars">4</output>
-            <button class="step" id="barsUp" type="button" aria-label="Más compases">+</button>
+            <button class="step" id="barsUp" type="button" data-i18n-attr="aria-label=barsUp" aria-label="Más compases">+</button>
           </div>
         </div>
       </div>
 
       <div class="sec" id="secFigs">
-        <h2>Figuras</h2>
+        <h2 data-i18n="secFigs">Figuras</h2>
         <div class="fig-grid" id="figs"></div>
-        <p class="hint">El número indica cuántas negras dura cada figura.</p>
-        <h2 class="sub">Silencios</h2>
+        <p class="hint" data-i18n="figsHint">El número indica cuántas negras dura cada figura.</p>
+        <h2 class="sub" data-i18n="secRests">Silencios</h2>
         <div class="fig-grid" id="restFigs"></div>
-        <p class="hint">Elige qué silencios pueden salir, igual que las figuras. Sin ninguno, el ritmo no tendrá silencios.</p>
-        <label class="sw"><input type="checkbox" id="sync"><span class="track"></span><span>Síncopas<small>Figuras que empiezan entre dos tiempos y siguen sonando sobre el pulso, como corchea-negra-corchea o negra-blanca-negra.</small></span></label>
-        <label class="sw"><input type="checkbox" id="ties"><span class="track"></span><span>Ligaduras<small>Notas ligadas entre tiempos y sobre la barra de compás. La nota ligada no se vuelve a tocar.</small></span></label>
+        <p class="hint" data-i18n="restsHint">Elige qué silencios pueden salir, igual que las figuras. Sin ninguno, el ritmo no tendrá silencios.</p>
+        <label class="sw"><input type="checkbox" id="sync"><span class="track"></span><span data-i18n="swSync">Síncopas<small>Figuras que empiezan entre dos tiempos y siguen sonando sobre el pulso, como corchea-negra-corchea o negra-blanca-negra.</small></span></label>
+        <label class="sw"><input type="checkbox" id="ties"><span class="track"></span><span data-i18n="swTies">Ligaduras<small>Notas ligadas entre tiempos y sobre la barra de compás. La nota ligada no se vuelve a tocar.</small></span></label>
       </div>
 
       <details class="fold" data-fold="repro">
-        <summary>Reproducción</summary>
+        <summary data-i18n="secRepro">Reproducción</summary>
         <div class="sec">
-        <label class="sw"><input type="checkbox" id="sound"><span class="track"></span><span>Escuchar el ritmo al practicar<small>«Reproducir» siempre hace sonar el ritmo. Actívalo si quieres oírlo también mientras practicas.</small></span></label>
-        <label class="sw"><input type="checkbox" id="cursor"><span class="track"></span><span>Resaltar la nota actual</span></label>
-        <label class="sw"><input type="checkbox" id="loop"><span class="track"></span><span>Repetir en bucle<small>Solo al reproducir</small></span></label>
-        <div class="field"><label for="timbre">Sonido de las notas</label>
-          <select id="timbre"><option value="tono">Tono sostenido (se oye la duración)</option><option value="golpe">Golpe de percusión</option></select></div>
-        <div class="field"><span class="rlabel">Volumen del ritmo <output id="rhythmVolOut"></output></span><input type="range" id="rhythmVol" min="0" max="1" step="0.05" aria-label="Volumen del ritmo"></div>
+        <label class="sw"><input type="checkbox" id="sound"><span class="track"></span><span data-i18n="swSound">Escuchar el ritmo al practicar<small>«Reproducir» siempre hace sonar el ritmo. Actívalo si quieres oírlo también mientras practicas.</small></span></label>
+        <label class="sw"><input type="checkbox" id="cursor"><span class="track"></span><span data-i18n="swCursor">Resaltar la nota actual</span></label>
+        <label class="sw"><input type="checkbox" id="loop"><span class="track"></span><span data-i18n="swLoop">Repetir en bucle<small>Solo al reproducir</small></span></label>
+        <div class="field"><label for="timbre" data-i18n="timbreLbl">Sonido de las notas</label>
+          <select id="timbre"><option value="tono" data-i18n="timbreTone">Tono sostenido (se oye la duración)</option><option value="golpe" data-i18n="timbreHit">Golpe de percusión</option></select></div>
+        <div class="field"><span class="rlabel"><span data-i18n="rhythmVol">Volumen del ritmo</span> <output id="rhythmVolOut"></output></span><input type="range" id="rhythmVol" min="0" max="1" step="0.05" data-i18n-attr="aria-label=rhythmVol" aria-label="Volumen del ritmo"></div>
         </div>
       </details>
 
       <details class="fold" data-fold="metro">
-        <summary>Metrónomo</summary>
+        <summary data-i18n="secMetro">Metrónomo</summary>
         <div class="sec">
         <div class="field"><span class="rlabel">Tempo <output id="bpmOut"></output></span><input type="range" id="bpmRange" min="30" max="240" step="1" aria-label="Tempo"></div>
-        <p class="hint" id="tLockHint" hidden>En la campaña el tempo lo fija cada nivel.</p>
-        <button class="btn" id="tapTempo" type="button">Marcar tempo con toques</button>
-        <label class="sw"><input type="checkbox" id="metro"><span class="track"></span><span>Sonar durante el ritmo</span></label>
-        <label class="sw"><input type="checkbox" id="accent"><span class="track"></span><span>Acentuar el primer tiempo</span></label>
+        <p class="hint" id="tLockHint" hidden data-i18n="tLockHint">En la campaña el tempo lo fija cada nivel.</p>
+        <button class="btn" id="tapTempo" type="button" data-i18n="tapTempo">Marcar tempo con toques</button>
+        <label class="sw"><input type="checkbox" id="metro"><span class="track"></span><span data-i18n="swMetro">Sonar durante el ritmo</span></label>
+        <label class="sw"><input type="checkbox" id="accent"><span class="track"></span><span data-i18n="swAccent">Acentuar el primer tiempo</span></label>
         <div class="two">
-          <div class="field"><label for="sub">Subdivisión</label>
-            <select id="sub"><option value="0">Ninguna</option><option value="6">Corcheas</option><option value="3">Semicorcheas</option><option value="4">Tresillos</option></select></div>
-          <div class="field"><label for="countIn">Cuenta previa</label>
-            <select id="countIn"><option value="0">Sin cuenta</option><option value="1">1 compás</option><option value="2">2 compases</option></select></div>
+          <div class="field"><label for="sub" data-i18n="subLbl">Subdivisión</label>
+            <select id="sub"><option value="0" data-i18n="subNone">Ninguna</option><option value="6" data-i18n="subE">Corcheas</option><option value="3" data-i18n="subS">Semicorcheas</option><option value="4" data-i18n="subT">Tresillos</option></select></div>
+          <div class="field"><label for="countIn" data-i18n="countInLbl">Cuenta previa</label>
+            <select id="countIn"><option value="0" data-i18n="ci0">Sin cuenta</option><option value="1" data-i18n="ci1">1 compás</option><option value="2" data-i18n="ci2">2 compases</option></select></div>
         </div>
-        <div class="field"><span class="rlabel">Volumen del metrónomo <output id="metroVolOut"></output></span><input type="range" id="metroVol" min="0" max="1" step="0.05" aria-label="Volumen del metrónomo"></div>
+        <div class="field"><span class="rlabel"><span data-i18n="metroVol">Volumen del metrónomo</span> <output id="metroVolOut"></output></span><input type="range" id="metroVol" min="0" max="1" step="0.05" data-i18n-attr="aria-label=metroVol" aria-label="Volumen del metrónomo"></div>
         </div>
       </details>
 
       <details class="fold" data-fold="prac">
-        <summary>Práctica</summary>
+        <summary data-i18n="secPrac">Práctica</summary>
         <div class="sec">
-        <label class="sw"><input type="checkbox" id="penalize"><span class="track"></span><span>Penalizar golpes de más<small>Cada golpe donde no hay nota resta puntos. Desactivado, solo se cuentan.</small></span></label>
-        <label class="sw"><input type="checkbox" id="holdSw"><span class="track"></span><span>Modo piano: medir la duración<small>Mantén pulsada la tecla o la pantalla mientras dura cada nota y suelta al terminar.</small></span></label>
-        <label class="sw"><input type="checkbox" id="tapSound"><span class="track"></span><span>Oír mis toques<small>Cada toque suena: en modo piano, mientras lo mantienes. Con auriculares Bluetooth lo oirás con algo de retraso.</small></span></label>
-        <div class="field" id="tapVolField"><span class="rlabel">Volumen de mis toques <output id="tapVolOut"></output></span><input type="range" id="tapVol" min="0" max="1" step="0.05" aria-label="Volumen de mis toques"></div>
-        <label class="sw" id="vibrateRow" hidden><input type="checkbox" id="vibrate"><span class="track"></span><span>Vibrar al tocar<small>Una vibración corta con cada toque en la pantalla.</small></span></label>
-        <label class="sw"><input type="checkbox" id="fab"><span class="track"></span><span>Botón flotante para tocar<small>En móvil y tableta, mientras practicas aparece un botón grande abajo de la pantalla. Toca ahí en vez de sobre la partitura, que se desplaza al cambiar de línea.</small></span></label>
-        <label class="sw"><input type="checkbox" id="autosave"><span class="track"></span><span>Guardar cada práctica automáticamente<small>Si lo desactivas, podrás guardar cada resultado a mano.</small></span></label>
-        <div class="field"><span class="rlabel">Ajuste de latencia <output id="offsetOut"></output></span><input type="range" id="offset" min="-150" max="250" step="5" aria-label="Ajuste de latencia"></div>
-        <p class="hint">Si siempre te marca «tarde» aunque vayas a tiempo (pasa con auriculares Bluetooth), sube este valor, o usa «Medir latencia» junto a la zona de toque para calcularlo automáticamente.</p>
+        <label class="sw"><input type="checkbox" id="penalize"><span class="track"></span><span data-i18n="swPen">Penalizar golpes de más<small>Cada golpe donde no hay nota resta puntos. Desactivado, solo se cuentan.</small></span></label>
+        <label class="sw"><input type="checkbox" id="holdSw"><span class="track"></span><span data-i18n="swHold">Modo piano: medir la duración<small>Mantén pulsada la tecla o la pantalla mientras dura cada nota y suelta al terminar.</small></span></label>
+        <label class="sw"><input type="checkbox" id="tapSound"><span class="track"></span><span data-i18n="swTapSound">Oír mis toques<small>Cada toque suena: en modo piano, mientras lo mantienes. Con auriculares Bluetooth lo oirás con algo de retraso.</small></span></label>
+        <div class="field" id="tapVolField"><span class="rlabel"><span data-i18n="tapVol">Volumen de mis toques</span> <output id="tapVolOut"></output></span><input type="range" id="tapVol" min="0" max="1" step="0.05" data-i18n-attr="aria-label=tapVol" aria-label="Volumen de mis toques"></div>
+        <label class="sw" id="vibrateRow" hidden><input type="checkbox" id="vibrate"><span class="track"></span><span data-i18n="swVibrate">Vibrar al tocar<small>Una vibración corta con cada toque en la pantalla.</small></span></label>
+        <label class="sw"><input type="checkbox" id="fab"><span class="track"></span><span data-i18n="swFab">Botón flotante para tocar<small>En móvil y tableta, mientras practicas aparece un botón grande abajo de la pantalla. Toca ahí en vez de sobre la partitura, que se desplaza al cambiar de línea.</small></span></label>
+        <label class="sw"><input type="checkbox" id="autosave"><span class="track"></span><span data-i18n="swAutosave">Guardar cada práctica automáticamente<small>Si lo desactivas, podrás guardar cada resultado a mano.</small></span></label>
+        <div class="field"><span class="rlabel"><span data-i18n="offsetLbl">Ajuste de latencia</span> <output id="offsetOut"></output></span><input type="range" id="offset" min="-150" max="250" step="5" data-i18n-attr="aria-label=offsetLbl" aria-label="Ajuste de latencia"></div>
+        <p class="hint" data-i18n="offsetHint">Si siempre te marca «tarde» aunque vayas a tiempo (pasa con auriculares Bluetooth), sube este valor, o usa «Medir latencia» junto a la zona de toque para calcularlo automáticamente.</p>
         </div>
       </details>
 
-      <div class="confirm" id="resetBox">
-        <button class="btn" id="resetSet" type="button">Restablecer ajustes</button>
-      </div>
+      <div class="confirm" id="resetBox"></div>
     </aside>
   </main>
 
@@ -237,36 +239,33 @@
     <div class="tiles" id="pTiles"></div>
     <div class="card">
       <div class="card-head">
-        <h2>Precisión en cada práctica</h2>
-        <div class="seg" id="pFilter" role="group" aria-label="Filtrar prácticas">
-          <button type="button" data-f="todo" aria-pressed="true">Todo</button>
-          <button type="button" data-f="libre" aria-pressed="false">Libre</button>
-          <button type="button" data-f="campana" aria-pressed="false">Campaña</button>
+        <h2 data-i18n="chartTitle">Precisión en cada práctica</h2>
+        <div class="seg" id="pFilter" role="group" data-i18n-attr="aria-label=filterAria" aria-label="Filtrar prácticas">
+          <button type="button" data-f="todo" aria-pressed="true" data-i18n="fAll">Todo</button>
+          <button type="button" data-f="libre" aria-pressed="false" data-i18n="fFree">Libre</button>
+          <button type="button" data-f="campana" aria-pressed="false" data-i18n="fCamp">Campaña</button>
         </div>
       </div>
       <div id="pChart"></div>
     </div>
     <div class="card">
-      <div class="card-head"><h2>Historial</h2><span class="hint" id="pCount"></span></div>
+      <div class="card-head"><h2 data-i18n="history">Historial</h2><span class="hint" id="pCount"></span></div>
       <div class="tbl-wrap" id="pTable"></div>
     </div>
     <div class="card danger-row">
       <p id="pStore"></p>
-      <div class="confirm" id="pClearBox">
-        <button class="btn warn" id="pClear" type="button">Borrar historial</button>
-      </div>
+      <div class="confirm" id="pClearBox"></div>
     </div>
   </section>
 </div>
 
 <button type="button" class="fab" id="tapFab" hidden aria-label="Tocar"><span class="fab-main" id="fabMain">Toca aquí</span></button>
-<button type="button" class="fab-restart" id="fabRestart" hidden aria-label="Reiniciar: mantén pulsado medio segundo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg><span>Reiniciar</span></button>
-<div class="fab fab-post" id="postFab" role="group" aria-label="Después de la práctica" hidden>
-  <button type="button" id="pfAgain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg>Repetir</button>
-  <button type="button" id="pfNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7h3.2c2 0 3.2.9 4.3 2.6l2.6 4.6c1 1.8 2.3 2.8 4.3 2.8h4.6"/><path d="M2.5 17h3.2c1.3 0 2.2-.4 3-1.1"/><path d="M14.4 8.1c.8-.7 1.7-1.1 3-1.1h4.1"/><path d="M18.5 4l3 3-3 3"/><path d="M18.5 14l3 3-3 3"/></svg>Nuevo ritmo</button>
+<button type="button" class="fab-restart" id="fabRestart" hidden data-i18n-attr="aria-label=restartAria" aria-label="Reiniciar: mantén pulsado medio segundo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg><span data-i18n="restart">Reiniciar</span></button>
+<div class="fab fab-post" id="postFab" role="group" data-i18n-attr="aria-label=postAria" aria-label="Después de la práctica" hidden>
+  <button type="button" id="pfAgain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg><span data-i18n="pfAgain">Repetir</span></button>
+  <button type="button" id="pfNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7h3.2c2 0 3.2.9 4.3 2.6l2.6 4.6c1 1.8 2.3 2.8 4.3 2.8h4.6"/><path d="M2.5 17h3.2c1.3 0 2.2-.4 3-1.1"/><path d="M14.4 8.1c.8-.7 1.7-1.1 3-1.1h4.1"/><path d="M18.5 4l3 3-3 3"/><path d="M18.5 14l3 3-3 3"/></svg><span data-i18n="newRhythm">Nuevo ritmo</span></button>
   <button type="button" id="pfNext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg><span id="pfNextLbl">Listo</span></button>
 </div>
-
 <script>
 (() => {
 const $ = s => document.querySelector(s);
@@ -274,16 +273,17 @@ const KEY = 'solfeo-ritmico-v1';
 
 /* ---------- Datos musicales (1 negra = 12 ticks) ---------- */
 const FIGS = [
-  {k:'w',  name:'Redonda', val:'4'},
-  {k:'h',  name:'Blanca', val:'2'},
-  {k:'hd', name:'Blanca con puntillo', val:'3'},
-  {k:'q',  name:'Negra', val:'1'},
-  {k:'qd', name:'Negra con puntillo', val:'1½'},
-  {k:'e',  name:'Corchea', val:'½'},
-  {k:'ed', name:'Corchea con puntillo', val:'¾'},
-  {k:'s',  name:'Semicorchea', val:'¼'},
-  {k:'t',  name:'Tresillo de corcheas', val:'3 en 1'},
+  {k:'w',  name:'Redonda', en:'Whole note', val:'4'},
+  {k:'h',  name:'Blanca', en:'Half note', val:'2'},
+  {k:'hd', name:'Blanca con puntillo', en:'Dotted half note', val:'3'},
+  {k:'q',  name:'Negra', en:'Quarter note', val:'1'},
+  {k:'qd', name:'Negra con puntillo', en:'Dotted quarter note', val:'1½'},
+  {k:'e',  name:'Corchea', en:'Eighth note', val:'½'},
+  {k:'ed', name:'Corchea con puntillo', en:'Dotted eighth note', val:'¾'},
+  {k:'s',  name:'Semicorchea', en:'Sixteenth note', val:'¼'},
+  {k:'t',  name:'Tresillo de corcheas', en:'Eighth-note triplet', val:'3 en 1', valEn:'3 in 1'},
 ];
+const figName = f => tr(f.name, f.en);
 const SIGS = {
   '2/4':{groups:[12,12],click:12,kind:'simple'},
   '3/4':{groups:[12,12,12],click:12,kind:'simple'},
@@ -300,6 +300,7 @@ const SIGS = {
   '8/8':{groups:[18,18,12],click:6,kind:'odd'},
 };
 const SIG_TITLES = {'2/2':'Compasillo partido (alla breve)','3/2':'Tres tiempos de blanca','5/8':'Amalgama: 3+2 o 2+3','7/8':'Amalgama: 2+2+3, 2+3+2 o 3+2+2','8/8':'Amalgama: 3+3+2, 3+2+3 o 2+3+3'};
+const SIG_TITLES_EN = {'2/2':'Cut time (alla breve)','3/2':'Three half-note beats','5/8':'Additive meter: 3+2 or 2+3','7/8':'Additive meter: 2+2+3, 2+3+2 or 3+2+2','8/8':'Additive meter: 3+3+2, 3+2+3 or 2+3+3'};
 // Agrupaciones posibles de los compases de amalgama (la primera es la de SIGS). 2 = dos corcheas (12 ticks), 3 = tres (18).
 const ODD_GROUPS = {'5/8':['3+2','2+3'], '7/8':['2+2+3','2+3+2','3+2+2'], '8/8':['3+3+2','3+2+3','2+3+3']};
 // Compás efectivo: en amalgama aplica la agrupación elegida (set.grp[sig] en práctica libre, l.grp en campaña)
@@ -368,13 +369,14 @@ const DUR2K = {48:'w',36:'hd',24:'h',18:'qd',12:'q',9:'ed',6:'e',4:'t',3:'s'};
 });
 // Silencios que se pueden elegir (cada uno por separado, como las figuras)
 const RESTS = [
-  {k:'w', name:'Silencio de redonda', short:'redonda', val:'4'},
-  {k:'h', name:'Silencio de blanca', short:'blanca', val:'2'},
-  {k:'q', name:'Silencio de negra', short:'negra', val:'1'},
-  {k:'qd', name:'Silencio de negra con puntillo', short:'negra con puntillo', val:'1½'},
-  {k:'e', name:'Silencio de corchea', short:'corchea', val:'½'},
-  {k:'s', name:'Silencio de semicorchea', short:'semicorchea', val:'¼'},
+  {k:'w', name:'Silencio de redonda', short:'redonda', en:'Whole rest', enShort:'whole', val:'4'},
+  {k:'h', name:'Silencio de blanca', short:'blanca', en:'Half rest', enShort:'half', val:'2'},
+  {k:'q', name:'Silencio de negra', short:'negra', en:'Quarter rest', enShort:'quarter', val:'1'},
+  {k:'qd', name:'Silencio de negra con puntillo', short:'negra con puntillo', en:'Dotted quarter rest', enShort:'dotted quarter', val:'1½'},
+  {k:'e', name:'Silencio de corchea', short:'corchea', en:'Eighth rest', enShort:'eighth', val:'½'},
+  {k:'s', name:'Silencio de semicorchea', short:'semicorchea', en:'Sixteenth rest', enShort:'sixteenth', val:'¼'},
 ];
+const restName = r => tr(r.name, r.en);
 const REST_KEYS = RESTS.map(r=>r.k);
 // Silencios activos: lista (práctica libre y niveles); acepta el booleano antiguo (= silencios de las figuras elegidas)
 function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.figs.filter(k=>REST_KEYS.includes(k)) : []); }
@@ -394,10 +396,86 @@ function load(){
 function freshSettings(){ return {...DEFAULTS, figs:[...DEFAULTS.figs], rests:[...DEFAULTS.rests], grp:{}, folds:{}}; }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(set)); }catch(e){ appWarn('store'); } }
 // Avisos persistentes arriba de la página (no se puede guardar, no hay audio)
-const WARNS={store:'Este navegador no deja guardar datos (modo privado o almacenamiento lleno): tus ajustes y tu progreso se perderán al cerrar la página.',
-  audio:'Tu navegador no permite reproducir audio, así que no se puede escuchar el ritmo ni practicar. Prueba con otro navegador actualizado.'};
+const WARNS={
+  store:()=>tr('Este navegador no deja guardar datos (modo privado o almacenamiento lleno): tus ajustes y tu progreso se perderán al cerrar la página.',
+    "This browser won't let the app save data (private mode or storage full): your settings and progress will be lost when you close the page."),
+  audio:()=>tr('Tu navegador no permite reproducir audio, así que no se puede escuchar el ritmo ni practicar. Prueba con otro navegador actualizado.',
+    "Your browser can't play audio, so you can't hear the rhythm or practice. Try another, up-to-date browser.")};
 const warnOn=new Set();
-function appWarn(k){ if(warnOn.has(k)) return; warnOn.add(k); const w=$('#appWarn'); w.textContent=[...warnOn].map(x=>WARNS[x]).join(' '); w.hidden=false; }
+function appWarn(k){ warnOn.add(k); refreshWarn(); }
+function refreshWarn(){ const w=$('#appWarn'); w.textContent=[...warnOn].map(x=>WARNS[x]()).join(' '); w.hidden=!warnOn.size; }
+
+/* ---------- Idioma ---------- */
+// Prioridad: ?lang= en el enlace (se guarda) > idioma guardado > idioma del navegador (es/en; si no, inglés)
+const LANGS=['es','en'];
+function detectLang(){
+  const list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language||''];
+  for(const l of list){ const b=String(l).slice(0,2).toLowerCase(); if(LANGS.includes(b)) return b; }
+  return 'en';
+}
+let lang = (()=>{ const q=new URLSearchParams(location.search).get('lang'); if(LANGS.includes(q)){ set.lang=q; return q; } return LANGS.includes(set.lang) ? set.lang : detectLang(); })();
+const tr=(es,en)=>lang==='en'?en:es;
+// Textos fijos del HTML en inglés (data-i18n = contenido, data-i18n-attr="atributo=clave"); el español se toma del propio HTML
+const EN={
+  appTitle:'Rhythm Reading', tagline:'Generate a rhythm, hear it with the metronome, then play it yourself: the app measures how close you land to each note.',
+  keys:'<span><kbd>Space</kbd> tap</span><span><kbd>P</kbd> practice</span><span><kbd>R</kbd> play</span><span><kbd>Esc</kbd> stop</span><span><kbd>N</kbd> new rhythm</span>',
+  tabsAria:'Sections', tabFree:'Free practice', tabCamp:'Campaign', tabProg:'My progress',
+  welTitle:'How to practice',
+  welSteps:'<li>Press <b>Play</b> <span class="kb">(<kbd>R</kbd>)</span> to hear the rhythm with the metronome.</li><li>Press <b>Practice</b> <span class="kb">(<kbd>P</kbd>)</span> or tap the score. After the count-in, tap on every note: with your finger, the mouse or the space bar.</li><li>When you finish you’ll see your accuracy and, under each note, whether you were early or late.</li>',
+  welHint:'If you use Bluetooth headphones or it always says you are “late”, measure your device’s latency first: it takes half a minute.',
+  welCalib:'Measure latency now', welOk:'Got it',
+  lvPrev:'Previous level', lvNext:'Next level',
+  play:'Play', stop:'Stop', metroOnly:'Metronome only', bpmDown:'Slower', bpmUp:'Faster', bpmAria:'Beats per minute', tLock:'Set by the level',
+  fullRhythm:'Full rhythm', padAria:'Score: tap on it for each note', scoreAria:'Rhythm score',
+  practice:'Practice', calib:'Measure latency', modeAria:'How you play', modeDrum:'Drums', modePiano:'Piano',
+  modeDrumTitle:'Only the moment you tap counts', modePianoTitle:'How long you hold each note counts too', offsetNow:'Current correction:',
+  calibAria:'Latency measurement', kAgain:'Measure again', resultsAria:'Results',
+  nextLevel:'Next level', again:'Practice again', newRhythm:'New rhythm', saveResult:'Save result', kApply:'Apply correction',
+  cExact:'Exact (±40 ms)', cGood:'Good (±90 ms)', cNear:'Close', cMiss:'Missed', cExtra:'Extra taps',
+  dExact:'Right length', dOk:'Acceptable length', dShort:'Released early', dLong:'Released late',
+  resNote:'The dots under each note show how far off you were: left of the tick you were early, right of it you were late. Grey triangles mark where you tapped with no note (extra taps).',
+  durNote:' In piano mode, the bar underneath compares how long you held the note (colour) with how long it should last (grey); the tick marks where you should have released.',
+  panelAria:'Options', levels:'Levels', campHint:'Pass a level with the target accuracy to unlock the next one. In the campaign each level sets the tempo.',
+  secSig:'Time signature', grpLbl:'Eighth-note grouping', grpAria:'Meter grouping', barsLbl:'Number of bars', barsDown:'Fewer bars', barsUp:'More bars',
+  secFigs:'Note values', figsHint:'The number shows how many quarter notes each value lasts.', secRests:'Rests',
+  restsHint:'Choose which rests can appear, just like the note values. With none selected, the rhythm will have no rests.',
+  swSync:'Syncopation<small>Notes that start between two beats and keep sounding over the pulse, like eighth-quarter-eighth or quarter-half-quarter.</small>',
+  swTies:'Ties<small>Notes tied across beats and over the bar line. The tied note is not tapped again.</small>',
+  secRepro:'Playback',
+  swSound:'Hear the rhythm while practicing<small>“Play” always sounds the rhythm. Turn this on to hear it while you practice too.</small>',
+  swCursor:'Highlight the current note', swLoop:'Loop<small>Only when playing</small>',
+  timbreLbl:'Note sound', timbreTone:'Sustained tone (you hear the length)', timbreHit:'Percussion hit', rhythmVol:'Rhythm volume',
+  secMetro:'Metronome', tLockHint:'In the campaign each level sets the tempo.', tapTempo:'Tap tempo',
+  swMetro:'Click during the rhythm', swAccent:'Accent the first beat',
+  subLbl:'Subdivision', subNone:'None', subE:'Eighth notes', subS:'Sixteenth notes', subT:'Triplets',
+  countInLbl:'Count-in', ci0:'No count-in', ci1:'1 bar', ci2:'2 bars', metroVol:'Metronome volume',
+  secPrac:'Practice',
+  swPen:'Penalize extra taps<small>Each tap where there is no note takes points off. When off, they are only counted.</small>',
+  swHold:'Piano mode: measure duration<small>Hold the key or the screen for as long as each note lasts and release at the end.</small>',
+  swTapSound:'Hear my taps<small>Each tap makes a sound: in piano mode, while you hold it. With Bluetooth headphones you’ll hear it with some delay.</small>',
+  tapVol:'My taps volume',
+  swVibrate:'Vibrate on tap<small>A short vibration with every tap on the screen.</small>',
+  swFab:'Floating tap button<small>On phones and tablets, a big button appears at the bottom of the screen while you practice. Tap there instead of on the score, which scrolls when it changes line.</small>',
+  swAutosave:'Save every practice automatically<small>If you turn this off, you can save each result by hand.</small>',
+  offsetLbl:'Latency adjustment',
+  offsetHint:'If it always says you are “late” even when you are on time (it happens with Bluetooth headphones), raise this value, or use “Measure latency” next to the tap area to calculate it automatically.',
+  chartTitle:'Accuracy in each practice', filterAria:'Filter practices', fAll:'All', fFree:'Free', fCamp:'Campaign', history:'History',
+  restartAria:'Restart: hold for half a second', restart:'Restart', postAria:'After practice', pfAgain:'Repeat',
+};
+function applyStatic(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if(el.__es===undefined) el.__es=el.innerHTML;
+    const v = lang==='en' ? EN[el.dataset.i18n] : el.__es;
+    if(v!=null && el.innerHTML!==v) el.innerHTML=v;
+  });
+  document.querySelectorAll('[data-i18n-attr]').forEach(el=>{
+    el.__esA=el.__esA||{};
+    el.dataset.i18nAttr.split(',').forEach(p=>{ const [a,k]=p.split('='); if(!(a in el.__esA)) el.__esA[a]=el.getAttribute(a); el.setAttribute(a, lang==='en' ? EN[k] : el.__esA[a]); });
+  });
+  document.documentElement.lang=lang;
+  document.title=tr('Solfeo Rítmico','Rhythm Reading');
+  document.querySelectorAll('.lang-seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===lang)));
+}
 // Anuncio para lectores de pantalla (se vacía antes para que se repita aunque el texto sea el mismo)
 function say(t){ const el=$('#srLive'); el.textContent=''; setTimeout(()=>{ el.textContent=t; },60); }
 
@@ -657,14 +735,14 @@ function measureSVG(mi,mx,MW){
     if(tk<m0 || tk>=m0+score.L) return;
     const t=tk-m0, k=evs.findIndex(e=>t>=e.start && t<e.start+e.dur); if(k<0) return;
     const e=evs[k], nx = k<evs.length-1 ? evs[k+1].x : mx+MW-8, x=e.x+(t-e.start)/e.dur*(nx-e.x), my=Y0+56;
-    s+=`<path class="mkextra" d="M${x} ${my-4.5}L${x+4.5} ${my+3.5}L${x-4.5} ${my+3.5}Z"><title>Golpe de más</title></path>`;
+    s+=`<path class="mkextra" d="M${x} ${my-4.5}L${x+4.5} ${my+3.5}L${x-4.5} ${my+3.5}Z"><title>${tr('Golpe de más','Extra tap')}</title></path>`;
   });
   return s;
 }
 
 /* ---------- Panel ---------- */
 function renderSigs(){
-  $('#sigs').innerHTML=Object.keys(SIGS).map(k=>{ const [n,d]=k.split('/'); return `<button type="button" class="sig" data-sig="${k}" aria-pressed="${k===set.sig}" title="${SIG_TITLES[k]||'Compás '+k}" aria-label="Compás ${k}"><span>${n}</span><span>${d}</span></button>`; }).join('');
+  $('#sigs').innerHTML=Object.keys(SIGS).map(k=>{ const [n,d]=k.split('/'); return `<button type="button" class="sig" data-sig="${k}" aria-pressed="${k===set.sig}" title="${tr(SIG_TITLES[k],SIG_TITLES_EN[k])||tr('Compás ','Time signature ')+k}" aria-label="${tr('Compás','Time signature')} ${k}"><span>${n}</span><span>${d}</span></button>`; }).join('');
 }
 function miniRest(k){
   const d={w:48,h:24,q:12,qd:18,e:6,s:3}[k];
@@ -672,7 +750,7 @@ function miniRest(k){
   return `<svg class="mini" viewBox="-11 -8 ${d===18?30:22} 58" aria-hidden="true">${line}${restSVG(0,2,d)}</svg>`;
 }
 function renderRests(){
-  $('#restFigs').innerHTML=RESTS.map(r=>`<button type="button" class="fig" data-r="${r.k}" aria-pressed="${set.rests.includes(r.k)}">${miniRest(r.k)}<span class="fn">${r.name}</span><span class="fv">${r.val}</span></button>`).join('');
+  $('#restFigs').innerHTML=RESTS.map(r=>`<button type="button" class="fig" data-r="${r.k}" aria-pressed="${set.rests.includes(r.k)}">${miniRest(r.k)}<span class="fn">${restName(r)}</span><span class="fv">${r.val}</span></button>`).join('');
 }
 function renderGrp(){
   const opts=ODD_GROUPS[set.sig]; $('#grpRow').hidden=!opts; if(!opts) return;
@@ -680,15 +758,16 @@ function renderGrp(){
   $('#grpSeg').innerHTML=opts.map(g=>`<button type="button" data-g="${g}" aria-pressed="${g===cur}">${g}</button>`).join('');
 }
 function renderFigs(){
-  $('#figs').innerHTML=FIGS.map(f=>`<button type="button" class="fig" data-k="${f.k}" aria-pressed="${set.figs.includes(f.k)}">${miniFig(f.k)}<span class="fn">${f.name}</span><span class="fv">${f.val}</span></button>`).join('');
+  $('#figs').innerHTML=FIGS.map(f=>`<button type="button" class="fig" data-k="${f.k}" aria-pressed="${set.figs.includes(f.k)}">${miniFig(f.k)}<span class="fn">${figName(f)}</span><span class="fv">${tr(f.val,f.valEn||f.val)}</span></button>`).join('');
 }
 function renderSummary(){
   const C=cfg();
-  const names=FIGS.filter(f=>C.figs.includes(f.k)).map(f=>f.name.toLowerCase());
-  const rn=RESTS.filter(r=>restList(C).includes(r.k)).map(r=>r.short);
-  const rtxt = !rn.length ? '' : ' · silencios de '+(rn.length>1 ? rn.slice(0,-1).join(', ')+' y '+rn[rn.length-1] : rn[0]);
+  const names=FIGS.filter(f=>C.figs.includes(f.k)).map(f=>figName(f).toLowerCase());
+  const rn=RESTS.filter(r=>restList(C).includes(r.k)).map(r=>tr(r.short,r.enShort));
+  const andList = a => a.length>1 ? a.slice(0,-1).join(', ')+tr(' y ',' and ')+a[a.length-1] : a[0];
+  const rtxt = !rn.length ? '' : tr(' · silencios de '+andList(rn), ' · '+andList(rn)+(rn.length>1?' rests':' rest'));
   const g=sigOf(C).grp;
-  $('#summary').innerHTML=`<b>${C.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${C.bars} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${rtxt}${C.sync?' · con síncopas':''}${C.ties?' · con ligaduras':''}`;
+  $('#summary').innerHTML=`<b>${C.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${C.bars} ${C.bars===1?tr('compás','bar'):tr('compases','bars')} · ${names.join(', ')}${rtxt}${C.sync?tr(' · con síncopas',' · with syncopation'):''}${C.ties?tr(' · con ligaduras',' · with ties'):''}`;
   const n=$('#notice');
   const sig=SIGS[C.sig];
   const warnT = C.figs.includes('t') && sig.kind!=='simple';
@@ -697,16 +776,16 @@ function renderSummary(){
   const fits = (r,withFigs) => cells.some(c=>c.rreq.includes(r.k) && (!c.wholeBar || L===48) && (!withFigs || allowed(c)));
   const chosen = RESTS.filter(r=>restList(C).includes(r.k));
   const noFit = chosen.filter(r=>!fits(r,false)), needFigs = chosen.filter(r=>fits(r,false) && !fits(r,true));
-  const lst = a => a.map(r=>r.name.toLowerCase()).join(' ni el ');
+  const lst = a => a.map(r=>restName(r).toLowerCase()).join(tr(' ni el ',' or the '));
   $('#bFull').hidden=!fullScore;
-  if(score.part){ n.textContent=`Practicando solo el compás ${score.part} del ritmo. Pulsa «Ritmo completo» para volver al ritmo entero.`; n.hidden=false; }
-  else if(score.fb){ n.textContent='Algunas partes se completaron con silencios porque las figuras elegidas no encajan en este compás. Prueba a añadir negras o corcheas.'; n.hidden=false; }
+  if(score.part){ n.textContent=tr(`Practicando solo el compás ${score.part} del ritmo. Pulsa «Ritmo completo» para volver al ritmo entero.`, `Practicing only bar ${score.part} of the rhythm. Press “Full rhythm” to go back to the whole rhythm.`); n.hidden=false; }
+  else if(score.fb){ n.textContent=tr('Algunas partes se completaron con silencios porque las figuras elegidas no encajan en este compás. Prueba a añadir negras o corcheas.','Some parts were filled with rests because the chosen note values don’t fit this time signature. Try adding quarter or eighth notes.'); n.hidden=false; }
   else if(noFit.length || needFigs.length){
-    n.textContent = [noFit.length ? `En ${C.sig} no cabe el ${lst(noFit)}.` : '',
-      needFigs.length ? `Con las figuras elegidas no puede salir el ${lst(needFigs)}: necesita figuras más cortas a su lado (por ejemplo, semicorcheas para el silencio de semicorchea).` : ''].filter(Boolean).join(' ');
+    n.textContent = [noFit.length ? tr(`En ${C.sig} no cabe el ${lst(noFit)}.`, `The ${lst(noFit)} doesn’t fit in ${C.sig}.`) : '',
+      needFigs.length ? tr(`Con las figuras elegidas no puede salir el ${lst(needFigs)}: necesita figuras más cortas a su lado (por ejemplo, semicorcheas para el silencio de semicorchea).`, `With the chosen note values the ${lst(needFigs)} can’t appear: it needs shorter notes next to it (for example, sixteenth notes for the sixteenth rest).`) : ''].filter(Boolean).join(' ');
     n.hidden=false;
   }
-  else if(warnT){ n.textContent='Los tresillos solo se usan en compases de subdivisión binaria (2/4, 3/4, 4/4, 5/4, 2/2).'; n.hidden=false; }
+  else if(warnT){ n.textContent=tr('Los tresillos solo se usan en compases de subdivisión binaria (2/4, 3/4, 4/4, 5/4, 2/2).','Triplets are only used in simple meters (2/4, 3/4, 4/4, 5/4, 2/2).'); n.hidden=false; }
   else n.hidden=true;
 }
 function renderLights(){
@@ -727,7 +806,7 @@ function tempoMark(b){
 function setBpm(v, fromUser=true){
   if(stageMode==='campana'){ showTempo(); return; }
   v=Math.round(+v); if(!isFinite(v)) v=set.bpm; v=Math.max(30,Math.min(240,v));
-  set.bpm=v; $('#bpm').value=v; $('#bpmRange').value=v; $('#bpmOut').textContent=v+' ppm'; $('#tMark').textContent=tempoMark(v);
+  set.bpm=v; $('#bpm').value=v; $('#bpmRange').value=v; $('#bpmOut').textContent=v+tr(' ppm',' bpm'); $('#tMark').textContent=tempoMark(v);
   if(fromUser){ save(); if(S.running && S.mode!=='metro') stop(); }
 }
 function syncControls(){
@@ -875,8 +954,8 @@ function start(mode){
     S.hold=!!set.hold; S.holds=new Map();
     ns.forEach((n,j)=>{ const pg=j>0?n.t-ns[j-1].t:1, ng=j<ns.length-1?ns[j+1].t-n.t:1; n.win=Math.max(0.05,Math.min(0.18,Math.min(pg,ng)/2)); });
     S.notes=ns;
-    pad.classList.add('live'); $('#padMain').textContent=set.hold?'Pulsa en cada nota y mantén mientras dure':'Toca en cada nota'; $('#padSub').textContent='Escucha la cuenta y empieza en el primer tiempo.';
-    say(`Práctica${set.hold?' en modo piano':''}: escucha la cuenta y toca en cada nota. Esc para terminar.`);
+    pad.classList.add('live'); $('#padMain').textContent=set.hold?tr('Pulsa en cada nota y mantén mientras dure','Press on each note and hold it for its length'):tr('Toca en cada nota','Tap on each note'); $('#padSub').textContent=tr('Escucha la cuenta y empieza en el primer tiempo.','Listen to the count-in and start on the first beat.');
+    say(tr(`Práctica${set.hold?' en modo piano':''}: escucha la cuenta y toca en cada nota. Esc para terminar.`, `Practice${set.hold?' in piano mode':''}: listen to the count-in and tap on each note. Esc to finish.`));
     showPad();
   } else if(document.activeElement && document.activeElement.blur && mode!=='metro') { /* keep focus */ }
   S.timer=setInterval(schedTick,40);
@@ -917,7 +996,7 @@ function setLight(i){
   if(i>=0 && ls[i]) ls[i].classList.add('on');
 }
 function showCount(c){
-  const fm=$('#fabMain'), ft=c?String(c):'Toca aquí'; if(fm.textContent!==ft){ fm.textContent=ft; fm.classList.toggle('count',!!c); }
+  const fm=$('#fabMain'), ft=c?String(c):tr('Toca aquí','Tap here'); if(fm.textContent!==ft){ fm.textContent=ft; fm.classList.toggle('count',!!c); }
   const el=$('#padCount');
   if(c){ el.textContent=c; el.hidden=false; } else el.hidden=true;
 }
@@ -1030,7 +1109,7 @@ function judgeRelease(n, tPress, tRel){
 }
 function updateLive(){
   const hits=S.notes.filter(n=>n.done).length;
-  $('#padSub').textContent=`Notas acertadas: ${hits} de ${S.notes.length}${extras?` · Golpes de más: ${extras}`:''}`;
+  $('#padSub').textContent=tr(`Notas acertadas: ${hits} de ${S.notes.length}${extras?` · Golpes de más: ${extras}`:''}`, `Notes hit: ${hits} of ${S.notes.length}${extras?` · Extra taps: ${extras}`:''}`);
 }
 let weakM=-1;
 function showResults(notes, holds, endT){
@@ -1052,18 +1131,19 @@ function showResults(notes, holds, endT){
   if(set.penalize) extraTks.forEach(tk=>{ mp[Math.min(mp.length-1,Math.floor(tk/score.L))].pts-=40; });
   const pct = N ? Math.max(0,Math.round((pts-penalty)/(N*100)*100)) : 0;
   $('#rPct').textContent=pct+'%';
-  $('#rHead').textContent = !N ? 'Este ritmo no tiene notas que tocar' : pct>=90?'Excelente precisión':pct>=75?'Muy bien':pct>=55?'Vas bien, sigue practicando':'Prueba a bajar el tempo';
+  $('#rHead').textContent = !N ? tr('Este ritmo no tiene notas que tocar','This rhythm has no notes to play') : pct>=90?tr('Excelente precisión','Excellent accuracy'):pct>=75?tr('Muy bien','Very good'):pct>=55?tr('Vas bien, sigue practicando','Good progress, keep practicing'):tr('Prueba a bajar el tempo','Try a slower tempo');
   let trend='';
   if(errs.length){
     const mean=Math.round(sum(errs)/errs.length);
-    trend = Math.abs(mean)<12 ? 'Vas centrado en el pulso.' : mean<0 ? `Tiendes a adelantarte: ${-mean} ms de media.` : `Tiendes a atrasarte: ${mean} ms de media.`;
-  } else trend='No se registró ningún golpe a tiempo. Empieza a tocar justo después de la cuenta.';
-  if(extras) trend+=` Tocaste ${extras} ${extras===1?'vez':'veces'} donde no había nota (por ejemplo, en un silencio, en la parte sostenida de una figura larga o en una nota ligada)${set.penalize?'':'; no restó puntos porque la penalización está desactivada'}.`;
+    trend = Math.abs(mean)<12 ? tr('Vas centrado en el pulso.','You are right on the beat.') : mean<0 ? tr(`Tiendes a adelantarte: ${-mean} ms de media.`,`You tend to rush: ${-mean} ms early on average.`) : tr(`Tiendes a atrasarte: ${mean} ms de media.`,`You tend to drag: ${mean} ms late on average.`);
+  } else trend=tr('No se registró ningún golpe a tiempo. Empieza a tocar justo después de la cuenta.','No taps landed on time. Start tapping right after the count-in.');
+  if(extras) trend+=tr(` Tocaste ${extras} ${extras===1?'vez':'veces'} donde no había nota (por ejemplo, en un silencio, en la parte sostenida de una figura larga o en una nota ligada)${set.penalize?'':'; no restó puntos porque la penalización está desactivada'}.`,
+    ` You tapped ${extras} ${extras===1?'time':'times'} where there was no note (for example, on a rest, during a long held note or on a tied note)${set.penalize?'':'; it took no points off because the penalty is turned off'}.`);
   if(holdMode){
     const judged=dc.exact+dc.ok+dc.short+dc.long;
-    if(judged){ if(dc.short>dc.long && dc.short>=judged*0.3) trend+=' Sueles soltar las notas antes de tiempo: mantenlas hasta el final de la figura.';
-      else if(dc.long>dc.short && dc.long>=judged*0.3) trend+=' Sueles mantener las notas de más: suelta al final de cada figura, sobre todo antes de un silencio.';
-      else trend+=' Las duraciones van bien.'; }
+    if(judged){ if(dc.short>dc.long && dc.short>=judged*0.3) trend+=tr(' Sueles soltar las notas antes de tiempo: mantenlas hasta el final de la figura.',' You tend to release notes too early: hold them until the end of the note value.');
+      else if(dc.long>dc.short && dc.long>=judged*0.3) trend+=tr(' Sueles mantener las notas de más: suelta al final de cada figura, sobre todo antes de un silencio.',' You tend to hold notes too long: release at the end of each note, especially before a rest.');
+      else trend+=tr(' Las duraciones van bien.',' Your note lengths are good.'); }
   }
   $('#durCounts').hidden=!holdMode; $('#durNote').hidden=!holdMode;
   $('#dExact').textContent=dc.exact; $('#dOk').textContent=dc.ok; $('#dShort').textContent=dc.short; $('#dLong').textContent=dc.long;
@@ -1079,13 +1159,13 @@ function showResults(notes, holds, endT){
   const showWeak = N && mp.length>1 && weakM>=0 && weakPct<90;
   $('#rWeak').hidden=!showWeak;
   if(showWeak){
-    $('#rWeakText').textContent=`El compás ${weakM+1} fue el más flojo (${weakPct}%). Practícalo por separado y luego vuelve al ritmo completo.`;
-    $('#rWeakBtn').textContent=`Practicar el compás ${weakM+1}`;
+    $('#rWeakText').textContent=tr(`El compás ${weakM+1} fue el más flojo (${weakPct}%). Practícalo por separado y luego vuelve al ritmo completo.`,`Bar ${weakM+1} was the weakest (${weakPct}%). Practice it on its own and then go back to the full rhythm.`);
+    $('#rWeakBtn').textContent=tr(`Practicar el compás ${weakM+1}`,`Practice bar ${weakM+1}`);
   }
   $('#results').hidden=false;
   updateFab();
   if(!set.seen) dismissWelcome();
-  say(`Resultado: ${pct}%. ${$('#rHead').textContent}. ${$('#rCamp').hidden?'':$('#rcText').textContent+' '}${trend}${showWeak?` El compás ${weakM+1} fue el más flojo.`:''}`);
+  say(`${tr('Resultado','Result')}: ${pct}%. ${$('#rHead').textContent}. ${$('#rCamp').hidden?'':$('#rcText').textContent+' '}${trend}${showWeak?tr(` El compás ${weakM+1} fue el más flojo.`,` Bar ${weakM+1} was the weakest.`):''}`);
   $('#results').focus({preventScroll:true});
   // que los botones de los resultados queden a la vista (sin tapar la partitura más de lo necesario)
   const ab=$('#resActions').getBoundingClientRect(), room=innerHeight-fabReserve();
@@ -1109,16 +1189,16 @@ function updateFab(){
   f.hidden=!on; document.body.classList.toggle('fab-on',on||post); f.classList.toggle('idle',on && !live);
   f.classList.toggle('split',on && live); $('#fabRestart').hidden=!(on && live);
   if(!(on && live)) restartCancel();
-  f.setAttribute('aria-label', live ? 'Tocar' : 'Practicar');
-  if(on && !live){ fm.textContent='Practicar'; fm.classList.remove('count'); }
-  else if(on && fm.textContent==='Practicar') fm.textContent='Toca aquí';
+  f.setAttribute('aria-label', live ? tr('Tocar','Tap') : tr('Practicar','Practice'));
+  if(on && !live){ fm.textContent=tr('Practicar','Practice'); fm.classList.remove('count'); }
+  else if(on && !fm.classList.contains('count')) fm.textContent=tr('Toca aquí','Tap here');
 }
 // En la campaña el tick lleva al siguiente nivel (apagado si no se superó); en práctica libre dice «Listo»
 function syncPostFab(){
   const camp=stageMode==='campana', b=$('#pfNext');
-  $('#pfNextLbl').textContent=camp?'Siguiente':'Listo';
+  $('#pfNextLbl').textContent=camp?tr('Siguiente','Next'):tr('Listo','Done');
   b.disabled = camp && $('#rcNext').hidden;
-  b.setAttribute('aria-label', camp ? 'Siguiente nivel' : 'Listo: cerrar los resultados');
+  b.setAttribute('aria-label', camp ? tr('Siguiente nivel','Next level') : tr('Listo: cerrar los resultados','Done: close the results'));
 }
 // Cierra los resultados y limpia las marcas de la partitura
 function closeResults(){ $('#results').hidden=true; judg=[]; extras=0; extraTks=[]; renderScore(); updateFab(); }
@@ -1134,8 +1214,8 @@ function showPad(){
 }
 function padIdle(){
   $('#pad').classList.remove('live');
-  $('#padMain').textContent='Toca la partitura (o «Practicar») para empezar, y luego toca sobre ella en cada nota';
-  $('#padSub').textContent='Con teclado: P empieza y, tras la cuenta, tocas con la barra espaciadora o cualquier tecla menos Esc, que detiene. Fuera de la práctica, P, R y N son atajos (practicar, reproducir, nuevo ritmo).';
+  $('#padMain').textContent=tr('Toca la partitura (o «Practicar») para empezar, y luego toca sobre ella en cada nota','Tap the score (or “Practice”) to start, then tap on it for each note');
+  $('#padSub').textContent=tr('Con teclado: P empieza y, tras la cuenta, tocas con la barra espaciadora o cualquier tecla menos Esc, que detiene. Fuera de la práctica, P, R y N son atajos (practicar, reproducir, nuevo ritmo).','With a keyboard: P starts and, after the count-in, you tap with the space bar or any key except Esc, which stops. Outside practice, P, R and N are shortcuts (practice, play, new rhythm).');
 }
 function startCalib(){
   stop(); if(!ensureAudio()) return;
@@ -1150,9 +1230,9 @@ function startCalib(){
   }
   $('#calib').hidden=true; $('#results').hidden=true;
   $('#pad').classList.add('live');
-  $('#padMain').textContent='Toca justo con cada clic';
-  $('#padSub').textContent=`Escucha 4 clics de cuenta y luego toca con los ${K_N} siguientes, a ${K_BPM} ppm.`;
-  say(`Medición de latencia: escucha 4 clics de cuenta y luego toca con cada uno de los ${K_N} siguientes.`);
+  $('#padMain').textContent=tr('Toca justo con cada clic','Tap exactly with each click');
+  $('#padSub').textContent=tr(`Escucha 4 clics de cuenta y luego toca con los ${K_N} siguientes, a ${K_BPM} ppm.`,`Listen to 4 count-in clicks, then tap with the next ${K_N}, at ${K_BPM} bpm.`);
+  say(tr(`Medición de latencia: escucha 4 clics de cuenta y luego toca con cada uno de los ${K_N} siguientes.`,`Latency measurement: listen to 4 count-in clicks, then tap with each of the next ${K_N}.`));
   showPad();
   S.raf=requestAnimationFrame(frame);
   updateTransport();
@@ -1164,7 +1244,7 @@ function calibFrame(heard){
   else {
     showCount('');
     const n=Math.min(K_N, Math.floor((heard-S.passStart)/S.period)+1);
-    $('#padMain').textContent=`Clic ${n} de ${K_N}`;
+    $('#padMain').textContent=tr(`Clic ${n} de ${K_N}`,`Click ${n} of ${K_N}`);
   }
   if(heard > S.passStart+K_N*S.period+0.2){ finishCalib(); return; }
   S.raf=requestAnimationFrame(frame);
@@ -1178,20 +1258,20 @@ function calibTap(){
   if(Math.abs(err) > S.period*0.45) return;
   if(!S.taps.some(t=>t.k===k)) S.taps.push({k,err:err*1000});
   flashPad('hit');
-  $('#padSub').textContent=`Toques registrados: ${S.taps.length}`;
+  $('#padSub').textContent=tr(`Toques registrados: ${S.taps.length}`,`Taps recorded: ${S.taps.length}`);
 }
 const median=a=>{ const b=[...a].sort((x,y)=>x-y), m=b.length>>1; return b.length%2?b[m]:(b[m-1]+b[m])/2; };
 function finishCalib(){
   const taps=S.taps; stop();
   const box=$('#calib'); box.hidden=false;
-  const apply=$('#kApply'); apply.textContent='Aplicar corrección';
+  const apply=$('#kApply'); apply.textContent=tr('Aplicar corrección','Apply correction');
   // descartar los dos primeros clics (el oído aún se está ajustando)
   const all=taps.filter(t=>t.k>=2).map(t=>t.err);
   if(all.length<6){
     K.suggest=null; apply.disabled=true;
     $('#kVal').textContent='—';
-    $('#kHead').textContent='No hubo suficientes toques';
-    $('#kText').textContent=`Se registraron ${all.length} toques válidos y hacen falta al menos 6. Toca con cada clic después de la cuenta de cuatro.`;
+    $('#kHead').textContent=tr('No hubo suficientes toques','Not enough taps');
+    $('#kText').textContent=tr(`Se registraron ${all.length} toques válidos y hacen falta al menos 6. Toca con cada clic después de la cuenta de cuatro.`,`${all.length} valid taps were recorded and at least 6 are needed. Tap with each click after the four-click count-in.`);
     $('#kStrip').innerHTML=''; announceCalib(); return;
   }
   const med=median(all);
@@ -1203,22 +1283,23 @@ function finishCalib(){
   K.suggest=suggest;
   const sgn=v=>(v>0?'+':'')+v;
   $('#kVal').textContent=sgn(suggest)+' ms';
-  $('#kHead').textContent = sd>45 ? 'Corrección sugerida (poco fiable)' : 'Corrección sugerida';
-  let txt = Math.abs(Math.round(mean))<5 ? 'Tus toques coinciden con el clic; no hace falta corregir casi nada.'
-    : `Tus toques llegaron de media ${Math.abs(Math.round(mean))} ms ${mean>0?'después':'antes'} del clic`;
-  if(Math.abs(Math.round(mean))>=5) txt+=` (dispersión ±${Math.round(sd)} ms, ${kept.length} toques usados${all.length-kept.length?`, ${all.length-kept.length} descartados por alejados`:''}).`;
-  txt += ` La corrección actual es ${sgn(base)} ms.`;
-  if(sd>45) txt+=' Tus toques variaron bastante: repite la medición concentrándote en caer justo con el clic.';
+  $('#kHead').textContent = sd>45 ? tr('Corrección sugerida (poco fiable)','Suggested correction (unreliable)') : tr('Corrección sugerida','Suggested correction');
+  const am=Math.abs(Math.round(mean)), drop=all.length-kept.length;
+  let txt = am<5 ? tr('Tus toques coinciden con el clic; no hace falta corregir casi nada.','Your taps match the click; almost no correction is needed.')
+    : tr(`Tus toques llegaron de media ${am} ms ${mean>0?'después':'antes'} del clic`,`On average your taps landed ${am} ms ${mean>0?'after':'before'} the click`);
+  if(am>=5) txt+=tr(` (dispersión ±${Math.round(sd)} ms, ${kept.length} toques usados${drop?`, ${drop} descartados por alejados`:''}).`,` (spread ±${Math.round(sd)} ms, ${kept.length} taps used${drop?`, ${drop} discarded as outliers`:''}).`);
+  txt += tr(` La corrección actual es ${sgn(base)} ms.`,` The current correction is ${sgn(base)} ms.`);
+  if(sd>45) txt+=tr(' Tus toques variaron bastante: repite la medición concentrándote en caer justo con el clic.',' Your taps varied quite a lot: repeat the measurement focusing on landing exactly with the click.');
   $('#kText').textContent=txt;
   apply.disabled = suggest===base;
-  if(suggest===base) apply.textContent='Ya está aplicada';
+  if(suggest===base) apply.textContent=tr('Ya está aplicada','Already applied');
   // tira de toques: -200..+200 ms
   const W=Math.max(300,Math.min(900,$('#kStrip').clientWidth||600)),H=64,cx=W/2,sc=(W/2-20)/200, X=v=>cx+Math.max(-200,Math.min(200,v))*sc;
   let g=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><line class="kaxis" x1="20" y1="30" x2="${W-20}" y2="30"/><line class="kzero" x1="${cx}" y1="10" x2="${cx}" y2="50"/>`;
   [-200,-100,0,100,200].forEach(v=>{ g+=`<text class="klbl" x="${X(v)}" y="62" text-anchor="middle">${v>0?'+':''}${v}</text>`; });
   all.forEach((e,j)=>{ const out=Math.abs(e-med)>80; g+=`<circle class="kdot${out?' out':''}" cx="${X(e)}" cy="${24+(j%3)*6}" r="4"/>`; });
-  g+=`<line class="kmean" x1="${X(mean)}" y1="8" x2="${X(mean)}" y2="52"/><text class="klbl acc" x="${X(mean)}" y="6" text-anchor="middle">media</text>`;
-  g+=`<text class="klbl" x="22" y="12">antes</text><text class="klbl" x="${W-22}" y="12" text-anchor="end">después</text></svg>`;
+  g+=`<line class="kmean" x1="${X(mean)}" y1="8" x2="${X(mean)}" y2="52"/><text class="klbl acc" x="${X(mean)}" y="6" text-anchor="middle">${tr('media','mean')}</text>`;
+  g+=`<text class="klbl" x="22" y="12">${tr('antes','early')}</text><text class="klbl" x="${W-22}" y="12" text-anchor="end">${tr('después','late')}</text></svg>`;
   $('#kStrip').innerHTML=g;
   announceCalib();
 }
@@ -1229,39 +1310,42 @@ function announceCalib(){
 
 /* ---------- Campaña ---------- */
 const CHAPTERS = ['El pulso','Corcheas','Semicorcheas y tresillos','Compases compuestos','Síncopas y ligaduras','Desafíos'];
+const CHAPTERS_EN = ['The pulse','Eighth notes','Sixteenths and triplets','Compound meters','Syncopation and ties','Challenges'];
+const chapName = i => tr(CHAPTERS[i], CHAPTERS_EN[i]);
 const LEVELS = [
-  {id:'L1',ch:0,title:'Negras en el pulso',desc:'Una nota por tiempo. Toca justo con cada clic del metrónomo.',sig:'4/4',bars:2,figs:['q'],rests:[],bpm:60,goal:70},
-  {id:'L2',ch:0,title:'Negras y blancas',desc:'La blanca dura dos tiempos: tócala una vez y deja pasar el segundo tiempo sin tocar.',sig:'4/4',bars:2,figs:['q','h'],rests:[],bpm:60,goal:70},
-  {id:'L3',ch:0,title:'La redonda',desc:'Cuatro tiempos en una sola nota. Sigue contando mientras suena.',sig:'4/4',bars:4,figs:['q','h','w'],rests:[],bpm:66,goal:70},
-  {id:'L4',ch:0,title:'Primeros silencios',desc:'En los silencios no se toca, pero el pulso sigue: cuéntalo por dentro.',sig:'4/4',bars:4,figs:['q','h'],rests:['q','h'],bpm:66,goal:70},
-  {id:'L5',ch:0,title:'Tres tiempos',desc:'El compás de 3/4 y la blanca con puntillo, que ocupa el compás entero.',sig:'3/4',bars:4,figs:['q','h','hd'],rests:['q','h'],bpm:72,goal:72},
-  {id:'L6',ch:1,title:'Dos por tiempo',desc:'Dos corcheas llenan un tiempo. Piensa «un-y, dos-y».',sig:'2/4',bars:4,figs:['q','e'],rests:[],bpm:66,goal:72},
-  {id:'L7',ch:1,title:'Corcheas y silencios',desc:'Un silencio de corchea deja la nota en la segunda mitad del tiempo.',sig:'4/4',bars:4,figs:['q','h','e'],rests:['q','e'],bpm:70,goal:72},
-  {id:'L8',ch:1,title:'Negra con puntillo',desc:'Tiempo y medio, casi siempre seguida de una corchea.',sig:'4/4',bars:4,figs:['q','qd','e','h'],rests:[],bpm:72,goal:72},
-  {id:'L9',ch:1,title:'Corcheas en 3/4',desc:'Todo lo anterior, ahora en compás de tres.',sig:'3/4',bars:4,figs:['q','qd','e','h','hd'],rests:['q','e'],bpm:80,goal:75},
-  {id:'L10',ch:2,title:'Cuatro por tiempo',desc:'Cuatro semicorcheas por tiempo: «1-e-y-a».',sig:'2/4',bars:4,figs:['q','e','s'],rests:[],bpm:60,goal:72},
-  {id:'L11',ch:2,title:'Mezclas de semicorcheas',desc:'Corchea y dos semicorcheas, y al revés.',sig:'4/4',bars:4,figs:['q','e','s'],rests:['q','e'],bpm:66,goal:74},
-  {id:'L12',ch:2,title:'Corchea con puntillo',desc:'El ritmo largo-corto: corchea con puntillo y semicorchea.',sig:'4/4',bars:4,figs:['q','e','ed','s'],rests:[],bpm:66,goal:74},
-  {id:'L27',ch:2,title:'Silencio de semicorchea',desc:'Un silencio de semicorchea retrasa la nota un cuarto de tiempo. Cuenta «1-e-y-a» por dentro y entra justo en su sitio.',sig:'2/4',bars:4,figs:['q','e','s'],rests:['e','s'],bpm:60,goal:72},
-  {id:'L13',ch:2,title:'Tresillos',desc:'Tres corcheas iguales en un tiempo. No las conviertas en dos más una.',sig:'4/4',bars:4,figs:['q','e','t'],rests:[],bpm:66,goal:74},
-  {id:'L14',ch:3,title:'El 6/8',desc:'Dos pulsos de negra con puntillo, cada uno dividido en tres corcheas.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:[],bpm:50,goal:72},
-  {id:'L15',ch:3,title:'6/8 con silencios',desc:'Silencios y semicorcheas dentro del compás compuesto.',sig:'6/8',bars:4,figs:['qd','q','e','s'],rests:['qd','q','e'],bpm:52,goal:74},
-  {id:'L16',ch:3,title:'El 12/8',desc:'Cuatro pulsos ternarios, con blanca con puntillo.',sig:'12/8',bars:2,figs:['qd','q','e','hd'],rests:['qd','e'],bpm:56,goal:75},
-  {id:'L21',ch:4,title:'La síncopa',desc:'Corchea, negra, corchea: la negra empieza entre dos tiempos. Tócala en el «y» y deja que el pulso pase por debajo.',sig:'2/4',bars:4,figs:['q','e'],rests:[],sync:true,bpm:60,goal:70},
-  {id:'L22',ch:4,title:'Ligaduras de prolongación',desc:'La ligadura une dos notas: toca solo la primera y cuenta las dos. La segunda no se toca.',sig:'4/4',bars:4,figs:['q','h','e'],rests:[],ties:true,bpm:66,goal:72},
-  {id:'L23',ch:4,title:'Síncopas de semicorchea',desc:'Semicorchea, corchea, semicorchea y notas ligadas sobre el tiempo.',sig:'2/4',bars:4,figs:['q','e','s'],rests:['e','s'],sync:true,ties:true,bpm:60,goal:72},
-  {id:'L24',ch:4,title:'Ligaduras en 6/8',desc:'Notas ligadas entre los dos pulsos de negra con puntillo y sobre la barra de compás.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:[],ties:true,bpm:50,goal:74},
-  {id:'L17',ch:5,title:'Siete octavos',desc:'Compás irregular agrupado 2+2+3. El metrónomo marca cada corchea.',sig:'7/8',grp:'2+2+3',bars:4,figs:['q','e'],rests:[],bpm:150,goal:74},
-  {id:'L28',ch:5,title:'Siete octavos: 3+2+2',desc:'El mismo compás con el grupo largo al principio. El metrónomo acentúa el inicio de cada grupo.',sig:'7/8',grp:'3+2+2',bars:4,figs:['q','qd','e'],rests:['e'],bpm:150,goal:75},
-  {id:'L18',ch:5,title:'Cinco octavos',desc:'Agrupado 3+2, ahora con semicorcheas.',sig:'5/8',grp:'3+2',bars:4,figs:['q','e','s'],rests:['e'],bpm:150,goal:75},
-  {id:'L29',ch:5,title:'Cinco octavos: 2+3',desc:'Los grupos al revés: primero el corto. Siente dónde cae cada acento.',sig:'5/8',grp:'2+3',bars:4,figs:['q','qd','e','s'],rests:['e','s'],bpm:150,goal:75},
-  {id:'L25',ch:5,title:'Ocho octavos',desc:'Agrupado 3+3+2: dos grupos largos y uno corto. El metrónomo marca cada corchea.',sig:'8/8',grp:'3+3+2',bars:4,figs:['q','qd','e'],rests:['q','e'],bpm:150,goal:75},
-  {id:'L26',ch:5,title:'Tres blancas',desc:'El 3/2: el pulso es la blanca. Cada clic vale dos negras.',sig:'3/2',bars:4,figs:['h','q','e'],rests:['h','q'],bpm:60,goal:75},
-  {id:'L19',ch:5,title:'Todo junto',desc:'Ocho compases con casi todas las figuras.',sig:'4/4',bars:8,figs:['h','q','qd','e','ed','s','t'],rests:['h','q','e','s'],bpm:76,goal:76},
-  {id:'L20',ch:5,title:'Maestría',desc:'Todas las figuras a tempo de Allegro.',sig:'4/4',bars:8,figs:['w','h','hd','q','qd','e','ed','s','t'],rests:['w','h','q','e','s'],bpm:100,goal:80},
+  {id:'L1',en:["Quarter notes on the beat", "One note per beat. Tap right with each metronome click."],ch:0,title:'Negras en el pulso',desc:'Una nota por tiempo. Toca justo con cada clic del metrónomo.',sig:'4/4',bars:2,figs:['q'],rests:[],bpm:60,goal:70},
+  {id:'L2',en:["Quarter and half notes", "A half note lasts two beats: tap it once and let the second beat go by without tapping."],ch:0,title:'Negras y blancas',desc:'La blanca dura dos tiempos: tócala una vez y deja pasar el segundo tiempo sin tocar.',sig:'4/4',bars:2,figs:['q','h'],rests:[],bpm:60,goal:70},
+  {id:'L3',en:["The whole note", "Four beats in a single note. Keep counting while it sounds."],ch:0,title:'La redonda',desc:'Cuatro tiempos en una sola nota. Sigue contando mientras suena.',sig:'4/4',bars:4,figs:['q','h','w'],rests:[],bpm:66,goal:70},
+  {id:'L4',en:["First rests", "You don’t tap on rests, but the pulse goes on: count it in your head."],ch:0,title:'Primeros silencios',desc:'En los silencios no se toca, pero el pulso sigue: cuéntalo por dentro.',sig:'4/4',bars:4,figs:['q','h'],rests:['q','h'],bpm:66,goal:70},
+  {id:'L5',en:["Three beats", "3/4 time and the dotted half note, which fills the whole bar."],ch:0,title:'Tres tiempos',desc:'El compás de 3/4 y la blanca con puntillo, que ocupa el compás entero.',sig:'3/4',bars:4,figs:['q','h','hd'],rests:['q','h'],bpm:72,goal:72},
+  {id:'L6',en:["Two per beat", "Two eighth notes fill a beat. Think “1-and, 2-and”."],ch:1,title:'Dos por tiempo',desc:'Dos corcheas llenan un tiempo. Piensa «un-y, dos-y».',sig:'2/4',bars:4,figs:['q','e'],rests:[],bpm:66,goal:72},
+  {id:'L7',en:["Eighth notes and rests", "An eighth rest puts the note on the second half of the beat."],ch:1,title:'Corcheas y silencios',desc:'Un silencio de corchea deja la nota en la segunda mitad del tiempo.',sig:'4/4',bars:4,figs:['q','h','e'],rests:['q','e'],bpm:70,goal:72},
+  {id:'L8',en:["Dotted quarter note", "A beat and a half, almost always followed by an eighth note."],ch:1,title:'Negra con puntillo',desc:'Tiempo y medio, casi siempre seguida de una corchea.',sig:'4/4',bars:4,figs:['q','qd','e','h'],rests:[],bpm:72,goal:72},
+  {id:'L9',en:["Eighth notes in 3/4", "Everything so far, now in three."],ch:1,title:'Corcheas en 3/4',desc:'Todo lo anterior, ahora en compás de tres.',sig:'3/4',bars:4,figs:['q','qd','e','h','hd'],rests:['q','e'],bpm:80,goal:75},
+  {id:'L10',en:["Four per beat", "Four sixteenth notes per beat: “1-e-and-a”."],ch:2,title:'Cuatro por tiempo',desc:'Cuatro semicorcheas por tiempo: «1-e-y-a».',sig:'2/4',bars:4,figs:['q','e','s'],rests:[],bpm:60,goal:72},
+  {id:'L11',en:["Sixteenth-note mixes", "An eighth and two sixteenths, and the other way round."],ch:2,title:'Mezclas de semicorcheas',desc:'Corchea y dos semicorcheas, y al revés.',sig:'4/4',bars:4,figs:['q','e','s'],rests:['q','e'],bpm:66,goal:74},
+  {id:'L12',en:["Dotted eighth note", "The long-short rhythm: dotted eighth and sixteenth."],ch:2,title:'Corchea con puntillo',desc:'El ritmo largo-corto: corchea con puntillo y semicorchea.',sig:'4/4',bars:4,figs:['q','e','ed','s'],rests:[],bpm:66,goal:74},
+  {id:'L27',en:["Sixteenth rest", "A sixteenth rest delays the note by a quarter of a beat. Count “1-e-and-a” in your head and come in right on time."],ch:2,title:'Silencio de semicorchea',desc:'Un silencio de semicorchea retrasa la nota un cuarto de tiempo. Cuenta «1-e-y-a» por dentro y entra justo en su sitio.',sig:'2/4',bars:4,figs:['q','e','s'],rests:['e','s'],bpm:60,goal:72},
+  {id:'L13',en:["Triplets", "Three equal eighth notes in one beat. Don’t turn them into two plus one."],ch:2,title:'Tresillos',desc:'Tres corcheas iguales en un tiempo. No las conviertas en dos más una.',sig:'4/4',bars:4,figs:['q','e','t'],rests:[],bpm:66,goal:74},
+  {id:'L14',en:["6/8 time", "Two dotted-quarter beats, each divided into three eighth notes."],ch:3,title:'El 6/8',desc:'Dos pulsos de negra con puntillo, cada uno dividido en tres corcheas.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:[],bpm:50,goal:72},
+  {id:'L15',en:["6/8 with rests", "Rests and sixteenths inside compound time."],ch:3,title:'6/8 con silencios',desc:'Silencios y semicorcheas dentro del compás compuesto.',sig:'6/8',bars:4,figs:['qd','q','e','s'],rests:['qd','q','e'],bpm:52,goal:74},
+  {id:'L16',en:["12/8 time", "Four triple beats, with the dotted half note."],ch:3,title:'El 12/8',desc:'Cuatro pulsos ternarios, con blanca con puntillo.',sig:'12/8',bars:2,figs:['qd','q','e','hd'],rests:['qd','e'],bpm:56,goal:75},
+  {id:'L21',en:["Syncopation", "Eighth, quarter, eighth: the quarter starts between two beats. Tap it on the “and” and let the pulse pass underneath."],ch:4,title:'La síncopa',desc:'Corchea, negra, corchea: la negra empieza entre dos tiempos. Tócala en el «y» y deja que el pulso pase por debajo.',sig:'2/4',bars:4,figs:['q','e'],rests:[],sync:true,bpm:60,goal:70},
+  {id:'L22',en:["Ties", "A tie joins two notes: tap only the first and count both. The second one is not tapped."],ch:4,title:'Ligaduras de prolongación',desc:'La ligadura une dos notas: toca solo la primera y cuenta las dos. La segunda no se toca.',sig:'4/4',bars:4,figs:['q','h','e'],rests:[],ties:true,bpm:66,goal:72},
+  {id:'L23',en:["Sixteenth-note syncopation", "Sixteenth, eighth, sixteenth, and notes tied over the beat."],ch:4,title:'Síncopas de semicorchea',desc:'Semicorchea, corchea, semicorchea y notas ligadas sobre el tiempo.',sig:'2/4',bars:4,figs:['q','e','s'],rests:['e','s'],sync:true,ties:true,bpm:60,goal:72},
+  {id:'L24',en:["Ties in 6/8", "Notes tied across the two dotted-quarter beats and over the bar line."],ch:4,title:'Ligaduras en 6/8',desc:'Notas ligadas entre los dos pulsos de negra con puntillo y sobre la barra de compás.',sig:'6/8',bars:4,figs:['qd','q','e'],rests:[],ties:true,bpm:50,goal:74},
+  {id:'L17',en:["Seven-eight", "Irregular meter grouped 2+2+3. The metronome clicks every eighth note."],ch:5,title:'Siete octavos',desc:'Compás irregular agrupado 2+2+3. El metrónomo marca cada corchea.',sig:'7/8',grp:'2+2+3',bars:4,figs:['q','e'],rests:[],bpm:150,goal:74},
+  {id:'L28',en:["Seven-eight: 3+2+2", "The same meter with the long group first. The metronome accents the start of each group."],ch:5,title:'Siete octavos: 3+2+2',desc:'El mismo compás con el grupo largo al principio. El metrónomo acentúa el inicio de cada grupo.',sig:'7/8',grp:'3+2+2',bars:4,figs:['q','qd','e'],rests:['e'],bpm:150,goal:75},
+  {id:'L18',en:["Five-eight", "Grouped 3+2, now with sixteenth notes."],ch:5,title:'Cinco octavos',desc:'Agrupado 3+2, ahora con semicorcheas.',sig:'5/8',grp:'3+2',bars:4,figs:['q','e','s'],rests:['e'],bpm:150,goal:75},
+  {id:'L29',en:["Five-eight: 2+3", "The groups reversed: the short one first. Feel where each accent falls."],ch:5,title:'Cinco octavos: 2+3',desc:'Los grupos al revés: primero el corto. Siente dónde cae cada acento.',sig:'5/8',grp:'2+3',bars:4,figs:['q','qd','e','s'],rests:['e','s'],bpm:150,goal:75},
+  {id:'L25',en:["Eight-eight", "Grouped 3+3+2: two long groups and a short one. The metronome clicks every eighth note."],ch:5,title:'Ocho octavos',desc:'Agrupado 3+3+2: dos grupos largos y uno corto. El metrónomo marca cada corchea.',sig:'8/8',grp:'3+3+2',bars:4,figs:['q','qd','e'],rests:['q','e'],bpm:150,goal:75},
+  {id:'L26',en:["Three half notes", "In 3/2 the beat is the half note. Each click is worth two quarter notes."],ch:5,title:'Tres blancas',desc:'El 3/2: el pulso es la blanca. Cada clic vale dos negras.',sig:'3/2',bars:4,figs:['h','q','e'],rests:['h','q'],bpm:60,goal:75},
+  {id:'L19',en:["All together", "Eight bars with almost every note value."],ch:5,title:'Todo junto',desc:'Ocho compases con casi todas las figuras.',sig:'4/4',bars:8,figs:['h','q','qd','e','ed','s','t'],rests:['h','q','e','s'],bpm:76,goal:76},
+  {id:'L20',en:["Mastery", "Every note value at an Allegro tempo."],ch:5,title:'Maestría',desc:'Todas las figuras a tempo de Allegro.',sig:'4/4',bars:8,figs:['w','h','hd','q','qd','e','ed','s','t'],rests:['w','h','q','e','s'],bpm:100,goal:80},
 ];
 // Los id son fijos: el avance (prog.levels) se guarda por id y los niveles nuevos no deben moverlo.
 LEVELS.forEach(l=>{ l.s2=Math.min(l.goal+12,90); l.s3=95; });
+const lvTitle = l => tr(l.title, l.en[0]), lvDesc = l => tr(l.desc, l.en[1]);
 const lvById = id => LEVELS.findIndex(l=>l.id===id);
 let stageMode = set.view==='campana' ? 'campana' : 'libre';
 let levelIdx = Math.max(0, lvById(set.levelId || 'L'+((set.level|0)+1)));
@@ -1273,32 +1357,32 @@ function unlocked(i){ return i===0 || lvState(i-1).stars>0 || lvState(i).stars>0
 function starStr(n){ return [0,1,2].map(i=>`<span class="${i<n?'on':''}">★</span>`).join(''); }
 function showTempo(){
   const b=curBpm(), camp=stageMode==='campana';
-  $('#bpm').value=b; $('#bpmRange').value=b; $('#bpmOut').textContent=b+' ppm'; $('#tMark').textContent=tempoMark(b);
+  $('#bpm').value=b; $('#bpmRange').value=b; $('#bpmOut').textContent=b+tr(' ppm',' bpm'); $('#tMark').textContent=tempoMark(b);
   ['#bpm','#bpmUp','#bpmDown','#bpmRange','#tapTempo'].forEach(id=>{ $(id).disabled=camp; });
   $('#tLock').hidden=!camp; $('#tLockHint').hidden=!camp;
 }
 function renderLevelBar(){
   const l=LEVELS[levelIdx], st=lvState(levelIdx);
-  $('#lvEyebrow').textContent=`Capítulo ${l.ch+1} · ${CHAPTERS[l.ch]} — Nivel ${levelIdx+1} de ${LEVELS.length}`;
-  $('#lvTitle').textContent=l.title;
-  $('#lvDesc').textContent=l.desc;
+  $('#lvEyebrow').textContent=tr(`Capítulo ${l.ch+1} · ${chapName(l.ch)} — Nivel ${levelIdx+1} de ${LEVELS.length}`,`Chapter ${l.ch+1} · ${chapName(l.ch)} — Level ${levelIdx+1} of ${LEVELS.length}`);
+  $('#lvTitle').textContent=lvTitle(l);
+  $('#lvDesc').textContent=lvDesc(l);
   const unit={12:'♩',24:'𝅗𝅥',18:'♩.',6:'♪'}[SIGS[l.sig].click];
-  $('#lvMeta').innerHTML=`<span>${l.sig}${l.grp?' ('+l.grp+')':''}</span><span>${l.bars} compases</span><span>${l.bpm} ppm</span><span>Objetivo ${l.goal}%</span><span>★★ ${l.s2}%</span><span>★★★ ${l.s3}%</span>${st.best?`<span>Mejor: ${st.best}%</span>`:''}`;
-  $('#lvStars').innerHTML=starStr(st.stars); $('#lvStars').setAttribute('aria-label',`${st.stars} de 3 estrellas`);
+  $('#lvMeta').innerHTML=`<span>${l.sig}${l.grp?' ('+l.grp+')':''}</span><span>${l.bars} ${tr('compases','bars')}</span><span>${l.bpm} ${tr('ppm','bpm')}</span><span>${tr('Objetivo','Goal')} ${l.goal}%</span><span>★★ ${l.s2}%</span><span>★★★ ${l.s3}%</span>${st.best?`<span>${tr('Mejor','Best')}: ${st.best}%</span>`:''}`;
+  $('#lvStars').innerHTML=starStr(st.stars); $('#lvStars').setAttribute('aria-label',tr(`${st.stars} de 3 estrellas`,`${st.stars} of 3 stars`));
   $('#lvPrev').disabled=levelIdx===0;
   $('#lvNext').disabled=levelIdx>=LEVELS.length-1 || !unlocked(levelIdx+1);
 }
 function renderCampMap(){
   let passed=0, stars=0;
   LEVELS.forEach((l,i)=>{ const s=lvState(i); if(s.stars) passed++; stars+=s.stars; });
-  $('#campTotal').innerHTML=`<b>${passed}</b> de ${LEVELS.length} niveles superados · <b>${stars}</b> de ${LEVELS.length*3} ★`;
+  $('#campTotal').innerHTML=tr(`<b>${passed}</b> de ${LEVELS.length} niveles superados · <b>${stars}</b> de ${LEVELS.length*3} ★`,`<b>${passed}</b> of ${LEVELS.length} levels passed · <b>${stars}</b> of ${LEVELS.length*3} ★`);
   const lock='<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="5.5" width="8" height="5.5" rx="1" fill="currentColor"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
   $('#campMap').innerHTML=CHAPTERS.map((c,ci)=>{
     const btns=LEVELS.map((l,i)=>({l,i})).filter(x=>x.l.ch===ci).map(({l,i})=>{
       const s=lvState(i), un=unlocked(i);
-      return `<button type="button" class="lv${s.stars?' done':''}" data-lv="${i}" ${un?'':'disabled'} aria-current="${i===levelIdx}" title="Nivel ${i+1}: ${l.title}${un?'':' (bloqueado)'}">${i+1}<small class="stars">${un?starStr(s.stars):lock}</small></button>`;
+      return `<button type="button" class="lv${s.stars?' done':''}" data-lv="${i}" ${un?'':'disabled'} aria-current="${i===levelIdx}" title="${tr('Nivel','Level')} ${i+1}: ${lvTitle(l)}${un?'':tr(' (bloqueado)',' (locked)')}">${i+1}<small class="stars">${un?starStr(s.stars):lock}</small></button>`;
     }).join('');
-    return `<div class="chap"><h3>${ci+1}. ${c}</h3><div class="lv-grid">${btns}</div></div>`;
+    return `<div class="chap"><h3>${ci+1}. ${chapName(ci)}</h3><div class="lv-grid">${btns}</div></div>`;
   }).join('');
 }
 function firstOpenLevel(){ for(let i=0;i<LEVELS.length;i++){ if(!lvState(i).stars) return i; } return LEVELS.length-1; }
@@ -1306,7 +1390,7 @@ function selectLevel(i){
   if(i<0||i>=LEVELS.length||!unlocked(i)) return;
   stop(); levelIdx=i; set.level=i; set.levelId=LEVELS[i].id; save();
   renderLevelBar(); renderCampMap(); showTempo(); generate();
-  say(`Nivel ${i+1}: ${LEVELS[i].title}. ${LEVELS[i].bpm} ppm, objetivo ${LEVELS[i].goal}%.`);
+  say(tr(`Nivel ${i+1}: ${lvTitle(LEVELS[i])}. ${LEVELS[i].bpm} ppm, objetivo ${LEVELS[i].goal}%.`,`Level ${i+1}: ${lvTitle(LEVELS[i])}. ${LEVELS[i].bpm} bpm, goal ${LEVELS[i].goal}%.`));
   requestAnimationFrame(centerScore);
 }
 // Centra la partitura en la parte visible (descontando el botón flotante en móvil) si no se ve entera
@@ -1318,10 +1402,11 @@ function centerScore(){
   const top = r.height<room-16 ? r.top-(room-r.height)/2 : r.top-8;
   scrollTo({top:scrollY+top, behavior:'smooth'});
 }
+function labelNew(){ $('#bNewLbl').textContent=stageMode==='campana'?tr('Otro ritmo del nivel','Another rhythm'):tr('Nuevo ritmo','New rhythm'); }
 function applyStageMode(){
   const camp=stageMode==='campana';
   $('#secSig').hidden=camp; $('#secFigs').hidden=camp; $('#secCamp').hidden=!camp; $('#levelBar').hidden=!camp;
-  $('#bNewLbl').textContent=camp?'Otro ritmo del nivel':'Nuevo ritmo';
+  labelNew();
   if(camp){ if(!unlocked(levelIdx)) levelIdx=firstOpenLevel(); renderLevelBar(); renderCampMap(); }
   showTempo(); generate();
 }
@@ -1390,8 +1475,8 @@ async function initStore(){
 }
 function renderStoreStatus(){
   $('#pStore').textContent = store.where==='cuenta'
-    ? 'Tu progreso se guarda en tu cuenta de Claude: lo verás igual desde cualquier dispositivo en el que abras esta app.'
-    : 'Tu progreso se guarda en este navegador. Si borras los datos del navegador o cambias de dispositivo, no estará disponible.';
+    ? tr('Tu progreso se guarda en tu cuenta de Claude: lo verás igual desde cualquier dispositivo en el que abras esta app.','Your progress is saved to your Claude account: you’ll see it on any device where you open this app.')
+    : tr('Tu progreso se guarda en este navegador. Si borras los datos del navegador o cambias de dispositivo, no estará disponible.','Your progress is saved in this browser. If you clear the browser data or switch devices, it won’t be available.');
 }
 function refreshProgUI(){
   if(stageMode==='campana'){ renderLevelBar(); renderCampMap(); }
@@ -1410,18 +1495,18 @@ function afterPractice(r){
     const next=$('#rcNext');
     if(st>0){
       const nowOpen = r.lvl<LEVELS.length-1;
-      $('#rcText').textContent = (r.lvl===LEVELS.length-1 ? '¡Completaste el último nivel de la campaña!' : wasLocked ? '¡Nivel superado! Se desbloqueó el siguiente nivel.' : '¡Nivel superado!')
-        + (st<3 ? ` Para ${st===1?'dos':'tres'} estrellas necesitas ${st===1?l.s2:l.s3}%.` : ' Conseguiste las tres estrellas.');
+      $('#rcText').textContent = (r.lvl===LEVELS.length-1 ? tr('¡Completaste el último nivel de la campaña!','You completed the last level of the campaign!') : wasLocked ? tr('¡Nivel superado! Se desbloqueó el siguiente nivel.','Level passed! The next level is unlocked.') : tr('¡Nivel superado!','Level passed!'))
+        + (st<3 ? tr(` Para ${st===1?'dos':'tres'} estrellas necesitas ${st===1?l.s2:l.s3}%.`,` For ${st===1?'two':'three'} stars you need ${st===1?l.s2:l.s3}%.`) : tr(' Conseguiste las tres estrellas.',' You earned all three stars.'));
       next.hidden=!nowOpen;
     } else {
-      $('#rcText').textContent=`Te faltan ${l.goal-r.pct} puntos para superar el nivel (objetivo ${l.goal}%). Pulsa «Reproducir» para escuchar el ritmo antes de volver a intentarlo.`;
+      $('#rcText').textContent=tr(`Te faltan ${l.goal-r.pct} puntos para superar el nivel (objetivo ${l.goal}%). Pulsa «Reproducir» para escuchar el ritmo antes de volver a intentarlo.`,`You need ${l.goal-r.pct} more points to pass the level (goal ${l.goal}%). Press “Play” to hear the rhythm before trying again.`);
       next.hidden=true;
     }
     renderLevelBar(); renderCampMap();
   } else { rc.hidden=true; $('#rcNext').hidden=true; }
   $('#rAgain').classList.toggle('primary', $('#rcNext').hidden);
-  if(set.autosave){ saveSession(r); save.hidden=true; saved.hidden=false; saved.textContent='Guardado en «Mi progreso».'; }
-  else { if(r.mode==='campana' && !r.part) commitProg(); save.hidden=false; save.disabled=false; save.textContent='Guardar resultado'; saved.hidden=true; }
+  if(set.autosave){ saveSession(r); save.hidden=true; saved.hidden=false; saved.textContent=tr('Guardado en «Mi progreso».','Saved to “My progress”.'); }
+  else { if(r.mode==='campana' && !r.part) commitProg(); save.hidden=false; save.disabled=false; save.textContent=tr('Guardar resultado','Save result'); saved.hidden=true; }
 }
 function saveSession(r){
   if(prog.sessions.some(x=>x.id===r.id)) return;
@@ -1431,48 +1516,49 @@ function saveSession(r){
 
 /* ---------- Vista de progreso ---------- */
 let pFilter='todo';
-const fmtDate=t=>new Date(t).toLocaleDateString('es',{day:'numeric',month:'short'});
-const fmtTime=t=>new Date(t).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+const fmtDate=t=>new Date(t).toLocaleDateString(lang,{day:'numeric',month:'short'});
+const fmtTime=t=>new Date(t).toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'});
 // Las sesiones antiguas solo guardan el índice (lvl); antes de añadir niveles el índice i era el id L(i+1)
 function sessLevel(r){ return r.mode==='campana' ? lvById(r.lid || 'L'+(r.lvl+1)) : -1; }
-function exName(r){ const i=sessLevel(r); return (i>=0 ? `Nivel ${i+1} · ${LEVELS[i].title}` : 'Práctica libre') + (r.part?' · un compás':'') + (r.play==='piano'?' · piano':''); }
+function exName(r){ const i=sessLevel(r); return (i>=0 ? `${tr('Nivel','Level')} ${i+1} · ${lvTitle(LEVELS[i])}` : tr('Práctica libre','Free practice')) + (r.part?tr(' · un compás',' · one bar'):'') + (r.play==='piano'?' · piano':''); }
 const avg=a=>a.length?sum(a)/a.length:0;
 function renderProgress(){
   const all=prog.sessions, list=all.filter(r=>pFilter==='todo'||r.mode===pFilter);
   document.querySelectorAll('#pFilter button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===pFilter)));
   // tiles
   const last10=list.slice(-10).map(r=>r.pct), prev10=list.slice(-20,-10).map(r=>r.pct);
-  let trend='Completa más prácticas para comparar.';
-  if(prev10.length>=3){ const d=Math.round(avg(last10)-avg(prev10)); trend = d===0 ? 'Igual que en las 10 anteriores' : `<span class="${d>0?'up':'down'}">${d>0?'▲':'▼'} ${Math.abs(d)} puntos</span> frente a las ${prev10.length} anteriores`; }
+  let trend=tr('Completa más prácticas para comparar.','Complete more practices to compare.');
+  if(prev10.length>=3){ const d=Math.round(avg(last10)-avg(prev10)), arrow=`<span class="${d>0?'up':'down'}">${d>0?'▲':'▼'} ${Math.abs(d)} ${tr('puntos','points')}</span>`;
+    trend = d===0 ? tr('Igual que en las 10 anteriores','Same as the previous 10') : tr(`${arrow} frente a las ${prev10.length} anteriores`,`${arrow} vs the previous ${prev10.length}`); }
   const best=list.reduce((b,r)=>!b||r.pct>b.pct?r:b,null);
   let passed=0, stars=0; LEVELS.forEach((l,i)=>{ const s=lvState(i); if(s.stars) passed++; stars+=s.stars; });
   const lastR=list[list.length-1];
   $('#pTiles').innerHTML=`
-    <div class="tile"><div class="lbl">Prácticas guardadas</div><div class="big">${list.length}</div><div class="sub">${lastR?'Última: '+fmtDate(lastR.t)+', '+fmtTime(lastR.t):'Aún no hay ninguna'}</div></div>
-    <div class="tile"><div class="lbl">Precisión reciente</div><div class="big">${list.length?Math.round(avg(last10))+'%':'—'}</div><div class="sub">${list.length?'Media de las últimas '+last10.length+'. ':''}${list.length?trend:''}</div></div>
-    <div class="tile"><div class="lbl">Mejor resultado</div><div class="big">${best?best.pct+'%':'—'}</div><div class="sub">${best?exName(best)+' · '+fmtDate(best.t):'—'}</div></div>
-    <div class="tile"><div class="lbl">Campaña</div><div class="big">${passed}<span style="font-size:18px;color:var(--muted)"> / ${LEVELS.length}</span></div><div class="sub">niveles superados · ${stars} de ${LEVELS.length*3} ★</div></div>`;
+    <div class="tile"><div class="lbl">${tr('Prácticas guardadas','Saved practices')}</div><div class="big">${list.length}</div><div class="sub">${lastR?tr('Última: ','Last: ')+fmtDate(lastR.t)+', '+fmtTime(lastR.t):tr('Aún no hay ninguna','None yet')}</div></div>
+    <div class="tile"><div class="lbl">${tr('Precisión reciente','Recent accuracy')}</div><div class="big">${list.length?Math.round(avg(last10))+'%':'—'}</div><div class="sub">${list.length?tr('Media de las últimas ','Average of the last ')+last10.length+'. ':''}${list.length?trend:''}</div></div>
+    <div class="tile"><div class="lbl">${tr('Mejor resultado','Best result')}</div><div class="big">${best?best.pct+'%':'—'}</div><div class="sub">${best?exName(best)+' · '+fmtDate(best.t):'—'}</div></div>
+    <div class="tile"><div class="lbl">${tr('Campaña','Campaign')}</div><div class="big">${passed}<span style="font-size:18px;color:var(--muted)"> / ${LEVELS.length}</span></div><div class="sub">${tr('niveles superados','levels passed')} · ${stars} ${tr('de','of')} ${LEVELS.length*3} ★</div></div>`;
   renderChart(list);
   // tabla
-  $('#pCount').textContent = list.length>30 ? `Últimas 30 de ${list.length}` : '';
-  if(!list.length){ $('#pTable').innerHTML='<p class="empty">Cuando termines una práctica aparecerá aquí.</p>'; }
+  $('#pCount').textContent = list.length>30 ? tr(`Últimas 30 de ${list.length}`,`Last 30 of ${list.length}`) : '';
+  if(!list.length){ $('#pTable').innerHTML=`<p class="empty">${tr('Cuando termines una práctica aparecerá aquí.','When you finish a practice it will appear here.')}</p>`; }
   else {
     const rows=list.slice(-30).reverse().map(r=>{
-      const dev = r.mean==null ? '—' : Math.abs(r.mean)<5 ? 'a tiempo' : `${Math.abs(r.mean)} ms ${r.mean>0?'tarde':'antes'}`;
-      return `<tr><td>${fmtDate(r.t)} <span class="hint" style="display:inline">${fmtTime(r.t)}</span></td><td>${exName(r)}</td><td>${r.sig}${r.grp?' ('+r.grp+')':''} · ${r.bars} c.</td><td class="num">${r.bpm}</td><td class="num">${r.pct}%<span class="pbar"><i style="width:${r.pct}%"></i></span></td><td class="num">${r.exact}/${r.n}</td><td class="num">${r.miss}</td><td>${dev}</td></tr>`;
+      const dev = r.mean==null ? '—' : Math.abs(r.mean)<5 ? tr('a tiempo','on time') : `${Math.abs(r.mean)} ms ${r.mean>0?tr('tarde','late'):tr('antes','early')}`;
+      return `<tr><td>${fmtDate(r.t)} <span class="hint" style="display:inline">${fmtTime(r.t)}</span></td><td>${exName(r)}</td><td>${r.sig}${r.grp?' ('+r.grp+')':''} · ${r.bars} ${tr('c.','b.')}</td><td class="num">${r.bpm}</td><td class="num">${r.pct}%<span class="pbar"><i style="width:${r.pct}%"></i></span></td><td class="num">${r.exact}/${r.n}</td><td class="num">${r.miss}</td><td>${dev}</td></tr>`;
     }).join('');
-    $('#pTable').innerHTML=`<table><thead><tr><th>Fecha</th><th>Ejercicio</th><th>Compás</th><th class="num">Tempo</th><th class="num">Precisión</th><th class="num">Exactas</th><th class="num">Sin tocar</th><th>Desvío medio</th></tr></thead><tbody>${rows}</tbody></table>`;
+    $('#pTable').innerHTML=`<table><thead><tr><th>${tr('Fecha','Date')}</th><th>${tr('Ejercicio','Exercise')}</th><th>${tr('Compás','Meter')}</th><th class="num">Tempo</th><th class="num">${tr('Precisión','Accuracy')}</th><th class="num">${tr('Exactas','Exact')}</th><th class="num">${tr('Sin tocar','Missed')}</th><th>${tr('Desvío medio','Mean offset')}</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
   renderStoreStatus();
 }
 function renderChart(list){
   const host=$('#pChart');
   const data=list.slice(-60);
-  if(data.length<2){ host.innerHTML=`<p class="empty">${data.length?'Con una práctica más verás la evolución.':'Aún no hay prácticas guardadas. Termina una práctica para empezar a ver tu progreso.'}</p>`; return; }
+  if(data.length<2){ host.innerHTML=`<p class="empty">${data.length?tr('Con una práctica más verás la evolución.','One more practice and you’ll see your trend.'):tr('Aún no hay prácticas guardadas. Termina una práctica para empezar a ver tu progreso.','No saved practices yet. Finish a practice to start seeing your progress.')}</p>`; return; }
   const W=Math.max(300,host.clientWidth), H=230, pl=40, pr=14, pt=14, pb=28;
   const iw=W-pl-pr, ih=H-pt-pb;
   const X=i=>pl+(data.length===1?iw/2:i*iw/(data.length-1)), Y=v=>pt+ih*(1-v/100);
-  let g=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Precisión de las últimas ${data.length} prácticas">`;
+  let g=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${tr(`Precisión de las últimas ${data.length} prácticas`,`Accuracy of the last ${data.length} practices`)}">`;
   [0,25,50,75,100].forEach(v=>{ g+=`<line class="ch-grid" x1="${pl}" y1="${Y(v)}" x2="${W-pr}" y2="${Y(v)}"/><text class="ch-axis" x="${pl-8}" y="${Y(v)+3}" text-anchor="end">${v}%</text>`; });
   const ticks=[0,Math.floor((data.length-1)/2),data.length-1].filter((v,i,a)=>a.indexOf(v)===i);
   ticks.forEach(i=>{ g+=`<text class="ch-axis" x="${X(i)}" y="${H-8}" text-anchor="${i===0?'start':i===data.length-1?'end':'middle'}">${fmtDate(data[i].t)}</text>`; });
@@ -1482,12 +1568,12 @@ function renderChart(list){
   const hw=Math.max(8,iw/(data.length-1)/2);
   data.forEach((r,i)=>{ g+=`<rect class="ch-hit" data-i="${i}" x="${X(i)-hw}" y="${pt}" width="${hw*2}" height="${ih}"/>`; });
   g+='</svg><div class="tip" id="pTip" hidden></div>';
-  g+=`<div class="legend"><span><i class="lg-dot"></i>Cada práctica</span><span><i class="lg-line"></i>Media de las últimas 5</span></div>`;
+  g+=`<div class="legend"><span><i class="lg-dot"></i>${tr('Cada práctica','Each practice')}</span><span><i class="lg-line"></i>${tr('Media de las últimas 5','Average of the last 5')}</span></div>`;
   host.innerHTML=g;
   const tip=$('#pTip');
   host.querySelectorAll('.ch-hit').forEach(h=>{
     const show=()=>{ const i=+h.dataset.i, r=data[i];
-      tip.innerHTML=`<b>${r.pct}%</b> · ${fmtDate(r.t)} ${fmtTime(r.t)}<br>${exName(r)} · ${r.sig} · ${r.bpm} ppm`;
+      tip.innerHTML=`<b>${r.pct}%</b> · ${fmtDate(r.t)} ${fmtTime(r.t)}<br>${exName(r)} · ${r.sig} · ${r.bpm} ${tr('ppm','bpm')}`;
       tip.style.left=Math.min(Math.max(X(i),90),W-90)+'px'; tip.style.top=Y(r.pct)+'px'; tip.hidden=false; };
     h.addEventListener('pointerenter',show); h.addEventListener('pointerdown',show);
     h.addEventListener('pointerleave',()=>{ tip.hidden=true; });
@@ -1550,7 +1636,7 @@ $('#kAgain').addEventListener('click',()=>startCalib());
 $('#kApply').addEventListener('click',()=>{
   if(K.suggest==null) return;
   set.offset=K.suggest; $('#offset').value=set.offset; updOutputs(); save();
-  $('#kApply').disabled=true; $('#kApply').textContent='Corrección aplicada';
+  $('#kApply').disabled=true; $('#kApply').textContent=tr('Corrección aplicada','Correction applied');
 });
 // La partitura es la zona de toque, pero solo durante la práctica o la medición: en reposo se puede desplazar y seleccionar con normalidad
 function bindTapZone(el,pre){
@@ -1577,8 +1663,8 @@ $('#fabRestart').addEventListener('pointerdown',e=>{
   restartCancel(); void e.currentTarget.offsetWidth; e.currentTarget.classList.add('arming');
   restartTimer=setTimeout(()=>{
     restartTimer=0; const m=S.running && S.mode;
-    if(m==='practice'){ start('practice'); say('Práctica reiniciada'); }
-    else if(m==='calib'){ startCalib(); say('Medición reiniciada'); }
+    if(m==='practice'){ start('practice'); say(tr('Práctica reiniciada','Practice restarted')); }
+    else if(m==='calib'){ startCalib(); say(tr('Medición reiniciada','Measurement restarted')); }
     restartCancel();
   },500);
 });
@@ -1622,10 +1708,10 @@ $('#modeSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); 
 $('#holdSw').addEventListener('change',e=>setHold(e.target.checked));
 $('#penalize').addEventListener('change',e=>{ set.penalize=e.target.checked; save(); });
 $('#vibrate').addEventListener('change',e=>{ set.vibrate=e.target.checked; save(); });
-$('#bFull').addEventListener('click',()=>{ backToFull(); say('Ritmo completo'); });
+$('#bFull').addEventListener('click',()=>{ backToFull(); say(tr('Ritmo completo','Full rhythm')); });
 $('#rWeakBtn').addEventListener('click',()=>{ if(weakM<0) return; measureExcerpt(weakM); start('practice'); });
 // Bienvenida: se muestra hasta que se cierra o se termina la primera práctica
-function dismissWelcome(){ set.seen=true; save(); $('#welcome').hidden=true; }
+function dismissWelcome(){ set.seen=true; set.lang=lang; save(); $('#welcome').hidden=true; }
 $('#welOk').addEventListener('click',()=>{ dismissWelcome(); $('#bPlay').focus(); });
 $('#welCalib').addEventListener('click',()=>{ dismissWelcome(); startCalib(); });
 // Paneles plegables: abiertos por defecto en pantallas anchas; se recuerda solo lo que cambia el usuario
@@ -1637,19 +1723,19 @@ document.querySelectorAll('.fold').forEach(d=>d.addEventListener('toggle',()=>{
   set.folds={...set.folds,[d.dataset.fold]:d.open}; save();
 }));
 // Restablecer ajustes: conserva el progreso, la corrección de latencia y la vista
-const RESET_BTN='<button class="btn" id="resetSet" type="button">Restablecer ajustes</button>';
+function renderReset(){ $('#resetBox').innerHTML=`<button class="btn" id="resetSet" type="button">${tr('Restablecer ajustes','Reset settings')}</button>`; }
 $('#resetBox').addEventListener('click',e=>{
   const box=$('#resetBox'), id=e.target.closest('button')?.id;
-  if(id==='resetSet'){ box.innerHTML='<span>¿Volver a las opciones iniciales? Se conservan tu progreso y la corrección de latencia.</span><button class="btn warn" id="resetYes" type="button">Restablecer</button><button class="btn" id="resetNo" type="button">Cancelar</button>'; $('#resetNo').focus(); }
+  if(id==='resetSet'){ box.innerHTML=`<span>${tr('¿Volver a las opciones iniciales? Se conservan tu progreso y la corrección de latencia.','Go back to the default settings? Your progress and latency correction are kept.')}</span><button class="btn warn" id="resetYes" type="button">${tr('Restablecer','Reset')}</button><button class="btn" id="resetNo" type="button">${tr('Cancelar','Cancel')}</button>`; $('#resetNo').focus(); }
   else if(id==='resetYes'){
     stop();
-    const keep={offset:set.offset, view:set.view, level:set.level, levelId:set.levelId, seen:set.seen};
+    const keep={offset:set.offset, view:set.view, level:set.level, levelId:set.levelId, seen:set.seen, lang:set.lang};
     set={...freshSettings(), ...keep}; save();
     renderSigs(); renderGrp(); renderFigs(); renderRests(); syncControls(); syncFolds(); updateFab();
     if(stageMode==='campana') showTempo(); else generate();
-    box.innerHTML=RESET_BTN; $('#resetSet').focus(); say('Ajustes restablecidos');
+    renderReset(); $('#resetSet').focus(); say(tr('Ajustes restablecidos','Settings reset'));
   }
-  else if(id==='resetNo'){ box.innerHTML=RESET_BTN; $('#resetSet').focus(); }
+  else if(id==='resetNo'){ renderReset(); $('#resetSet').focus(); }
 });
 
 let rz=0;
@@ -1667,17 +1753,36 @@ $('#campMap').addEventListener('click',e=>{ const b=e.target.closest('.lv'); if(
 $('#lvPrev').addEventListener('click',()=>selectLevel(levelIdx-1));
 $('#lvNext').addEventListener('click',()=>selectLevel(levelIdx+1));
 $('#rcNext').addEventListener('click',()=>selectLevel(levelIdx+1));
-$('#rSave').addEventListener('click',()=>{ if(!pendingRec) return; saveSession(pendingRec); $('#rSave').hidden=true; $('#rSaved').hidden=false; $('#rSaved').textContent='Guardado en «Mi progreso».'; });
+$('#rSave').addEventListener('click',()=>{ if(!pendingRec) return; saveSession(pendingRec); $('#rSave').hidden=true; $('#rSaved').hidden=false; $('#rSaved').textContent=tr('Guardado en «Mi progreso».','Saved to “My progress”.'); });
 $('#autosave').addEventListener('change',e=>{ set.autosave=e.target.checked; save(); });
 $('#pFilter').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; pFilter=b.dataset.f; renderProgress(); });
+function renderClear(){ $('#pClearBox').innerHTML=`<button class="btn warn" id="pClear" type="button">${tr('Borrar historial','Clear history')}</button>`; }
 $('#pClearBox').addEventListener('click',e=>{
   const box=$('#pClearBox'), id=e.target.closest('button')?.id;
-  if(id==='pClear'){ box.innerHTML='<span>¿Borrar todas las prácticas y el avance de la campaña?</span><button class="btn warn" id="pClearYes" type="button">Sí, borrar todo</button><button class="btn" id="pClearNo" type="button">Cancelar</button>'; $('#pClearNo').focus(); }
-  else if(id==='pClearYes'){ prog=emptyProg(); commitProg(); box.innerHTML='<button class="btn warn" id="pClear" type="button">Borrar historial</button>'; renderProgress(); $('#pClear').focus(); say('Historial borrado'); }
-  else if(id==='pClearNo'){ box.innerHTML='<button class="btn warn" id="pClear" type="button">Borrar historial</button>'; $('#pClear').focus(); }
+  if(id==='pClear'){ box.innerHTML=`<span>${tr('¿Borrar todas las prácticas y el avance de la campaña?','Delete all practices and campaign progress?')}</span><button class="btn warn" id="pClearYes" type="button">${tr('Sí, borrar todo','Yes, delete everything')}</button><button class="btn" id="pClearNo" type="button">${tr('Cancelar','Cancel')}</button>`; $('#pClearNo').focus(); }
+  else if(id==='pClearYes'){ prog=emptyProg(); commitProg(); renderClear(); renderProgress(); $('#pClear').focus(); say(tr('Historial borrado','History cleared')); }
+  else if(id==='pClearNo'){ renderClear(); $('#pClear').focus(); }
 });
 new ResizeObserver(()=>{ if(!$('#progView').hidden) renderChart(prog.sessions.filter(r=>pFilter==='todo'||r.mode===pFilter)); }).observe($('#progView'));
 
+// Cambio de idioma: vuelve a pintar todo; una práctica en curso se detiene y se cierran los resultados (sus textos ya están escritos)
+function setLang(l){
+  if(!LANGS.includes(l)) return;
+  const changed = l!==lang;
+  lang=l; set.lang=l; save();
+  if(!changed){ applyStatic(); return; }
+  stop(); $('#calib').hidden=true; if(!$('#results').hidden) closeResults();
+  applyStatic(); renderSigs(); renderFigs(); renderRests(); renderReset(); renderClear(); refreshWarn();
+  syncControls(); padIdle(); labelNew(); showTempo();
+  if(score) renderSummary();
+  if(stageMode==='campana'){ renderLevelBar(); renderCampMap(); }
+  if(!$('#progView').hidden) renderProgress(); else renderStoreStatus();
+  updateFab(); syncPostFab();
+  say(tr('Idioma: español','Language: English'));
+}
+document.querySelectorAll('.lang-seg').forEach(g=>g.addEventListener('click',e=>{ const b=e.target.closest('button[data-lang]'); if(b) setLang(b.dataset.lang); }));
+
+applyStatic(); renderReset(); renderClear();
 renderSigs(); renderGrp(); renderFigs(); renderRests(); syncControls(); syncFolds(); padIdle();
 setView(stageMode);
 if(!set.seen && !prog.sessions.length) $('#welcome').hidden=false;
