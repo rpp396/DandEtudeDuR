@@ -72,6 +72,8 @@ Las tres secciones se pliegan y despliegan pulsando su título (en el móvil emp
 
 1. **Reproducción:** *Reproducir* siempre hace sonar el ritmo; *Escuchar el ritmo al practicar* lo hace sonar también mientras practicas (viene apagada, para que lo leas tú). También: resaltar la nota actual, repetir en bucle, sonido de las notas (tono sostenido o golpe) y volumen.
 2. **Metrónomo:** tempo, marcar el tempo con toques, sonar durante el ritmo, acento en el primer tiempo, subdivisión, compases de cuenta previa y volumen.
+   - *Subdivisión en la cuenta previa* (activada por defecto): en compases compuestos (3/8, 6/8, 9/8, 12/8) y de amalgama (5/8, 7/8, 8/8), la cuenta marca el pulso y, más suaves, las corcheas.
+   - En amalgama, durante el ejercicio el metrónomo marca solo los pulsos (el inicio de cada grupo); elige *Corcheas* en *Subdivisión* para oír también las demás corcheas.
 3. **Práctica:**
    - *Penalizar golpes de más:* cada golpe donde no hay nota resta puntos; si lo desactivas, solo se cuentan.
    - *Modo piano:* igual que el selector Batería / Piano.

@@ -208,6 +208,7 @@
           <div class="field"><label for="countIn">Cuenta previa</label>
             <select id="countIn"><option value="0">Sin cuenta</option><option value="1">1 compás</option><option value="2">2 compases</option></select></div>
         </div>
+        <label class="sw"><input type="checkbox" id="countSub"><span class="track"></span><span>Subdivisión en la cuenta previa<small>En compases compuestos (3/8, 6/8, 9/8, 12/8) y de amalgama (5/8, 7/8, 8/8), además del pulso suenan las corcheas mientras cuenta.</small></span></label>
         <div class="field"><span class="rlabel">Volumen del metrónomo <output id="metroVolOut"></output></span><input type="range" id="metroVol" min="0" max="1" step="0.05" aria-label="Volumen del metrónomo"></div>
         </div>
       </details>
@@ -381,13 +382,15 @@ function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.fig
 
 const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:false, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
-  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, sv:2};
+  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, countSub:true, sv:3};
 let set = load();
 function load(){
   try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; s.folds = (s.folds && typeof s.folds==='object') ? {...s.folds} : {};if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; s.rests=restList(s).filter(k=>REST_KEYS.includes(k));
     // sv 2: «Escuchar el ritmo» pasa a aplicarse solo a la práctica (apagado) y «Oír mis toques» viene activado
     if(o.sync===undefined) s.sync=!!s.ties;
     if((o.sv|0)<2){ s.sound=false; s.tapSound=true; s.sv=2; }
+    // sv 3: en la cuenta previa de compases compuestos y de amalgama suenan pulso y subdivisión
+    if((o.sv|0)<3){ s.countSub=true; s.sv=3; }
     return s; } }catch(e){}
   return freshSettings();
 }
@@ -731,7 +734,7 @@ function setBpm(v, fromUser=true){
   if(fromUser){ save(); if(S.running && S.mode!=='metro') stop(); }
 }
 function syncControls(){
-  ['sync','ties','sound','cursor','loop','metro','accent','tapSound','fab','vibrate'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
+  ['sync','ties','sound','cursor','loop','metro','accent','tapSound','fab','vibrate','countSub'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
   $('#vibrateRow').hidden=!('vibrate' in navigator && touchMQ.matches);
   $('#timbre').value=set.timbre; $('#sub').value=set.sub; $('#countIn').value=set.countIn;
   $('#rhythmVol').value=set.rhythmVol; $('#metroVol').value=set.metroVol; $('#tapVol').value=set.tapVol; syncTapVol(); $('#offset').value=set.offset;
@@ -834,16 +837,31 @@ function tapSoundOff(src){
 let S={running:false,nowI:-1};
 function barClicks(tb,spt,countIn,force){
   const sig=score.sig, L=score.L, starts=new Set(); let a=0; sig.groups.forEach(g=>{ starts.add(a); a+=g; });
+  // Cuenta previa en compases compuestos y de amalgama: suena cada corchea; el pulso (inicio de cada grupo) con su clic
+  // y el resto, más suave. El número de la cuenta solo avanza en cada pulso.
+  if(countIn && set.countSub && sig.kind!=='simple'){
+    let pulse=0, light=0;
+    for(let tk=0; tk<L; tk+=6){
+      const t=tb+tk*spt, isPulse=starts.has(tk);
+      if(isPulse) pulse++;
+      click(S.bus,t, tk===0 ? (set.accent?'accent':'beat') : isPulse ? 'beat' : 'weak');
+      if(tk%sig.click===0) S.vis.push({t,idx:light++,count:pulse});
+    }
+    return;
+  }
   const audible = countIn || force || set.metro;
+  const sb=+set.sub;
+  // Amalgama fuera de la cuenta previa: por defecto solo suenan los pulsos (inicio de cada grupo);
+  // las demás corcheas, solo si se elige una subdivisión
+  const oddPulses = sig.kind==='odd' && !countIn;
   let n=0;
   for(let tk=0; tk<L; tk+=sig.click){
     const lvl = tk===0 ? (set.accent?'accent':'beat') : (sig.kind==='odd' ? (starts.has(tk)?'beat':'weak') : 'beat');
     const t=tb+tk*spt;
-    if(audible) click(S.bus,t,lvl);
+    if(audible && (!oddPulses || starts.has(tk) || sb>0)) click(S.bus,t,lvl);
     S.vis.push({t,idx:n,count:countIn?n+1:0});
     n++;
   }
-  const sb=+set.sub;
   if(audible && !countIn && sb>0 && sb<sig.click && sig.click%sb===0){
     for(let tk=0; tk<L; tk+=sb) if(tk%sig.click) click(S.bus,tb+tk*spt,'sub');
   }
@@ -1521,7 +1539,7 @@ $('#restFigs').addEventListener('click',e=>{
   b.setAttribute('aria-pressed',String(set.rests.includes(k)));
   rhythmChanged();
 });
-['sound','loop','metro','accent'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.checked; save(); if(S.running && S.mode!=='metro') stop(); }));
+['sound','loop','metro','accent','countSub'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.checked; save(); if(S.running && S.mode!=='metro') stop(); }));
 $('#cursor').addEventListener('change',e=>{ set.cursor=e.target.checked; save(); if(!set.cursor && S.nowI>=0 && evEls[S.nowI]) evEls[S.nowI].classList.remove('now'); });
 ['timbre','sub','countIn'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.value; save(); if(S.running && S.mode!=='metro') stop(); }));
 $('#tapSound').addEventListener('change',e=>{ set.tapSound=e.target.checked; save(); syncTapVol(); });
