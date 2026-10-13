@@ -159,7 +159,7 @@ Para escribir tus propios ejercicios, guardarlos y compartirlos.
 4. **Notación de texto:** el mismo ejercicio escrito con letras; se puede editar y aplicar.
 5. **Compartir:** archivo .json, texto o enlace.
 
-- **Crear:** *Nuevo ejercicio*, o *Editar* sobre un ritmo de Práctica libre o de la campaña para copiarlo y cambiarlo. Eliges nombre, compás (y agrupación en amalgama); el tempo se guarda con cada ejercicio.
+- **Crear:** si aún no tienes ninguno, la pestaña abre directamente uno nuevo y vacío. Después, *Nuevo ejercicio*, o *Editar* sobre un ritmo de Práctica libre o de la campaña para copiarlo y cambiarlo. Eliges nombre, compás (y agrupación en amalgama); el tempo se guarda con cada ejercicio.
 - **Escribir figuras:** con la paleta (redonda, blanca, negra, corchea, semicorchea y tresillo, más *Puntillo*, *Silencio* y *Ligar*) o con el teclado: <kbd>1</kbd> <kbd>2</kbd> <kbd>4</kbd> <kbd>8</kbd> <kbd>6</kbd> para las figuras, <kbd>T</kbd> tresillo, <kbd>.</kbd> puntillo, <kbd>S</kbd> silencio, <kbd>L</kbd> ligadura, <kbd>Retroceso</kbd> borra, flechas para moverte, <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> deshacer y rehacer. Toca una figura de la partitura para seleccionarla: lo nuevo se añade detrás.
 - **Compases:** si una nota no cabe en el compás, se parte sola con una ligadura (un silencio, en silencios). Para practicar, todos los compases deben estar completos; mientras tanto el ejercicio queda como *borrador*.
 - **Notación de texto:** también puedes escribirlo directamente: `w` redonda, `h` blanca, `q` negra, `e` corchea, `s` semicorchea, `t` tresillo; `.` detrás para el puntillo, `r` delante para el silencio, `~` detrás para ligar con la siguiente y `|` entre compases. Por ejemplo: `q e~ e q q | h. q`.
