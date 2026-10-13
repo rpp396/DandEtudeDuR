@@ -1,7 +1,7 @@
 // Ayudantes comunes de las pruebas de navegador (Playwright + Chromium).
 //
-// - Construye una copia de index.html en un directorio temporal (fuera del repo) con `window.__t`
-//   inyectado antes del último `})();` del script, para dar acceso al estado interno de la app.
+// - Construye una copia de index.html, styles.css y js/ en un directorio temporal (fuera del repo) con `window.__t`
+//   en un script extra (js/test-hook.js) cargado después de los de la app, para dar acceso a su estado interno.
 // - Las fuentes de Google se sirven vacías: las pruebas no dependen de la red.
 // - Cada archivo *.test.js define una suite con `suite(nombre, async ctx => {...})`.
 'use strict';
@@ -23,7 +23,7 @@ function loadPlaywright() {
 }
 const { chromium } = loadPlaywright();
 
-// Estado interno expuesto a las pruebas (se añade al final del script de index.html)
+// Estado interno expuesto a las pruebas (js/test-hook.js, cargado después de inicio.js)
 const HOOK = "window.__t={get own(){return own}, get ownApi(){ return typeof parseNotation==='function' ? {parseNotation,serialize,reflow,importAny,exLink,exText,exJSON,fromLinkCode,ownInsert,ownOpen} : null; }, get fullScore(){return fullScore}, setLevelForTest(i){ levelIdx=i; stageMode='campana'; }, get score(){return score}, generate, figsUsed, restList, get set(){return set}, SIGS, LEVELS, selectLevel, setView, cfg, get levelIdx(){return levelIdx}, get S(){return S}, get ctx(){return ctx}, tapVoices, renderScore, get prog(){return prog}};\n";
 
 let tmpDir = null;
@@ -39,17 +39,24 @@ function tmp() {
 // (Con file:// el localStorage de Chromium pierde datos a veces al recargar la página, y las pruebas serían intermitentes.)
 async function buildTestPage() {
   let s = fs.readFileSync(path.join(REPO, 'index.html'), 'utf8');
-  const i = s.lastIndexOf('})();');
-  if (i < 0) throw new Error('index.html: no se encuentra el cierre «})();» del script');
-  s = s.slice(0, i) + HOOK + s.slice(i);
+  // El HOOK va en un script propio justo después del último de js/ (inicio.js): comparte con ellos el ámbito global
+  const tag = /<script src="js\/[^"]+"><\/script>/g;
+  let last = null, m;
+  while ((m = tag.exec(s))) last = m;
+  if (!last) throw new Error('index.html: no se encuentran los <script src="js/…">');
+  const i = last.index + last[0].length;
+  s = s.slice(0, i) + '\n<script src="js/test-hook.js"></script>' + s.slice(i);
   const d = tmp();
   fs.writeFileSync(path.join(d, 'test.html'), s);
   fs.copyFileSync(path.join(REPO, 'styles.css'), path.join(d, 'styles.css'));
-  const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8' };
+  fs.cpSync(path.join(REPO, 'js'), path.join(d, 'js'), { recursive: true });
+  fs.writeFileSync(path.join(d, 'js', 'test-hook.js'), HOOK);
+  const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8' };
   const server = http.createServer((req, res) => {
     const name = decodeURIComponent(new url.URL(req.url, 'http://x').pathname).replace(/^\/+/, '') || 'test.html';
-    const f = path.join(d, path.basename(name));
-    if (path.basename(name) !== name || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+    const f = path.join(d, name);
+    // solo archivos de la raíz o de js/, sin «..»
+    if (!/^(js\/)?[\w.-]+$/.test(name) || name.includes('..') || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
     res.writeHead(200, { 'content-type': types[path.extname(f)] || 'application/octet-stream', 'cache-control': 'no-store' });
     res.end(fs.readFileSync(f));
   });

@@ -20,7 +20,7 @@ Genera ritmos en partitura según el compás y las figuras que elijas, los repro
 
 ## Uso
 
-Abre `index.html` en el navegador (junto a `styles.css`, en la misma carpeta). No necesita instalación ni compilación. El progreso se guarda en el navegador.
+Abre `index.html` en el navegador. Necesita a su lado, en la misma carpeta, `styles.css` y la carpeta `js/` (el código de la app, en varios archivos); basta con abrirlo directamente (`file://`) o servir la carpeta con cualquier servidor web. No necesita instalación ni compilación. El progreso se guarda en el navegador.
 
 ## Cómo funciona
 
@@ -225,6 +225,6 @@ npx playwright install chromium   # descarga el navegador (una vez)
 npm test                          # equivale a: node tests/run.js
 ```
 
-`node tests/run.js ej dock` ejecuta solo las suites cuyo nombre de archivo contiene «ej» o «dock», y `node tests/ej.test.js` una sola suite. El proceso termina con código distinto de 0 si falla alguna comprobación. Las pruebas copian `index.html` y `styles.css` a una carpeta temporal, sirven esa copia en `127.0.0.1` y no necesitan red (las fuentes de Google se sustituyen por un CSS vacío). En GitHub se ejecutan solas con cada *push* y *pull request* (`.github/workflows/tests.yml`).
+`node tests/run.js ej dock` ejecuta solo las suites cuyo nombre de archivo contiene «ej» o «dock», y `node tests/ej.test.js` una sola suite. El proceso termina con código distinto de 0 si falla alguna comprobación. Las pruebas copian `index.html`, `styles.css` y `js/` a una carpeta temporal, sirven esa copia en `127.0.0.1` y no necesitan red (las fuentes de Google se sustituyen por un CSS vacío). En GitHub se ejecutan solas con cada *push* y *pull request* (`.github/workflows/tests.yml`).
 
 Para el detalle técnico, consulta [`CLAUDE.md`](CLAUDE.md).

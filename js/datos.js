@@ -1,0 +1,136 @@
+// Solfeo Rítmico · Datos musicales (figuras, compases, celdas rítmicas, silencios), ajustes y su guardado, avisos y anuncios para lectores de pantalla.
+// Script clásico (no módulo): comparte el ámbito global con los demás de js/; el orden de carga está en index.html.
+
+const $ = s => document.querySelector(s);
+const KEY = 'solfeo-ritmico-v1';
+
+/* ---------- Datos musicales (1 negra = 12 ticks) ---------- */
+const FIGS = [
+  {k:'w',  name:'Redonda', val:'4'},
+  {k:'h',  name:'Blanca', val:'2'},
+  {k:'hd', name:'Blanca con puntillo', val:'3'},
+  {k:'q',  name:'Negra', val:'1'},
+  {k:'qd', name:'Negra con puntillo', val:'1½'},
+  {k:'e',  name:'Corchea', val:'½'},
+  {k:'ed', name:'Corchea con puntillo', val:'¾'},
+  {k:'s',  name:'Semicorchea', val:'¼'},
+  {k:'t',  name:'Tresillo de corcheas', val:'3 en 1'},
+];
+const SIGS = {
+  '2/4':{groups:[12,12],click:12,kind:'simple'},
+  '3/4':{groups:[12,12,12],click:12,kind:'simple'},
+  '4/4':{groups:[12,12,12,12],click:12,kind:'simple'},
+  '5/4':{groups:[12,12,12,12,12],click:12,kind:'simple'},
+  '2/2':{groups:[12,12,12,12],click:24,kind:'simple'},
+  '3/2':{groups:[12,12,12,12,12,12],click:24,kind:'simple'},
+  '3/8':{groups:[18],click:6,kind:'compound'},
+  '6/8':{groups:[18,18],click:18,kind:'compound'},
+  '9/8':{groups:[18,18,18],click:18,kind:'compound'},
+  '12/8':{groups:[18,18,18,18],click:18,kind:'compound'},
+  '5/8':{groups:[18,12],click:6,kind:'odd'},
+  '7/8':{groups:[12,12,18],click:6,kind:'odd'},
+  '8/8':{groups:[18,18,12],click:6,kind:'odd'},
+};
+const SIG_TITLES = {'2/2':'Compasillo partido (alla breve)','3/2':'Tres tiempos de blanca','5/8':'Amalgama: 3+2 o 2+3','7/8':'Amalgama: 2+2+3, 2+3+2 o 3+2+2','8/8':'Amalgama: 3+3+2, 3+2+3 o 2+3+3'};
+// Agrupaciones posibles de los compases de amalgama (la primera es la de SIGS). 2 = dos corcheas (12 ticks), 3 = tres (18).
+const ODD_GROUPS = {'5/8':['3+2','2+3'], '7/8':['2+2+3','2+3+2','3+2+2'], '8/8':['3+3+2','3+2+3','2+3+3']};
+// Compás efectivo: en amalgama aplica la agrupación elegida (set.grp[sig] en práctica libre, l.grp en campaña)
+function sigOf(C){
+  const base=SIGS[C.sig], opts=ODD_GROUPS[C.sig];
+  if(!opts) return {...base, grp:null};
+  const want = typeof C.grp==='string' ? C.grp : (C.grp||{})[C.sig];
+  const g = opts.includes(want) ? want : opts[0];
+  return {...base, groups:g.split('+').map(n=>n==='2'?12:18), grp:g};
+}
+const SIMPLE_BEAT = [
+  {ev:[[12]]},
+  {ev:[[6],[6]]},
+  {ev:[[3],[3],[3],[3]]},
+  {ev:[[6],[3],[3]]},
+  {ev:[[3],[3],[6]]},
+  {ev:[[3],[6],[3]]},
+  {ev:[[9],[3]]},
+  {ev:[[4],[4],[4]], tuplet:true},
+  {ev:[[12,1]]},
+  {ev:[[6,1],[6]]},
+  {ev:[[6],[6,1]]},
+  {ev:[[3,1],[3],[3],[3]]},
+  {ev:[[3],[3],[3,1],[3]]},
+  {ev:[[6,1],[3],[3]]},
+  {ev:[[3,1],[3],[6]]},
+  {ev:[[6],[3,1],[3]]},
+  {ev:[[3,1],[9]]},
+];
+const SIMPLE_MULTI = [
+  {ev:[[24]]},
+  {ev:[[36]]},
+  {ev:[[48]], wholeBar:true},
+  {ev:[[18],[6]]},
+  {sync:true, ev:[[6],[12],[6]]},
+  {sync:true, ev:[[12],[24],[12]], wholeBar:true},
+  {ev:[[24,1]]},
+  {ev:[[48,1]], wholeBar:true},
+];
+const COMP_BEAT = [
+  {ev:[[18]]},
+  {ev:[[6],[6],[6]]},
+  {ev:[[12],[6]]},
+  {ev:[[6],[12]]},
+  {ev:[[3],[3],[6],[6]]},
+  {ev:[[6],[3],[3],[6]]},
+  {ev:[[6],[6],[3],[3]]},
+  {ev:[[3],[3],[3],[3],[3],[3]]},
+  {ev:[[9],[3],[6]]},
+  {ev:[[18,1]]},
+  {ev:[[6,1],[6],[6]]},
+  {ev:[[6],[6],[6,1]]},
+  {ev:[[12],[6,1]]},
+  {ev:[[12,1],[6]]},
+  {ev:[[3,1],[3],[3],[3],[3],[3]]},
+  {ev:[[3,1],[3],[6],[6]]},
+  {ev:[[6],[3,1],[3],[6]]},
+  {ev:[[6],[6],[3,1],[3]]},
+];
+const COMP_MULTI = [ {ev:[[36]]} ];
+// Figuras que usa cada celda, derivadas de sus eventos: req = notas, rreq = silencios
+const DUR2K = {48:'w',36:'hd',24:'h',18:'qd',12:'q',9:'ed',6:'e',4:'t',3:'s'};
+[SIMPLE_BEAT,SIMPLE_MULTI,COMP_BEAT,COMP_MULTI].flat().forEach(c=>{
+  const keys=r=>[...new Set(c.ev.filter(e=>!!e[1]===r).map(e=>DUR2K[e[0]]))];
+  c.req=keys(false); c.rreq=keys(true); c.rest=c.rreq.length>0;
+});
+// Silencios que se pueden elegir (cada uno por separado, como las figuras)
+const RESTS = [
+  {k:'w', name:'Silencio de redonda', short:'redonda', val:'4'},
+  {k:'h', name:'Silencio de blanca', short:'blanca', val:'2'},
+  {k:'q', name:'Silencio de negra', short:'negra', val:'1'},
+  {k:'qd', name:'Silencio de negra con puntillo', short:'negra con puntillo', val:'1½'},
+  {k:'e', name:'Silencio de corchea', short:'corchea', val:'½'},
+  {k:'s', name:'Silencio de semicorchea', short:'semicorchea', val:'¼'},
+];
+const REST_KEYS = RESTS.map(r=>r.k);
+// Silencios activos: lista (práctica libre y niveles); acepta el booleano antiguo (= silencios de las figuras elegidas)
+function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.figs.filter(k=>REST_KEYS.includes(k)) : []); }
+
+const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:false, cursor:true, loop:false,
+  timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
+  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, countSub:true, sv:3};
+let set = load();
+function load(){
+  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; s.folds = (s.folds && typeof s.folds==='object') ? {...s.folds} : {};if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; s.rests=restList(s).filter(k=>REST_KEYS.includes(k));
+    // sv 2: «Escuchar el ritmo» pasa a aplicarse solo a la práctica (apagado) y «Oír mis toques» viene activado
+    if(o.sync===undefined) s.sync=!!s.ties;
+    if((o.sv|0)<2){ s.sound=false; s.tapSound=true; s.sv=2; }
+    // sv 3: en la cuenta previa de compases compuestos y de amalgama suenan pulso y subdivisión
+    if((o.sv|0)<3){ s.countSub=true; s.sv=3; }
+    return s; } }catch(e){}
+  return freshSettings();
+}
+function freshSettings(){ return {...DEFAULTS, figs:[...DEFAULTS.figs], rests:[...DEFAULTS.rests], grp:{}, folds:{}}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(set)); }catch(e){ appWarn('store'); } }
+// Avisos persistentes arriba de la página (no se puede guardar, no hay audio)
+const WARNS={store:'Este navegador no deja guardar datos (modo privado o almacenamiento lleno): tus ajustes y tu progreso se perderán al cerrar la página.',
+  audio:'Tu navegador no permite reproducir audio, así que no se puede escuchar el ritmo ni practicar. Prueba con otro navegador actualizado.'};
+const warnOn=new Set();
+function appWarn(k){ if(warnOn.has(k)) return; warnOn.add(k); const w=$('#appWarn'); w.textContent=[...warnOn].map(x=>WARNS[x]).join(' '); w.hidden=false; }
+// Anuncio para lectores de pantalla (se vacía antes para que se repita aunque el texto sea el mismo)
+function say(t){ const el=$('#srLive'); el.textContent=''; setTimeout(()=>{ el.textContent=t; },60); }
