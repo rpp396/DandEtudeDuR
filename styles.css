@@ -334,3 +334,35 @@ body.fab-on{padding-bottom:140px}
   .pad.hit,.pad.miss,.fab.hit,.fab.miss,.fab-post{animation:none}
   .light,.btn,.track,.track::after,.fold summary::after{transition:none}
 }
+/* Mis ejercicios */
+.ev.sel{color:var(--accent)}
+.ev.sel .hole{fill:var(--accent-soft)}
+#pad .ev{cursor:inherit}
+.own-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.own-list{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}
+.own-item{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);cursor:pointer;min-height:44px}
+.own-item:hover{border-color:var(--muted)}
+.own-item[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.own-n{font-weight:700;overflow-wrap:anywhere}
+.own-m{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.own-m i{font-style:normal;color:var(--near)}
+.own-import{display:flex;flex-direction:column;gap:8px;border:1px dashed var(--line);border-radius:10px;padding:10px}
+.own-msg{margin:0;font-size:13px;color:var(--good)}
+.own-msg.bad{color:var(--bad)}
+.own-status{margin:0;font-size:13px;color:var(--ink)}
+.pal{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.pal-b{position:relative;display:grid;place-items:center;min-height:52px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);cursor:pointer;padding:4px 2px 10px}
+.pal-b:hover:not(:disabled){border-color:var(--accent)}
+.pal-b:disabled{opacity:.35;cursor:default}
+.pal-b .mini{height:34px;width:auto}
+.pal-b kbd{position:absolute;right:3px;bottom:2px;font-size:9px;padding:0 3px}
+.pal-mods{display:flex;gap:6px;flex-wrap:wrap}
+.pal-mods button{flex:1 1 auto;min-height:40px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.pal-mods button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.pal-mods button[aria-pressed="true"] kbd{background:transparent;color:inherit;border-color:currentColor}
+.field input[type=text],.own-import textarea,#ownText,.own-out{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);width:100%}
+#ownText,.own-out,.own-import textarea{font-family:var(--mono);font-size:13px;resize:vertical}
+.own-out{color:var(--muted)}
+.hint code{font-family:var(--mono);font-size:11px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.evhit{fill:transparent}
+@media (max-width:520px){ .tabs{display:grid;grid-template-columns:1fr 1fr} }

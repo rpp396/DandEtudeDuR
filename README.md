@@ -146,7 +146,18 @@ Al cambiar de nivel, la partitura se centra en la pantalla.
 1. **Siguiente nivel:** aparece, como botón principal, cuando superas el nivel.
 2. **Estrellas** conseguidas y lo que falta para la siguiente.
 
-### 8. Mi progreso
+### 8. Mis ejercicios
+
+Para escribir tus propios ejercicios, guardarlos y compartirlos.
+
+- **Crear:** *Nuevo ejercicio*, o *Editar* sobre un ritmo de Práctica libre o de la campaña para copiarlo y cambiarlo. Eliges nombre, compás (y agrupación en amalgama); el tempo se guarda con cada ejercicio.
+- **Escribir figuras:** con la paleta (redonda, blanca, negra, corchea, semicorchea y tresillo, más *Puntillo*, *Silencio* y *Ligar*) o con el teclado: <kbd>1</kbd> <kbd>2</kbd> <kbd>4</kbd> <kbd>8</kbd> <kbd>6</kbd> para las figuras, <kbd>T</kbd> tresillo, <kbd>.</kbd> puntillo, <kbd>S</kbd> silencio, <kbd>L</kbd> ligadura, <kbd>Retroceso</kbd> borra, flechas para moverte, <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> deshacer y rehacer. Toca una figura de la partitura para seleccionarla: lo nuevo se añade detrás.
+- **Compases:** si una nota no cabe en el compás, se parte sola con una ligadura (un silencio, en silencios). Para practicar, todos los compases deben estar completos; mientras tanto el ejercicio queda como *borrador*.
+- **Notación de texto:** también puedes escribirlo directamente: `w` redonda, `h` blanca, `q` negra, `e` corchea, `s` semicorchea, `t` tresillo; `.` detrás para el puntillo, `r` delante para el silencio, `~` detrás para ligar con la siguiente y `|` entre compases. Por ejemplo: `q e~ e q q | h. q`.
+- **Guardar:** cada cambio se guarda solo en el navegador. Las prácticas aparecen en *Mi progreso* con el nombre del ejercicio (filtro *Propios*) y no dan estrellas.
+- **Compartir:** *Descargar .json* (o *Exportar todos*), *Copiar texto* (nombre, compás y tempo, y la notación) o *Copiar enlace*. *Importar* acepta los tres: un archivo, el texto pegado o el enlace; al abrir un enlace, el ejercicio se añade a tu lista. El enlace lleva el ejercicio dentro y solo usa caracteres que no cortan los navegadores ni WhatsApp; si pasa de 2000 caracteres (unos 40 compases muy densos), la app propone el archivo o el texto.
+
+### 9. Mi progreso
 
 ![Mi progreso: resumen, gráfica de precisión e historial](docs/capturas/5-progreso.png)
 
