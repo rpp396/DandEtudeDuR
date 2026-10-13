@@ -1441,6 +1441,8 @@ function applyStageMode(){
   $('#secSig').hidden=camp||mine; $('#secFigs').hidden=camp||mine; $('#secCamp').hidden=!camp; $('#levelBar').hidden=!camp;
   $('#secOwn').hidden=!mine; if(!mine) $('#secEdit').hidden=true;
   $('#bNew').hidden=mine; $('#bEditThis').hidden=mine; $('#rNew').hidden=mine;
+  // sin ningún ejercicio guardado se abre directamente uno nuevo (salvo si se llega con un enlace #ej=, que ya lo trae)
+  if(mine && !own.list.length && !ownLinking) ownNewEx();
   if(mine){ renderOwnList(); renderOwnMeter(); renderPalette(); }
   if(!S.running) padIdle();
   $('#bNewLbl').textContent=camp?'Otro ritmo del nivel':'Nuevo ritmo';
@@ -1737,8 +1739,12 @@ function ownImport(text){
   ownMsg(xs.length===1 ? `Importado «${xs[0].name}».` : `Importados ${xs.length} ejercicios.`);
   return true;
 }
+let ownLinking=false;
 function ownFromHash(){
   const m=/^#ej=([A-Za-z0-9_-]+)$/.exec(location.hash); if(!m) return false;
+  ownLinking=true; try{ return ownLinkIn(m); } finally{ ownLinking=false; }
+}
+function ownLinkIn(m){
   try{ history.replaceState(null,'',location.href.split('#')[0]); }catch(e){}
   try{
     const x=fromLinkCode(m[1]);
@@ -1749,6 +1755,7 @@ function ownFromHash(){
   }catch(e){
     if(!(e instanceof OwnError)) throw e;
     setView('propio'); ownMsg('El enlace del ejercicio no es válido: '+e.message, true);
+    if(!own.list.length) ownNewEx();
   }
   return true;
 }
@@ -2187,11 +2194,14 @@ $('#ownTextApply').addEventListener('click',()=>{
   own.undo.push(ownSnap()); own.redo=[]; own.toks=t; own.cursor=t.length; ownMsg('Notación aplicada.'); ownCommit();
 });
 $('#ownList').addEventListener('click',e=>{ const b=e.target.closest('.own-item'); if(!b) return; const x=own.list.find(y=>y.id===b.dataset.id); if(x){ ownMsg(''); ownOpen(x); } });
-$('#ownNew').addEventListener('click',()=>{
+// Crea un ejercicio vacío (con el compás y el tempo del abierto o de Práctica libre) y lo abre
+function ownNewEx(){
   let n=own.list.length+1; while(own.list.some(y=>y.name===`Ejercicio ${n}`)) n++;
   const base=own.cur||{sig:set.sig, grp:sigOf(set).grp, bpm:set.bpm};
   ownAdd(cleanEx({name:`Ejercicio ${n}`, sig:base.sig, grp:base.grp, bpm:base.bpm, notation:''}));
-  ownMsg('');
+}
+$('#ownNew').addEventListener('click',()=>{
+  ownNewEx(); ownMsg('');
   // en pantallas táctiles no se enfoca el nombre (abriría el teclado y quitaría la paleta fija): se lleva la vista a la partitura
   if(touchMQ.matches) $('.score-card').scrollIntoView({block:'start', behavior:'smooth'});
   else { $('#ownName').focus(); $('#ownName').select(); }
@@ -2217,7 +2227,7 @@ $('#ownDelBox').addEventListener('click',e=>{
   const id=e.target.closest('button')?.id, x=own.cur; if(!x) return;
   if(id==='ownDup'){ const c=cleanEx({...x, id:'', name:x.name+' (copia)', created:0, updated:0}); ownAdd(c); ownMsg(`Creada la copia «${c.name}».`); }
   else if(id==='ownDel'){ $('#ownDelBox').innerHTML=`<span>¿Borrar «${esc(x.name)}»? Tus prácticas guardadas se conservan.</span><button class="btn warn" id="ownDelYes" type="button">Sí, borrar</button><button class="btn" id="ownDelNo" type="button">Cancelar</button>`; $('#ownDelNo').focus(); }
-  else if(id==='ownDelYes'){ own.list=own.list.filter(y=>y!==x); saveOwn(); renderOwnDelBox(); ownOpen(own.list[0]||null); ownMsg(`Borrado «${x.name}».`); say(`Borrado ${x.name}`); }
+  else if(id==='ownDelYes'){ own.list=own.list.filter(y=>y!==x); saveOwn(); renderOwnDelBox(); if(own.list.length) ownOpen(own.list[0]); else ownNewEx(); ownMsg(`Borrado «${x.name}».`); say(`Borrado ${x.name}`); }
   else if(id==='ownDelNo'){ renderOwnDelBox(); $('#ownDel').focus(); }
 });
 $('#bEditThis').addEventListener('click',editThis);
