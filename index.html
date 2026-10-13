@@ -40,6 +40,7 @@
           <li>Pulsa <b>Practicar</b> <span class="kb">(<kbd>P</kbd>)</span> o toca la partitura. Tras la cuenta previa, toca en cada nota: con el dedo, el ratón o la barra espaciadora.</li>
           <li>Al terminar verás tu precisión y, bajo cada nota, si llegaste antes o tarde.</li>
         </ol>
+        <p class="hint">En las pestañas de arriba tienes además la <b>Campaña</b> (niveles que se desbloquean con estrellas), <b>Mis ejercicios</b> (escribe tus propios ritmos figura a figura, guárdalos y compártelos con un enlace) y <b>Mi progreso</b> (tu historial de prácticas).</p>
         <p class="hint">Si usas auriculares Bluetooth o notas que siempre te marca «tarde», mide antes la latencia de tu equipo: tarda medio minuto.</p>
         <div class="res-actions">
           <button class="btn primary" id="welCalib" type="button">Medir latencia ahora</button>
@@ -177,19 +178,27 @@
           <div class="field"><label for="ownSig">Compás</label><select id="ownSig"></select></div>
           <div class="field" id="ownGrpF"><label for="ownGrp">Agrupación</label><select id="ownGrp"></select></div>
         </div>
-        <span class="rlabel">Figuras (se añaden tras la resaltada)</span>
-        <div class="pal" id="ownPal" role="group" aria-label="Añadir figura"></div>
-        <div class="pal-mods" id="ownMods" role="group" aria-label="Modificadores para la siguiente figura">
-          <button type="button" data-mod="dot" aria-pressed="false">Puntillo <kbd>.</kbd></button>
-          <button type="button" data-mod="rest" aria-pressed="false">Silencio <kbd>S</kbd></button>
-          <button type="button" data-mod="tie" aria-pressed="false">Ligar <kbd>L</kbd></button>
+        <span class="rlabel pal-lbl">Figuras (se añaden tras la resaltada)</span>
+        <!-- en pantallas estrechas, mientras se edita, este bloque queda fijo abajo (body.dock-on) -->
+        <div class="own-dock" id="ownDock" role="group" aria-label="Paleta de figuras">
+          <div class="pal" id="ownPal" role="group" aria-label="Añadir figura"></div>
+          <div class="dock-row">
+            <div class="pal-mods" id="ownMods" role="group" aria-label="Modificadores para la siguiente figura">
+              <button type="button" data-mod="dot" aria-pressed="false">Puntillo <kbd>.</kbd></button>
+              <button type="button" data-mod="rest" aria-pressed="false">Silencio <kbd>S</kbd></button>
+              <button type="button" data-mod="tie" aria-pressed="false">Ligar <kbd>L</kbd></button>
+            </div>
+            <div class="own-row own-edit">
+              <button class="btn" id="ownUndo" type="button" title="Deshacer (Ctrl+Z)" aria-label="Deshacer"><svg viewBox="0 0 16 16"><path d="M5.5 3L2.5 6l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6h6.5a4 4 0 0 1 0 8H7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Deshacer</span></button>
+              <button class="btn" id="ownRedo" type="button" title="Rehacer (Ctrl+Y)" aria-label="Rehacer"><svg viewBox="0 0 16 16"><path d="M10.5 3l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 6H6.5a4 4 0 0 0 0 8H9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Rehacer</span></button>
+              <button class="btn" id="ownDelTok" type="button" title="Borrar la figura resaltada (Retroceso)" aria-label="Borrar figura"><svg viewBox="0 0 16 16"><path d="M6 3h8v10H6L2 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6l4 4M12 6l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Borrar figura</span></button>
+            </div>
+          </div>
+          <div class="dock-top">
+            <p class="own-status" id="ownStatus" aria-live="polite"></p>
+            <button class="btn primary" id="ownPractice" type="button"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>Practicar</button>
+          </div>
         </div>
-        <div class="own-row">
-          <button class="btn" id="ownUndo" type="button" title="Ctrl+Z">Deshacer</button>
-          <button class="btn" id="ownRedo" type="button" title="Ctrl+Y">Rehacer</button>
-          <button class="btn" id="ownDelTok" type="button" title="Retroceso">Borrar figura</button>
-        </div>
-        <p class="own-status" id="ownStatus" aria-live="polite"></p>
         <div class="field"><label for="ownText">Notación</label><textarea id="ownText" rows="3" spellcheck="false"></textarea></div>
         <div class="own-row"><button class="btn" id="ownTextApply" type="button">Aplicar texto</button></div>
         <p class="hint">w redonda · h blanca · q negra · e corchea · s semicorchea · t tresillo · «.» detrás = puntillo · «r» delante = silencio · «~» detrás = ligada a la siguiente · «|» separa compases. Ejemplo: <code>q e~ e q q | h. q</code></p>
@@ -1191,10 +1200,20 @@ const fabWanted = () => !!set.fab && touchMQ.matches;
 // En reposo el botón dice «Practicar» (solo si la partitura está a la vista); durante la práctica o la medición, «Toca aquí»
 // Con los resultados a la vista pasa a ser el botón de tres partes (#postFab)
 let padInView=false, postSince=0;
+// Paleta de «Mis ejercicios» fija abajo en pantallas estrechas (panel bajo la partitura) con un ejercicio abierto.
+// Se oculta (sin volver a su sitio en el panel, para que la página no salte) al practicar o reproducir, con resultados
+// o la medición a la vista y mientras se escribe en un campo, para no quedar encima del teclado
+const narrowMQ = matchMedia('(max-width: 920px)');
+let fieldFocus=false;
+const dockWanted = () => narrowMQ.matches && stageMode==='propio' && !!own.cur && !$('#stageView').hidden;
+const dockShown = () => dockWanted() && !S.running && !fieldFocus && $('#results').hidden && $('#calib').hidden;
 function updateFab(){
   const f=$('#tapFab'), fm=$('#fabMain'), pf=$('#postFab'), live=S.running && (S.mode==='practice'||S.mode==='calib');
   const post=fabWanted() && !S.running && !$('#results').hidden && !$('#stageView').hidden;
-  const on=fabWanted() && !post && (live || (!S.running && padInView));
+  const dock=dockShown();
+  document.body.classList.toggle('dock-on',dockWanted()); document.body.classList.toggle('dock-away',!dock);
+  if(dock) document.body.style.setProperty('--dockH',$('#ownDock').offsetHeight+'px');
+  const on=fabWanted() && !post && (live || (!S.running && padInView && !dock));
   if(post){ if(pf.hidden){ pf.hidden=false; postSince=performance.now(); } syncPostFab(); } else pf.hidden=true;
   f.hidden=!on; document.body.classList.toggle('fab-on',on||post); f.classList.toggle('idle',on && !live);
   f.classList.toggle('split',on && live); $('#fabRestart').hidden=!(on && live);
@@ -1215,7 +1234,10 @@ function syncPostFab(){
 function closeResults(){ $('#results').hidden=true; judg=[]; extras=0; extraTks=[]; renderScore(); updateFab(); }
 new IntersectionObserver(es=>{ padInView=es[es.length-1].isIntersecting; updateFab(); }).observe($('#pad'));
 // Alto de la parte inferior de la pantalla que tapa el botón flotante (para el seguimiento de la partitura)
-function fabReserve(){ const f=[$('#tapFab'),$('#postFab')].find(x=>!x.hidden); return f ? innerHeight-f.getBoundingClientRect().top+12 : 8; }
+function fabReserve(){
+  const f=[$('#tapFab'),$('#postFab')].find(x=>!x.hidden) || (dockShown() && $('#ownDock'));
+  return f ? innerHeight-f.getBoundingClientRect().top+12 : 8;
+}
 function showPad(){
   updateFab();
   const p=$('#pad'), r=p.getBoundingClientRect();
@@ -1647,10 +1669,12 @@ function renderOwnStatus(){
   else t=`${bars} ${bars===1?'compás completo':'compases completos'}: listo para practicar.`;
   if(own.toks.length) t += own.cursor===0 ? ' Lo nuevo se añade al principio.' : own.cursor<own.toks.length ? ' Lo nuevo se añade tras la figura resaltada.' : '';
   st.textContent=t;
+  $('#ownPractice').disabled=!own.complete;
+  updateFab();   // el alto de la paleta fija puede cambiar con el texto
 }
 function renderOwnEditor(){
   $('#secEdit').hidden=!own.cur;
-  if(!own.cur) return;
+  if(!own.cur){ updateFab(); return; }
   renderOwnStatus();
   if(document.activeElement!==$('#ownText')) $('#ownText').value=own.cur.notation;
   $('#ownUndo').disabled=!own.undo.length; $('#ownRedo').disabled=!own.redo.length; $('#ownDelTok').disabled=own.cursor<1;
@@ -2126,11 +2150,25 @@ function ownKeys(e){
   return false;
 }
 $('#ownSig').innerHTML=Object.keys(SIGS).map(k=>`<option value="${k}">${k}</option>`).join('');
-$('#ownPal').addEventListener('click',e=>{ const b=e.target.closest('.pal-b'); if(b && !b.disabled) ownInsert(b.dataset.k); });
+// Con la paleta fija abajo, la figura resaltada debe quedar a la vista por encima de ella
+function ownReveal(){
+  if(!dockShown()) return;
+  const el=document.querySelector('#score .ev.sel') || [...document.querySelectorAll('#score .ev')].pop(); if(!el) return;
+  const r=el.getBoundingClientRect(), room=innerHeight-fabReserve();
+  if(r.bottom+40>room) scrollTo({top:scrollY+r.bottom+40-room, behavior:'smooth'});
+  else if(r.top<40) scrollTo({top:scrollY+r.top-40, behavior:'smooth'});
+}
+$('#ownPal').addEventListener('click',e=>{ const b=e.target.closest('.pal-b'); if(b && !b.disabled){ ownInsert(b.dataset.k); ownReveal(); } });
 $('#ownMods').addEventListener('click',e=>{ const b=e.target.closest('button[data-mod]'); if(!b) return; own.mods[b.dataset.mod]=!own.mods[b.dataset.mod]; renderPalette(); });
-$('#ownUndo').addEventListener('click',()=>ownUndoRedo(own.undo,own.redo));
-$('#ownRedo').addEventListener('click',()=>ownUndoRedo(own.redo,own.undo));
-$('#ownDelTok').addEventListener('click',ownDelete);
+$('#ownUndo').addEventListener('click',()=>{ ownUndoRedo(own.undo,own.redo); ownReveal(); });
+$('#ownRedo').addEventListener('click',()=>{ ownUndoRedo(own.redo,own.undo); ownReveal(); });
+$('#ownDelTok').addEventListener('click',()=>{ ownDelete(); ownReveal(); });
+$('#ownPractice').addEventListener('click',()=>start('practice'));
+// Mientras se escribe en un campo (nombre, notación…) la paleta fija se quita, para no tapar ni quedar sobre el teclado
+const isTyping = el => !!el && el.matches && el.matches('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea,select');
+document.addEventListener('focusin',e=>{ const f=isTyping(e.target); if(f!==fieldFocus){ fieldFocus=f; updateFab(); } });
+document.addEventListener('focusout',()=>{ setTimeout(()=>{ const f=isTyping(document.activeElement); if(f!==fieldFocus){ fieldFocus=f; updateFab(); } }); });
+narrowMQ.addEventListener('change',updateFab);
 $('#ownName').addEventListener('input',e=>{ if(!own.cur) return; own.cur.name=cleanName(e.target.value); saveOwn(); renderOwnList(); renderSummary(); });
 $('#ownName').addEventListener('change',e=>{ if(own.cur){ uniqueName(own.cur); e.target.value=own.cur.name; saveOwn(); renderOwnList(); renderSummary(); } });
 function ownChangeMeter(sig, grp){
@@ -2153,7 +2191,10 @@ $('#ownNew').addEventListener('click',()=>{
   let n=own.list.length+1; while(own.list.some(y=>y.name===`Ejercicio ${n}`)) n++;
   const base=own.cur||{sig:set.sig, grp:sigOf(set).grp, bpm:set.bpm};
   ownAdd(cleanEx({name:`Ejercicio ${n}`, sig:base.sig, grp:base.grp, bpm:base.bpm, notation:''}));
-  ownMsg(''); $('#ownName').focus(); $('#ownName').select();
+  ownMsg('');
+  // en pantallas táctiles no se enfoca el nombre (abriría el teclado y quitaría la paleta fija): se lleva la vista a la partitura
+  if(touchMQ.matches) $('.score-card').scrollIntoView({block:'start', behavior:'smooth'});
+  else { $('#ownName').focus(); $('#ownName').select(); }
 });
 $('#ownImpBtn').addEventListener('click',()=>{ const b=$('#ownImport'); b.hidden=!b.hidden; $('#ownImpBtn').setAttribute('aria-expanded',String(!b.hidden)); if(!b.hidden) $('#ownImpText').focus(); });
 $('#ownImpCancel').addEventListener('click',()=>{ $('#ownImport').hidden=true; $('#ownImpBtn').setAttribute('aria-expanded','false'); $('#ownImpText').value=''; $('#ownImpFile').value=''; });

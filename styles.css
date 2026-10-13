@@ -365,4 +365,27 @@ body.fab-on{padding-bottom:140px}
 .own-out{color:var(--muted)}
 .hint code{font-family:var(--mono);font-size:11px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:0 4px}
 .evhit{fill:transparent}
+.own-dock{display:flex;flex-direction:column;gap:10px}
+.dock-row{display:flex;flex-direction:column;gap:10px}
+.dock-top{display:flex;align-items:center;gap:10px}
+#ownPractice{display:none;flex:none}
+body.dock-on #ownPractice{display:inline-flex;min-height:40px}
+body.dock-on .dock-top{order:-1}
+/* paleta fija abajo en pantallas estrechas mientras se edita (la pone updateFab con body.dock-on) */
+body.dock-on{padding-bottom:calc(var(--dockH,200px) + 24px)}
+body.dock-on .pal-lbl{display:none}
+body.dock-on .own-dock{position:fixed;z-index:50;left:50%;transform:translateX(-50%);bottom:0;width:min(560px,100vw);gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--panel);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(20,24,33,.18);animation:dockin .2s ease-out}
+body.dock-on .own-dock .own-status{flex:1 1 auto;font-size:12px;line-height:1.3;color:var(--muted)}
+body.dock-on .dock-row{flex-direction:row;gap:6px}
+body.dock-on .pal-mods{flex:1 1 auto;flex-wrap:nowrap;gap:4px}
+body.dock-on .pal-mods button{min-height:44px;padding:0 4px;font-size:12px}
+body.dock-on .own-edit{flex-wrap:nowrap;gap:4px}
+body.dock-on .own-edit .btn{min-width:44px;min-height:44px;padding:0;justify-content:center}
+body.dock-on .own-edit .btn span{display:none}
+body.dock-on .own-edit .btn svg{margin:0;width:19px;height:19px}
+body.dock-on .pal-b{min-height:48px}
+body.dock-on .own-dock kbd{display:none}
+body.dock-on.dock-away .own-dock{visibility:hidden;transform:translateX(-50%) translateY(110%);animation:none}
+@keyframes dockin{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%)}}
+@media (prefers-reduced-motion: reduce){ body.dock-on .own-dock{animation:none} }
 @media (max-width:520px){ .tabs{display:grid;grid-template-columns:1fr 1fr} }

@@ -14,6 +14,7 @@ Genera ritmos en partitura según el compás y las figuras que elijas, los repro
 - **Resultados sobre la partitura:** cada nota muestra tu desvío, las notas sin tocar se marcan con una ✕ y los golpes de más con un triángulo en el lugar donde tocaste.
 - **Medición de latencia:** calcula la corrección para tu equipo, por ejemplo con auriculares Bluetooth.
 - **Campaña:** 29 niveles en 6 capítulos, del pulso en negras a las síncopas, las ligaduras y los compases de amalgama, con estrellas y desbloqueo progresivo.
+- **Mis ejercicios:** escribe tus propios ritmos figura a figura (o con una notación de texto), guárdalos y compártelos como archivo, texto o enlace.
 - **Mi progreso:** historial de prácticas, gráfica de precisión y comparación con las prácticas anteriores.
 - **Pensada también para el móvil:** la página sigue a la partitura mientras suena y, en pantallas táctiles, hay un botón flotante para tocar sin miedo a equivocarte de sitio.
 
@@ -25,7 +26,7 @@ Abre `index.html` en el navegador (junto a `styles.css`, en la misma carpeta). N
 
 ### 1. La pantalla principal
 
-La primera vez, una tarjeta explica cómo se practica:
+La primera vez, una tarjeta explica cómo se practica y presenta las demás pestañas (*Campaña*, *Mis ejercicios* y *Mi progreso*):
 
 ![Tarjeta de bienvenida de la primera vez](docs/capturas/bienvenida.png)
 
@@ -36,7 +37,7 @@ Después, la pantalla principal queda así:
 
 ![Pantalla principal con las partes numeradas](docs/capturas/1-pantalla-principal.png)
 
-1. **Modo:** *Práctica libre* (tú eliges todo), *Campaña* (niveles guiados) o *Mi progreso*.
+1. **Modo:** *Práctica libre* (tú eliges todo), *Campaña* (niveles guiados), *Mis ejercicios* (ritmos que escribes tú) o *Mi progreso*.
 2. **Compás y opciones del ritmo:** en el panel de la derecha (debajo, en el móvil). Se explican en el apartado siguiente.
 3. **Tempo:** con − / +, escribiendo el número o marcándolo con toques.
 4. **Reproducir:** hace sonar el ritmo con el metrónomo para que lo oigas antes de practicarlo. *Nuevo ritmo* (o la tecla <kbd>N</kbd>) genera otro.
@@ -150,10 +151,22 @@ Al cambiar de nivel, la partitura se centra en la pantalla.
 
 Para escribir tus propios ejercicios, guardarlos y compartirlos.
 
+![Mis ejercicios: lista, paleta de figuras, figura seleccionada, notación de texto y botones para compartir](docs/capturas/mis-ejercicios.png)
+
+1. **Tus ejercicios:** la lista, con su compás, compases, tempo y tu mejor resultado (o *borrador* si falta completarlo).
+2. **Paleta:** figuras, *Puntillo*, *Silencio* y *Ligar*, deshacer, rehacer y borrar.
+3. **Figura seleccionada:** tócala en la partitura; lo nuevo se añade detrás.
+4. **Notación de texto:** el mismo ejercicio escrito con letras; se puede editar y aplicar.
+5. **Compartir:** archivo .json, texto o enlace.
+
 - **Crear:** *Nuevo ejercicio*, o *Editar* sobre un ritmo de Práctica libre o de la campaña para copiarlo y cambiarlo. Eliges nombre, compás (y agrupación en amalgama); el tempo se guarda con cada ejercicio.
 - **Escribir figuras:** con la paleta (redonda, blanca, negra, corchea, semicorchea y tresillo, más *Puntillo*, *Silencio* y *Ligar*) o con el teclado: <kbd>1</kbd> <kbd>2</kbd> <kbd>4</kbd> <kbd>8</kbd> <kbd>6</kbd> para las figuras, <kbd>T</kbd> tresillo, <kbd>.</kbd> puntillo, <kbd>S</kbd> silencio, <kbd>L</kbd> ligadura, <kbd>Retroceso</kbd> borra, flechas para moverte, <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> deshacer y rehacer. Toca una figura de la partitura para seleccionarla: lo nuevo se añade detrás.
 - **Compases:** si una nota no cabe en el compás, se parte sola con una ligadura (un silencio, en silencios). Para practicar, todos los compases deben estar completos; mientras tanto el ejercicio queda como *borrador*.
 - **Notación de texto:** también puedes escribirlo directamente: `w` redonda, `h` blanca, `q` negra, `e` corchea, `s` semicorchea, `t` tresillo; `.` detrás para el puntillo, `r` delante para el silencio, `~` detrás para ligar con la siguiente y `|` entre compases. Por ejemplo: `q e~ e q q | h. q`.
+- **En el móvil:** mientras editas, la paleta queda fija abajo de la pantalla, con el estado del compás y un botón *Practicar*, para escribir sin desplazarte hasta el panel. Se aparta al escribir en un campo (nombre, notación), al practicar y con los resultados a la vista.
+
+  <img src="docs/capturas/movil-ejercicios.png" alt="Móvil editando un ejercicio con la paleta fija abajo" width="260">
+
 - **Guardar:** cada cambio se guarda solo en el navegador. Las prácticas aparecen en *Mi progreso* con el nombre del ejercicio (filtro *Propios*) y no dan estrellas.
 - **Compartir:** *Descargar .json* (o *Exportar todos*), *Copiar texto* (nombre, compás y tempo, y la notación) o *Copiar enlace*. *Importar* acepta los tres: un archivo, el texto pegado o el enlace; al abrir un enlace, el ejercicio se añade a tu lista. El enlace lleva el ejercicio dentro y solo usa caracteres que no cortan los navegadores ni WhatsApp; si pasa de 2000 caracteres (unos 40 compases muy densos), la app propone el archivo o el texto.
 
@@ -182,6 +195,8 @@ En pantallas pequeñas el panel de opciones pasa debajo de la partitura. En móv
 
 Si prefieres tocar sobre la partitura, desactívalo en *Práctica → Botón flotante para tocar*.
 
+En *Mis ejercicios*, mientras editas, en lugar del botón *Practicar* aparece abajo la paleta de figuras (ver el apartado 8).
+
 ### Teclado
 
 - <kbd>P</kbd>: practicar (también <kbd>Espacio</kbd> o <kbd>Enter</kbd> con la partitura enfocada).
@@ -195,7 +210,7 @@ La app anuncia a los lectores de pantalla el inicio de la práctica, el resultad
 
 ### Otros detalles
 
-- **Primera vez:** una tarjeta explica cómo se practica y ofrece medir la latencia. Desaparece al pulsar *Entendido* o al terminar la primera práctica.
+- **Primera vez:** una tarjeta explica cómo se practica, presenta las demás pestañas y ofrece medir la latencia. Desaparece al pulsar *Entendido* o al terminar la primera práctica.
 - **Opciones plegables:** *Reproducción*, *Metrónomo* y *Práctica* se pliegan (en el móvil empiezan plegadas) y la app recuerda cómo las dejaste. Al final del panel, *Restablecer ajustes* vuelve a las opciones iniciales sin tocar tu progreso ni la corrección de latencia.
 - **Avisos:** si el navegador no deja guardar datos (modo privado, almacenamiento lleno) o no puede reproducir audio, aparece un aviso arriba.
 - **En pantallas táctiles** los botones redondos miden 44 px y, si el dispositivo lo permite, cada toque vibra (*Práctica → Vibrar al tocar*).
