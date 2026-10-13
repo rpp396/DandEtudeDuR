@@ -15,6 +15,8 @@ const FIGS = [
   {k:'ed', name:'Corchea con puntillo', val:'¾'},
   {k:'s',  name:'Semicorchea', val:'¼'},
   {k:'t',  name:'Tresillo de corcheas', val:'3 en 1'},
+  {k:'lb', name:'Ritmo lombardo', val:'¼ + ¾'},
+  {k:'du', name:'Dosillo de corcheas', val:'2 en 1½'},
 ];
 const SIGS = {
   '2/4':{groups:[12,12],click:12,kind:'simple'},
@@ -60,6 +62,7 @@ const SIMPLE_BEAT = [
   {ev:[[3,1],[3],[6]]},
   {ev:[[6],[3,1],[3]]},
   {ev:[[3,1],[9]]},
+  {ev:[[3],[9]], fig:'lb'},   // ritmo lombardo (semicorchea y corchea con puntillo): solo si se elige «lb»
 ];
 const SIMPLE_MULTI = [
   {ev:[[24]]},
@@ -69,7 +72,6 @@ const SIMPLE_MULTI = [
   {sync:true, ev:[[6],[12],[6]]},
   {sync:true, ev:[[12],[24],[12]], wholeBar:true},
   {ev:[[24,1]]},
-  {ev:[[48,1]], wholeBar:true},
 ];
 const COMP_BEAT = [
   {ev:[[18]]},
@@ -90,17 +92,24 @@ const COMP_BEAT = [
   {ev:[[3,1],[3],[6],[6]]},
   {ev:[[6],[3,1],[3],[6]]},
   {ev:[[6],[6],[3,1],[3]]},
+  {ev:[[12],[3],[3]]},
+  {ev:[[3],[3],[12]]},
+  {ev:[[6],[6,1],[6]]},
+  {ev:[[9],[9]], duplet:true, fig:'du'},   // dosillo: dos corcheas en el pulso de negra con puntillo (solo compuestos)
 ];
 const COMP_MULTI = [ {ev:[[36]]} ];
-// Figuras que usa cada celda, derivadas de sus eventos: req = notas, rreq = silencios
+// Figuras que usa cada celda, derivadas de sus eventos: req = notas, rreq = silencios.
+// Una celda con «fig» (lombardo, dosillo) pide esa figura de FIGS en lugar de las de sus notas.
 const DUR2K = {48:'w',36:'hd',24:'h',18:'qd',12:'q',9:'ed',6:'e',4:'t',3:'s'};
 [SIMPLE_BEAT,SIMPLE_MULTI,COMP_BEAT,COMP_MULTI].flat().forEach(c=>{
   const keys=r=>[...new Set(c.ev.filter(e=>!!e[1]===r).map(e=>DUR2K[e[0]]))];
-  c.req=keys(false); c.rreq=keys(true); c.rest=c.rreq.length>0;
+  c.req=c.fig?[c.fig]:keys(false); c.rreq=keys(true); c.rest=c.rreq.length>0;
 });
+// Silencio de compás entero: el de redonda, en cualquier compás (dura lo que el compás; evento con mr:true)
+const BAR_REST = {ev:[], req:[], rreq:['w'], rest:true, mr:true};
 // Silencios que se pueden elegir (cada uno por separado, como las figuras)
 const RESTS = [
-  {k:'w', name:'Silencio de redonda', short:'redonda', val:'4'},
+  {k:'w', name:'Silencio de redonda', short:'redonda', val:'compás'},   // compás entero, en cualquier compás
   {k:'h', name:'Silencio de blanca', short:'blanca', val:'2'},
   {k:'q', name:'Silencio de negra', short:'negra', val:'1'},
   {k:'qd', name:'Silencio de negra con puntillo', short:'negra con puntillo', val:'1½'},

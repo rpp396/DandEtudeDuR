@@ -31,8 +31,13 @@ function renderSummary(){
     else if(!x){ n.textContent='Crea un ejercicio con «Nuevo ejercicio», impórtalo o elige uno de la lista.'; n.hidden=false; }
     else if(!own.complete){ n.textContent = own.toks.length ? `El último compás está a medias (${remVerb(own.rem,score.sig)} ${fmtTicks(own.rem,score.sig)}): complétalo para poder practicar.` : 'El ejercicio está vacío: añade figuras con la paleta del panel.'; n.hidden=false; }
     else n.hidden=true;
+    // figuras que ocultan el pulso: aviso (no impide nada) y botón para reescribirlas con ligaduras
+    const nb=x && !score.part ? own.issues.length : 0;
+    $('#pulseWarn').hidden=!nb;
+    if(nb) $('#pulseWarnTxt').textContent=`${nb===1?'Una figura oculta':nb+' figuras ocultan'} el pulso o la mitad del compás (en otro color). Puedes dejar${nb===1?'la':'las'} así o escribir${nb===1?'la':'las'} con ligaduras.`;
     return;
   }
+  $('#pulseWarn').hidden=true;
   const C=cfg();
   const names=FIGS.filter(f=>C.figs.includes(f.k)).map(f=>f.name.toLowerCase());
   const rn=RESTS.filter(r=>restList(C).includes(r.k)).map(r=>r.short);
@@ -41,22 +46,25 @@ function renderSummary(){
   $('#summary').innerHTML=`<b>${C.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${C.bars} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${rtxt}${C.sync?' · con síncopas':''}${C.ties?' · con ligaduras':''}`;
   const n=$('#notice');
   const sig=SIGS[C.sig];
-  const warnT = C.figs.includes('t') && sig.kind!=='simple';
-  // silencios elegidos que ninguna celda posible de este compás puede usar
-  const L=sum(sig.groups), cells = sig.kind==='simple' ? [...SIMPLE_BEAT,...SIMPLE_MULTI] : sig.kind==='compound' ? [...COMP_BEAT,...COMP_MULTI] : [...SIMPLE_BEAT.filter(c=>!c.tuplet),...COMP_BEAT];
-  const fits = (r,withFigs) => cells.some(c=>c.rreq.includes(r.k) && (!c.wholeBar || L===48) && (!withFigs || allowed(c)));
+  const warnT = C.figs.includes('t') && sig.kind!=='simple', warnD = C.figs.includes('du') && sig.kind!=='compound';
+  // silencios elegidos que ninguna celda posible de este compás puede usar (el de redonda es el de compás entero: vale en todos)
+  const L=sum(sig.groups), cells = sig.kind==='simple' ? [...SIMPLE_BEAT,...SIMPLE_MULTI] : sig.kind==='compound' ? [...COMP_BEAT,...COMP_MULTI] : [...SIMPLE_BEAT.filter(c=>!c.tuplet),...COMP_BEAT.filter(c=>!c.duplet)];
+  const fits = (r,withFigs) => r.k==='w' || cells.some(c=>c.rreq.includes(r.k) && (!c.wholeBar || L===48) && (!withFigs || allowed(c)));
   const chosen = RESTS.filter(r=>restList(C).includes(r.k));
   const noFit = chosen.filter(r=>!fits(r,false)), needFigs = chosen.filter(r=>fits(r,false) && !fits(r,true));
   const lst = a => a.map(r=>r.name.toLowerCase()).join(' ni el ');
+  // en simple, el silencio de negra con puntillo se escribe como silencio de negra y de corchea
+  const nfTxt = noFit.length===1 && noFit[0].k==='qd' && sig.kind==='simple' ? `En ${C.sig} no se usa el silencio de negra con puntillo: en los compases simples se escribe como silencio de negra y silencio de corchea.` : `En ${C.sig} no se usa el ${lst(noFit)}.`;
   $('#bFull').hidden=!fullScore;
   if(score.part){ n.textContent=`Practicando solo el compás ${score.part} del ritmo. Pulsa «Ritmo completo» para volver al ritmo entero.`; n.hidden=false; }
   else if(score.fb){ n.textContent='Algunas partes se completaron con silencios porque las figuras elegidas no encajan en este compás. Prueba a añadir negras o corcheas.'; n.hidden=false; }
   else if(noFit.length || needFigs.length){
-    n.textContent = [noFit.length ? `En ${C.sig} no cabe el ${lst(noFit)}.` : '',
+    n.textContent = [noFit.length ? nfTxt : '',
       needFigs.length ? `Con las figuras elegidas no puede salir el ${lst(needFigs)}: necesita figuras más cortas a su lado (por ejemplo, semicorcheas para el silencio de semicorchea).` : ''].filter(Boolean).join(' ');
     n.hidden=false;
   }
-  else if(warnT){ n.textContent='Los tresillos solo se usan en compases de subdivisión binaria (2/4, 3/4, 4/4, 5/4, 2/2).'; n.hidden=false; }
+  else if(warnT){ n.textContent='Los tresillos solo se usan en compases de subdivisión binaria (2/4, 3/4, 4/4, 5/4, 2/2 y 3/2).'; n.hidden=false; }
+  else if(warnD){ n.textContent='El dosillo solo se usa en compases compuestos (3/8, 6/8, 9/8 y 12/8).'; n.hidden=false; }
   else n.hidden=true;
 }
 function renderLights(){

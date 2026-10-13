@@ -50,11 +50,11 @@ suite('Mis ejercicios', async ({ b, URL, ok, tmp, MOB, page, open, until, wf, sc
   await p.click('#score .ev[data-i="1"]');
   ok(await until(p, () => __t.own.cursor === 2 && document.querySelector('#score .ev[data-i="1"]').classList.contains('sel')), 'clic en una figura la selecciona');
   await p.keyboard.press('8');
-  ok(await notaIs(p, 'q q e e e e~ | e rq h~ e~ | e q'), 'insertar en medio reparte los compases con ligaduras (' + await nota(p) + ')');
+  ok(await notaIs(p, 'q q e e e e~ | e rq e~ h~ | e q'), 'insertar en medio reparte los compases con ligaduras según el pulso (' + await nota(p) + ')');
   await p.keyboard.press('Control+z');
   ok(await notaIs(p, 'q q e e q | rq h. | q'), 'Ctrl+Z deshace');
   await p.keyboard.press('Control+y');
-  ok(await notaIs(p, 'q q e e e e~ | e rq h~ e~ | e q'), 'Ctrl+Y rehace');
+  ok(await notaIs(p, 'q q e e e e~ | e rq e~ h~ | e q'), 'Ctrl+Y rehace');
   await p.keyboard.press('Control+z');
   await p.evaluate(() => { __t.own.cursor = __t.own.toks.length; });
   await p.keyboard.press('Backspace');

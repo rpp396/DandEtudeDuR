@@ -77,6 +77,7 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
 .summary{color:var(--muted);font-size:14px}
 .summary b{color:var(--ink);font-family:var(--serif);font-weight:400;font-size:17px;margin-right:4px}
 .notice{margin:4px 0 0;font-size:13px;color:var(--near)}
+.pulse-warn .btn{padding:4px 10px;font-size:13px;margin-top:4px;color:var(--ink)}
 #score{min-height:120px;overflow-x:auto}
 #score svg.sys{display:block;overflow:visible}
 .staff{stroke:var(--staff);stroke-width:1}
@@ -335,8 +336,9 @@ body.fab-on{padding-bottom:140px}
   .light,.btn,.track,.track::after,.fold summary::after{transition:none}
 }
 /* Mis ejercicios */
+.ev.offp{color:var(--near)}
 .ev.sel{color:var(--accent)}
-.ev.sel .hole{fill:var(--accent-soft)}
+.ev.sel .hole{fill:var(--paper);fill:color-mix(in srgb,var(--accent) 12%,var(--paper))}
 #pad .ev{cursor:inherit}
 .own-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .own-list{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}

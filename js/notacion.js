@@ -3,7 +3,7 @@
 
 /* ---------- Dibujo de notación ---------- */
 const DOTTED=[36,18,9];
-function evW(e){ let w=13+23*Math.sqrt(e.dur/12); if(DOTTED.includes(e.dur)) w+=5; return w; }
+function evW(e){ if(e.mr) return 40; let w=13+23*Math.sqrt(e.dur/12); if(DOTTED.includes(e.dur) && !e.duplet) w+=5; return w; }
 function flag(sx,sy){ return `<path d="M${sx} ${sy}C${sx+1} ${sy+7} ${sx+10} ${sy+10} ${sx+7.5} ${sy+21}C${sx+8.5} ${sy+13} ${sx+3} ${sy+10.5} ${sx} ${sy+9}Z" fill="currentColor"/>`; }
 function noteSVG(x,ny,dur,beamed){
   if(dur===48) return `<ellipse cx="${x}" cy="${ny}" rx="7.6" ry="4.9" fill="currentColor"/><ellipse class="hole" cx="${x}" cy="${ny}" rx="3.3" ry="3.1" transform="rotate(55 ${x} ${ny})"/>`;
@@ -34,19 +34,22 @@ function restSVG(x,y0,dur){
   // corchea
   return `<circle cx="${x-2.5}" cy="${y0+15}" r="2.4" fill="${c}"/><path d="M${x-2.5} ${y0+16.8}Q${x+1} ${y0+17.8} ${x+4} ${y0+13}L${x-0.5} ${y0+30}" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`;
 }
+// Barras de un grupo. El grupo puede llevar silencios dentro (empieza y acaba en nota): la barra principal pasa por
+// encima y la secundaria se corta en el silencio (la semicorchea que queda sola lleva media barra hacia dentro del grupo)
 function beamsSVG(run){
-  const by=run[0].ny-34, xs=run.map(e=>e.x+5.5);
+  const by=run[0].ny-34, xs=run.map(e=>e.x+5.5), s16=e=>e && !e.rest && e.dur===3;
   let s=`<rect x="${xs[0]-0.7}" y="${by}" width="${xs[xs.length-1]-xs[0]+1.4}" height="4.6" fill="currentColor"/>`;
   run.forEach((e,j)=>{
-    if(e.dur!==3) return;
+    if(!s16(e)) return;
     const nx=run[j+1], pv=run[j-1];
-    if(nx && nx.dur===3) s+=`<rect x="${xs[j]-0.7}" y="${by+7.5}" width="${xs[j+1]-xs[j]+1.4}" height="4.6" fill="currentColor"/>`;
-    else if(!(pv && pv.dur===3)){
+    if(s16(nx)) s+=`<rect x="${xs[j]-0.7}" y="${by+7.5}" width="${xs[j+1]-xs[j]+1.4}" height="4.6" fill="currentColor"/>`;
+    else if(!s16(pv)){
       const x1 = pv ? xs[j]-9 : xs[j];
       s+=`<rect x="${x1-0.7}" y="${by+7.5}" width="${9+1.4}" height="4.6" fill="currentColor"/>`;
     }
   });
-  if(run[0].tuplet) s+=`<text class="tup" x="${(xs[0]+xs[xs.length-1])/2}" y="${by-5}" text-anchor="middle">3</text>`;
+  const tn = run[0].tuplet ? 3 : run[0].duplet ? 2 : 0;
+  if(tn) s+=`<text class="tup" x="${(xs[0]+xs[xs.length-1])/2}" y="${by-5}" text-anchor="middle">${tn}</text>`;
   return `<g class="beam">${s}</g>`;
 }
 function chainEnd(e){ let c=e; while(score.flat[c.i+1] && score.flat[c.i+1].tie) c=score.flat[c.i+1]; return c; }
@@ -61,6 +64,9 @@ function miniFig(k){
   if(k==='t'){
     const run=[7,19,31].map(x=>({x,ny,dur:4,tuplet:true}));
     s=run.map(e=>noteSVG(e.x,ny,4,true)).join('')+beamsSVG(run); w=42;
+  } else if(k==='lb' || k==='du'){
+    const run = k==='lb' ? [{x:7,ny,dur:3},{x:21,ny,dur:9}] : [{x:7,ny,dur:9,duplet:true},{x:23,ny,dur:9,duplet:true}];
+    s=run.map(e=>noteSVG(e.x,ny,e.duplet?6:e.dur,true)).join('')+beamsSVG(run); w=k==='lb'?38:34;
   } else {
     const d=map[k]; s=noteSVG(d===48?9:8,ny,d,false);
     w = d===48?18 : (DOTTED.includes(d)?24 : (d<12?22:18));
@@ -125,21 +131,31 @@ function measureSVG(mi,mx,MW){
   const inner=measInner(evs), sc=(MW-28)/inner;
   let cum=0;
   evs.forEach(e=>{ e.x=mx+14+cum*sc+6; e.ny=ny; cum+=evW(e); });
-  if(evs.length===1) evs[0].x=mx+MW/2-4;
-  // grupos de barras
+  // solo el silencio de compás entero va centrado; una nota sola va a la izquierda, donde se ataca
+  if(evs.length===1 && evs[0].rest) evs[0].x=mx+MW/2-4;
+  // grupos de barras: uno por celda (pulso); en 2/2 y 3/2 dos celdas de dos corcheas del mismo pulso de blanca van juntas
+  const gk=new Map();
+  if(score.sig.click===24){
+    const cells=[]; evs.forEach(e=>{ const c=cells[cells.length-1]; if(c && c[0].cell===e.cell) c.push(e); else cells.push([e]); });
+    const ee=c=>c.length===2 && c.every(e=>!e.rest && e.dur===6 && !e.tuplet);
+    for(let i=0;i+1<cells.length;i++){ const a=cells[i], b=cells[i+1];
+      if(ee(a) && ee(b) && a[0].start%24===0 && b[0].start===a[0].start+12){ gk.set(b[0].cell, a[0].cell); i++; } }
+  }
+  const key=e=>gk.has(e.cell)?gk.get(e.cell):e.cell;
+  // dentro del grupo, las figuras con barra se unen por encima de los silencios cortos que tengan en medio
   const beamed=new Set(), runs=[];
-  let run=[], cell=-1;
-  const flush=()=>{ if(run.length>1){ runs.push(run); run.forEach(e=>beamed.add(e)); } run=[]; };
+  let run=[], cell=null;
+  const flush=()=>{ while(run.length && run[run.length-1].rest) run.pop(); if(run.filter(e=>!e.rest).length>1){ runs.push(run); run.forEach(e=>{ if(!e.rest) beamed.add(e); }); } run=[]; };
   evs.forEach(e=>{
-    if(e.cell!==cell){ flush(); cell=e.cell; }
-    if(!e.rest && e.dur<12) run.push(e); else flush();
+    if(key(e)!==cell){ flush(); cell=key(e); }
+    if(e.dur<12 && (run.length || !e.rest)) run.push(e); else if(!(e.rest && e.dur<12)) flush();
   });
   flush();
   let s='';
   evs.forEach((e,k)=>{
     const j=judg[e.i], jc=judg[e.head];
     s+=`<g class="ev${e.rest?' rest':''}${e.tie?' tied':''}${jc?' j-'+jc.cls:''}" data-i="${e.i}">`;
-    s+= e.rest ? restSVG(e.x+1,Y0,e.dur) : noteSVG(e.x,ny,e.dur,beamed.has(e));
+    s+= e.rest ? restSVG(e.x+1,Y0,e.mr?48:e.dur) : noteSVG(e.x,ny,e.duplet?6:e.dur,beamed.has(e));
     if(score.own) s+=`<rect class="evhit" x="${e.x-9}" y="${Y0-14}" width="22" height="62"/>`;
     s+='</g>';
     if(j){
