@@ -215,4 +215,16 @@ La app anuncia a los lectores de pantalla el inicio de la práctica, el resultad
 - **Avisos:** si el navegador no deja guardar datos (modo privado, almacenamiento lleno) o no puede reproducir audio, aparece un aviso arriba.
 - **En pantallas táctiles** los botones redondos miden 44 px y, si el dispositivo lo permite, cada toque vibra (*Práctica → Vibrar al tocar*).
 
+## Pruebas
+
+La app no necesita nada para funcionar, pero tiene una batería de pruebas de navegador en `tests/` (Playwright + Chromium, unas 190 comprobaciones: teclado y accesibilidad, Mis ejercicios, botones flotantes del móvil, paleta fija, audio en iOS y cobertura de figuras en la campaña). Hace falta Node 22 o superior:
+
+```
+npm install                       # instala Playwright (solo para las pruebas)
+npx playwright install chromium   # descarga el navegador (una vez)
+npm test                          # equivale a: node tests/run.js
+```
+
+`node tests/run.js ej dock` ejecuta solo las suites cuyo nombre de archivo contiene «ej» o «dock», y `node tests/ej.test.js` una sola suite. El proceso termina con código distinto de 0 si falla alguna comprobación. Las pruebas copian `index.html` y `styles.css` a una carpeta temporal, sirven esa copia en `127.0.0.1` y no necesitan red (las fuentes de Google se sustituyen por un CSS vacío). En GitHub se ejecutan solas con cada *push* y *pull request* (`.github/workflows/tests.yml`).
+
 Para el detalle técnico, consulta [`CLAUDE.md`](CLAUDE.md).

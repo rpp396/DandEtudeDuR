@@ -1,0 +1,11 @@
+{
+  "name": "dandetudedur",
+  "private": true,
+  "description": "App web de solfeo rítmico (sin build). Este package.json solo existe para las pruebas.",
+  "scripts": {
+    "test": "node tests/run.js"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

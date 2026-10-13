@@ -48,6 +48,8 @@ Nació como un Artifact publicado en claude.ai. Allí el progreso se guardaba en
 
 **Capturas del README:** están en `docs/capturas/` (las seis numeradas de la pantalla principal y los modos, y las descriptivas de bienvenida, opciones, ejemplo de ritmo, compás más flojo, modo piano, latencia, nivel superado, móvil en reposo, móvil al terminar (`movil-resultado.png`), Mis ejercicios (`mis-ejercicios.png`) y su paleta fija en el móvil (`movil-ejercicios.png`); todas salvo la de bienvenida con `seen:true` para que no salga la tarjeta), hechas con Playwright (Chromium) a 1200 px (y 390 px ×2 las de móvil), con datos de ejemplo y marcadores numerados añadidos al DOM solo para la captura. Si cambia la interfaz, conviene rehacerlas.
 
+**Pruebas:** `tests/*.test.js` (Playwright + Chromium), se ejecutan todas con `npm test` (= `node tests/run.js [filtro]`; antes `npm install` y `npx playwright install chromium`) y en GitHub con `.github/workflows/tests.yml`. `tests/lib.js` copia `index.html` y `styles.css` a una carpeta temporal, inyecta `window.__t` (estado interno) justo antes del último `})();` del script —ese cierre debe seguir siendo el último del script— y lo sirve por HTTP en 127.0.0.1 (con `file://` el `localStorage` de Chromium pierde datos a veces al recargar); las fuentes de Google se responden vacías. Si una prueba necesita más estado interno, se añade a `HOOK` en `tests/lib.js`.
+
 ## Convenciones y decisiones
 
 - **Tiempo en ticks:** 1 negra = 12 ticks (semicorchea 3, corchea de tresillo 4, corchea 6, corchea con puntillo 9, negra con puntillo 18, blanca 24, blanca con puntillo 36, redonda 48).
