@@ -77,6 +77,11 @@ $('#ownTextApply').addEventListener('click',()=>{
   let t; try{ t=parseNotation($('#ownText').value, own.cur); }catch(err){ if(!(err instanceof OwnError)) throw err; ownMsg(err.message,true); return; }
   own.undo.push(ownSnap()); own.redo=[]; own.toks=t; own.cursor=t.length; ownMsg('Notación aplicada.'); ownCommit();
 });
+$('#ownFix').addEventListener('click',()=>{
+  if(!own.cur || !own.issues.length) return;
+  const r=pulseRewrite(own.toks, own.cur);
+  if(ownApply(r.toks, r.map[own.cursor])){ ownMsg('Reescrito según el pulso.'); say('Reescrito según el pulso'); }
+});
 $('#ownList').addEventListener('click',e=>{ const b=e.target.closest('.own-item'); if(!b) return; const x=own.list.find(y=>y.id===b.dataset.id); if(x){ ownMsg(''); ownOpen(x); } });
 // Crea un ejercicio vacío (con el compás y el tempo del abierto o de Práctica libre) y lo abre
 function ownNewEx(){

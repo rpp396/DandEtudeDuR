@@ -24,7 +24,7 @@ function loadPlaywright() {
 const { chromium } = loadPlaywright();
 
 // Estado interno expuesto a las pruebas (js/test-hook.js, cargado después de inicio.js)
-const HOOK = "window.__t={get own(){return own}, get ownApi(){ return typeof parseNotation==='function' ? {parseNotation,serialize,reflow,importAny,exLink,exText,exJSON,fromLinkCode,ownInsert,ownOpen} : null; }, get fullScore(){return fullScore}, setLevelForTest(i){ levelIdx=i; stageMode='campana'; }, get score(){return score}, generate, figsUsed, restList, get set(){return set}, SIGS, LEVELS, selectLevel, setView, cfg, get levelIdx(){return levelIdx}, get S(){return S}, get ctx(){return ctx}, tapVoices, renderScore, get prog(){return prog}};\n";
+const HOOK = "window.__t={get own(){return own}, get ownApi(){ return typeof parseNotation==='function' ? {parseNotation,serialize,reflow,importAny,exLink,exText,exJSON,fromLinkCode,ownInsert,ownOpen} : null; }, get fullScore(){return fullScore}, setLevelForTest(i){ levelIdx=i; stageMode='campana'; }, get score(){return score}, generate, figsUsed, restList, get set(){return set}, SIGS, LEVELS, selectLevel, setView, cfg, get levelIdx(){return levelIdx}, get S(){return S}, get ctx(){return ctx}, tapVoices, renderScore, get prog(){return prog}, get pulseApi(){ return typeof fitsPulse==='function' ? {fitsPulse,pulseIssues,pulseRewrite,decompAt,sigOf,scoreToToks,editThis} : null; }};\n";
 
 let tmpDir = null;
 function tmp() {

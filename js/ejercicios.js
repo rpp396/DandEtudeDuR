@@ -5,8 +5,9 @@
 // Ejercicios que escribe el usuario: una lista de figuras («tokens») que se reparte en compases.
 // Token: {dur (ticks), rest, tie (ligada a la siguiente)} o {trip:true} (tresillo de corcheas, ocupa 12 ticks).
 // Se guardan como texto (notación): w h q e s, «.» puntillo, «r» silencio, «~» ligadura, «t» tresillo, «|» compás.
+// «rw» es el silencio de compás entero ({dur:48, rest, mr:true} al leerlo; tras repartir dura lo que el compás).
 const OKEY='solfeo-ritmico-ejercicios-v1', OWN_MAX_BARS=64, OWN_MAX_TEXT=4000, LINK_MAX=2000, OWN_MAX=200;   // OWN_MAX: ejercicios guardados como máximo (cada uno ocupa hasta ~4 KB en localStorage)
-const NOTE_DURS=[48,36,24,18,12,9,6,3], REST_DURS=[48,24,18,12,6,3];
+const NOTE_DURS=[48,36,24,18,12,9,6,3], REST_DURS=[48,24,18,12,6,3], REST_PIECES=[24,18,12,6,3];
 const D2L={48:'w',36:'h.',24:'h',18:'q.',12:'q',9:'e.',6:'e',3:'s'}, L2D={w:48,h:24,q:12,e:6,s:3};
 const TOKNAME={48:'redonda',36:'blanca con puntillo',24:'blanca',18:'negra con puntillo',12:'negra',9:'corchea con puntillo',6:'corchea',3:'semicorchea'};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -32,7 +33,7 @@ function loadOwn(){
   return [];
 }
 function saveOwn(){ try{ localStorage.setItem(OKEY, JSON.stringify({v:1, exercises:own.list})); }catch(e){ appWarn('store'); } }
-let own={list:loadOwn(), cur:null, toks:[], cursor:0, undo:[], redo:[], mods:{dot:false,rest:false,tie:false}, evTok:[], rem:48, complete:false};
+let own={list:loadOwn(), cur:null, toks:[], cursor:0, undo:[], redo:[], mods:{dot:false,rest:false,tie:false}, evTok:[], rem:48, complete:false, issues:[]};
 
 // Duración legible: en negras en los compases simples, en corcheas en los demás
 function fmtTicks(t,sig){
@@ -40,8 +41,77 @@ function fmtTicks(t,sig){
   return `${n||!fr?n:''}${fr} ${u===12?(t>u?'negras':'negra'):(t>u?'corcheas':'corchea')}`;
 }
 const remVerb=(t,sig)=>t>(sig.kind==='simple'?12:6)?'faltan':'falta';
-function decomp(t,rest){ const vals=rest?REST_DURS:NOTE_DURS, r=[]; while(t>0){ const v=vals.find(v=>v<=t); r.push(v); t-=v; } return r; }
-// Reparte los tokens en compases: la nota que cruza la barra se parte en notas ligadas; el silencio, en silencios.
+
+/* --- Escritura según el pulso --- */
+// Pulsos del compás: sus grupos (en 2/2 y 3/2, la blanca) y la mitad que tiene que verse en 4/4, 2/2 y 12/8
+function pulseGrid(sig){
+  const L=sum(sig.groups), g=sig.click===24 ? Array(L/24).fill(24) : sig.groups, starts=[]; let a=0;
+  g.forEach(x=>{ starts.push(a); a+=x; });
+  return {L, g, starts, half:(sig.kind==='simple' && L===48) || (sig.kind==='compound' && L===72) ? L/2 : 0};
+}
+// ¿Se puede escribir una figura de v ticks que empieza en p sin ocultar el pulso? strict = la escritura que se usa al
+// partir figuras; sin strict se aceptan también las síncopas que escribe la app (corchea-negra-corchea, negra-blanca-negra
+// en 4/4 y 2/2), el dosillo escrito con dos corcheas con puntillo y, en amalgama, una figura que ocupa varios grupos enteros.
+function fitsPulse(p, v, sig, rest, strict){
+  const G=pulseGrid(sig), L=G.L, end=p+v;
+  if(end>L) return false;
+  if(p===0 && v===L && (rest || !strict || sig.kind!=='odd')) return true;   // compás entero
+  let k=0; G.starts.forEach((s0,i)=>{ if(p>=s0) k=i; });
+  const gs=G.starts[k], gl=G.g[k], ge=gs+gl, rel=p-gs;
+  if(rest){
+    if(v===48) return false;                 // el silencio de redonda solo como silencio de compás entero
+    if(v===18 && gl!==18) return false;      // el de negra con puntillo, solo en pulso compuesto (en simple, rq re)
+    if(end<=ge) return rel%v===0;            // dentro del pulso y en su sitio (rq al empezar el pulso, re en corchea…)
+    return v===24 && gl===12 && p%24===0;    // el de blanca, en los tiempos 1 y 3 (en 3/4, solo en el 1)
+  }
+  if(!strict && v===24 && p===12 && L===48 && sig.kind==='simple') return true;   // negra-blanca-negra
+  if(G.half && p>0 && p<G.half && end>G.half) return false;                     // tapa la mitad del compás
+  if(rel===0){
+    if(end<=ge) return true;
+    if(G.starts.includes(end) || end===L) return !(strict && sig.kind==='odd');    // pulsos enteros
+    return sig.kind!=='odd' && v===gl*1.5 && G.g[k+1]===gl;                       // negra con puntillo en el tiempo
+  }
+  if(end<=ge){
+    // en compuesto, lo que empieza a mitad de corchea no pasa de la corchea siguiente
+    if(gl===18 && rel%6 && end>gs+Math.ceil(rel/6)*6) return !strict && v===9 && rel===9;
+    return true;
+  }
+  return !strict && sig.kind==='simple' && gl===12 && rel===6 && v===12;   // corchea-negra-corchea
+}
+// Parte len ticks desde la posición p (sin pasar de la barra) en figuras que dejan ver el pulso: en cada paso, la más
+// larga que cumpla fitsPulse. Un silencio que llena el compás es el de compás entero ({mr:true}).
+function decompAt(p, len, sig, rest){
+  const L=sum(sig.groups), r=[];
+  while(len>0){
+    if(rest && p===0 && len>=L){ r.push({dur:L, mr:true}); len-=L; continue; }
+    const v=(rest?REST_PIECES:NOTE_DURS).find(v=>v<=len && fitsPulse(p,v,sig,rest,true)) || 3;
+    r.push({dur:v}); len-=v; p=(p+v)%L;
+  }
+  return r;
+}
+// Índices de los tokens (ya repartidos) que ocultan el pulso o la mitad del compás
+function pulseIssues(toks, ex){
+  const sig=sigOf(ex), L=sum(sig.groups), bad=[]; let pos=0;
+  toks.forEach((t,i)=>{ if(!t.trip && !t.mr && !fitsPulse(pos,t.dur,sig,t.rest,false)) bad.push(i); pos=(pos+tokTicks(t))%L; });
+  return bad;
+}
+// «Reescribir según el pulso»: parte esos tokens en figuras ligadas (o silencios) que dejan ver el pulso
+function pulseRewrite(toks, ex){
+  const sig=sigOf(ex), L=sum(sig.groups), out=[], map=[]; let pos=0;
+  toks.forEach((t,ti)=>{
+    map[ti]=out.length;
+    const d=tokTicks(t);
+    if(t.trip || t.mr || fitsPulse(pos,d,sig,t.rest,false)) out.push(t);
+    else { const ps=decompAt(pos,d,sig,t.rest); ps.forEach((q,i)=>out.push(q.mr ? {dur:L,rest:true,mr:true,tie:false} : {dur:q.dur, rest:!!t.rest, tie:!t.rest && (i<ps.length-1 || !!t.tie)})); }
+    pos=(pos+d)%L;
+  });
+  map[toks.length]=out.length;
+  return {toks:out, map};
+}
+
+// Reparte los tokens en compases. Lo que cabe en el compás se deja como está; la figura que cruza la barra se parte en
+// figuras ligadas (el silencio, en silencios) según su posición (decompAt). «rw» (mr) dura un compás: al empezar el compás
+// es el silencio de compás entero; a mitad de compás, se reparte. Un silencio que llena el compás pasa a ser el de compás entero.
 // Devuelve los tokens resultantes y, para cada token de entrada, dónde empieza en la salida (para colocar el cursor).
 function reflow(toks, ex){
   const sig=sigOf(ex), L=sum(sig.groups), out=[], map=[]; let pos=0;
@@ -52,10 +122,11 @@ function reflow(toks, ex){
       if(pos%12) ownErr('Un tresillo tiene que empezar en un tiempo.');
       out.push({trip:true}); pos=(pos+12)%L; return;
     }
-    let d=t.dur; const parts=[];
-    while(d>0){ const take=Math.min(d,L-pos); parts.push(take); d-=take; pos=(pos+take)%L; }
-    const pieces=parts.flatMap(p=>decomp(p,t.rest));
-    pieces.forEach((p,i)=>out.push({dur:p, rest:!!t.rest, tie:!t.rest && (i<pieces.length-1 || !!t.tie)}));
+    const rest=!!t.rest; let d=rest && t.mr ? L : t.dur;
+    if(pos+d<=L && !(rest && (d===L || d===48))){ out.push({dur:d, rest, tie:!rest && !!t.tie}); pos=(pos+d)%L; return; }
+    const pieces=[];
+    while(d>0){ const take=Math.min(d,L-pos); pieces.push(...decompAt(pos,take,sig,rest)); d-=take; pos=(pos+take)%L; }
+    pieces.forEach((q,i)=>out.push(q.mr ? {dur:L, rest:true, mr:true, tie:false} : {dur:q.dur, rest, tie:!rest && (i<pieces.length-1 || !!t.tie)}));
   });
   map[toks.length]=out.length;
   // una ligadura solo une dos notas: si lo siguiente es un silencio o un tresillo, se quita
@@ -67,29 +138,36 @@ function reflow(toks, ex){
 function parseNotation(text, ex){
   const raw=String(text).trim(); if(!raw) return [];
   if(raw.length>OWN_MAX_TEXT) ownErr('La notación es demasiado larga.');
-  const sig=sigOf(ex), L=sum(sig.groups), segs=raw.split('|'), toks=[], lens=[];
+  const sig=sigOf(ex), L=sum(sig.groups), segs=raw.split('|'), toks=[], lens=[], lens48=[];
   segs.forEach((seg,si)=>{
-    let len=0;
+    let len=0, len48=0;
     seg.trim().split(/\s+/).filter(Boolean).forEach(w=>{
       if(toks.length>=1024) ownErr('El ejercicio tiene demasiadas figuras.');
       const t=w.toLowerCase();
-      if(t==='t'){ toks.push({trip:true}); len+=12; return; }
+      if(t==='t'){ toks.push({trip:true}); len+=12; len48+=12; return; }
       const m=/^(r?)([whqes])(\.?)(~?)$/.exec(t);
       if(!m) ownErr(`No entiendo «${w.slice(0,12)}» (compás ${si+1}).`);
       const rest=!!m[1], d=L2D[m[2]]*(m[3]?1.5:1);
       if(!(rest?REST_DURS:NOTE_DURS).includes(d)) ownErr(rest ? `«${w}» no existe: el único silencio con puntillo es rq. (negra con puntillo).` : `«${w}» no existe: solo la blanca, la negra y la corchea llevan puntillo.`);
       if(rest && m[4]) ownErr(`«${w}»: un silencio no se liga.`);
-      toks.push({dur:d, rest, tie:!!m[4]}); len+=d;
+      // «rw»: silencio de compás entero (dura un compás)
+      if(rest && d===48){ toks.push({dur:48, rest, tie:false, mr:true}); len+=L; len48+=48; return; }
+      toks.push({dur:d, rest, tie:!!m[4]}); len+=d; len48+=d;
     });
-    lens.push(len);
+    lens.push(len); lens48.push(len48);
   });
-  if(segs.length>1) lens.forEach((len,i)=>{
+  // Antes «rw» duraba siempre 4 negras: en los compases de más de 4 negras, si así cuadran los compases (y como compás
+  // entero no), se lee como antes (luego se reescribe con silencios que dejan ver el pulso)
+  const fits=a=>a.every((len,i)=>i===a.length-1 ? len<=L : len===L);
+  const legacy = L>48 && !fits(lens) && fits(lens48);
+  if(legacy) toks.forEach(t=>{ delete t.mr; });
+  if(segs.length>1) (legacy?lens48:lens).forEach((len,i)=>{
     const last=i===lens.length-1;
     if(last ? len>L : len!==L) ownErr(`El compás ${i+1} dura ${fmtTicks(len,sig)} y en ${ex.sig} debe durar ${fmtTicks(L,sig)}.`);
   });
   return reflow(toks, ex).toks;
 }
-function tokStr(t){ return t.trip ? 't' : (t.rest?'r':'')+D2L[t.dur]+(t.tie?'~':''); }
+function tokStr(t){ return t.trip ? 't' : t.mr ? 'rw' : (t.rest?'r':'')+D2L[t.dur]+(t.tie?'~':''); }
 function serialize(toks, ex){
   const L=sum(sigOf(ex).groups); let pos=0, s='';
   toks.forEach((t,i)=>{ if(i) s+= pos===0 ? ' | ' : ' '; s+=tokStr(t); pos=(pos+tokTicks(t))%L; });
@@ -106,7 +184,7 @@ function ownScore(){
     if(pos===L){ measures.push([]); pos=0; }
     const m=measures.length-1, push=e=>{ e.m=m; e.abs=m*L+e.start; e.i=flat.length; flat.push(e); measures[m].push(e); evTok.push(ti); };
     if(t.trip){ const c=tc++; for(let k=0;k<3;k++){ push({dur:4,rest:false,tuplet:true,cell:c,start:pos}); pos+=4; } prevTie=false; return; }
-    push({dur:t.dur, rest:t.rest, tuplet:false, cell:cellAt(pos), start:pos, tie:prevTie && !t.rest});
+    push({dur:t.dur, rest:t.rest, mr:!!t.mr, tuplet:false, cell:cellAt(pos), start:pos, tie:prevTie && !t.rest});
     prevTie=t.tie && !t.rest; pos+=t.dur;
   });
   chainTies(flat);
@@ -114,19 +192,20 @@ function ownScore(){
 }
 function ownCfg(){
   const ex=own.cur||{sig:'4/4',grp:null}, figs=new Set(), rests=new Set(); let ties=false;
-  own.toks.forEach(t=>{ if(t.trip) figs.add('t'); else (t.rest?rests:figs).add(DUR2K[t.dur]); if(t.tie) ties=true; });
+  own.toks.forEach(t=>{ if(t.trip) figs.add('t'); else (t.rest?rests:figs).add(t.mr?'w':DUR2K[t.dur]); if(t.tie) ties=true; });
   return {sig:ex.sig, grp:ex.grp, bars:Math.max(1,score&&score.own?score.bars:1), figs:[...figs], rests:[...rests], sync:false, ties};
 }
 function buildOwn(){
   const r=ownScore(); score=r.score; own.evTok=r.evTok; own.rem=r.rem; own.complete=r.complete;
+  own.issues = own.cur ? pulseIssues(own.toks, own.cur) : [];
   fullScore=null; judg=[]; extras=0; extraTks=[]; $('#results').hidden=true;
   renderScore(); renderSummary(); renderLights(); renderTempoGlyph(); renderOwnEditor(); updateTransport();
 }
 // Resalta la figura tras la que se insertará la siguiente
 function markSel(){
   if(stageMode!=='propio' || S.running || judg.length) return;
-  const ti=own.cursor-1;
-  own.evTok.forEach((t,i)=>{ if(evEls[i]) evEls[i].classList.toggle('sel', t===ti); });
+  const ti=own.cursor-1, bad=new Set(own.issues);
+  own.evTok.forEach((t,i)=>{ if(evEls[i]){ evEls[i].classList.toggle('sel', t===ti); evEls[i].classList.toggle('offp', bad.has(t)); } });
 }
 function ownMsg(t,bad){ const m=$('#ownMsg'); m.textContent=t||''; m.hidden=!t; m.classList.toggle('bad',!!bad); }
 function ownSnap(){ return {toks:own.toks, cursor:own.cursor, sig:own.cur.sig, grp:own.cur.grp}; }
@@ -150,6 +229,7 @@ function ownInsert(k){
     const rest=own.mods.rest, d=L2D[k]*(own.mods.dot?1.5:1);
     if(!(rest?REST_DURS:NOTE_DURS).includes(d)){ ownMsg(rest&&own.mods.dot ? 'El único silencio con puntillo es el de negra.' : 'Solo la blanca, la negra y la corchea llevan puntillo.', true); return; }
     tok={dur:d, rest, tie:!rest && own.mods.tie};
+    if(rest && d===48) tok.mr=true;   // silencio de compás entero
   }
   const c=own.cursor;
   if(ownApply([...own.toks.slice(0,c), tok, ...own.toks.slice(c)], c+1)){
@@ -322,7 +402,7 @@ function scoreToToks(sc){
     const e=sc.flat[i];
     if(e.tuplet){ toks.push({trip:true}); i+=2; continue; }
     if(e.tie && toks.length && !toks[toks.length-1].trip) toks[toks.length-1].tie=true;
-    toks.push({dur:e.dur, rest:e.rest, tie:false});
+    toks.push(e.mr ? {dur:e.dur, rest:true, mr:true, tie:false} : {dur:e.dur, rest:e.rest, tie:false});
   }
   return toks;
 }
