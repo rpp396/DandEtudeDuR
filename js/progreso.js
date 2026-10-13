@@ -6,13 +6,46 @@ const PKEY='solfeo-ritmico-progreso-v1', MAX_SESS=400;
 let prog = loadProgLocal();
 const store = {ref:null, where:'local', writing:false, pending:false};
 function emptyProg(){ return {levels:{}, sessions:[]}; }
-function loadProgLocal(){ try{ const o=JSON.parse(localStorage.getItem(PKEY)||'null'); if(o && Array.isArray(o.sessions)) return {levels:o.levels||{}, sessions:o.sessions}; }catch(e){} return emptyProg(); }
+// Lo guardado (localStorage o db de claude.ai) no es de fiar: se copian solo campos conocidos, con su tipo y rango (ver «Validación» en datos.js).
+// Sesión → copia validada, o null si no sirve (no es un objeto, le falta lo esencial o el compás/nivel no existen)
+function cleanSession(r){
+  if(!isObj(r)) return null;
+  const id=strIn(r.id,/^[A-Za-z0-9_-]{1,40}$/,''), t=numIn(r.t,0,8.64e15,NaN), pct=numIn(r.pct,0,100,NaN,true), mode=oneOf(r.mode,['libre','campana','propio'],'');
+  const sig=typeof r.sig==='string' && has(SIGS,r.sig) ? r.sig : '';
+  if(!id || !isFinite(t) || !isFinite(pct) || !mode || !sig) return null;
+  let lid=null, lvl=null;
+  if(mode==='campana'){
+    lid = typeof r.lid==='string' && lvById(r.lid)>=0 ? r.lid : null; lvl = Number.isInteger(r.lvl) && r.lvl>=0 && r.lvl<LEVELS.length ? r.lvl : null;
+    if(lid==null && (lvl==null || lvById('L'+(lvl+1))<0)) return null;   // las sesiones antiguas no tienen lid: su lvl es L(lvl+1)
+  }
+  const c=(v,hi)=>numIn(v,0,hi,0,true), exn=typeof r.exn==='string' && r.exn.trim() ? cleanName(r.exn) : null;
+  return {id, t, mode, lvl, lid, sig, grp: has(ODD_GROUPS,sig) && ODD_GROUPS[sig].includes(r.grp) ? r.grp : null,
+    bars:numIn(r.bars,1,64,1,true), bpm:numIn(r.bpm,30,240,80,true), pct, n:c(r.n,9999), exact:c(r.exact,9999), good:c(r.good,9999), near:c(r.near,9999), miss:c(r.miss,9999), extra:c(r.extra,9999),
+    mean: r.mean==null ? null : numIn(r.mean,-5000,5000,null,true), play:r.play==='piano'?'piano':'bateria', pen:r.pen===true,
+    ...(r.part===true?{part:true}:{}), ...(mode==='propio' ? {ex:strIn(r.ex,/^[a-z0-9]{4,24}$/,''), ...(exn?{exn}:{})} : {})};
+}
+// Avance por nivel: solo los id de LEVELS (nunca las claves del dato), con best 0-100, stars 0-3 y tries >= 0
+function cleanLevels(l){
+  const out={}; if(!isObj(l)) return out;
+  LEVELS.forEach(lv=>{ const v=has(l,lv.id) ? l[lv.id] : null; if(isObj(v)) out[lv.id]={best:numIn(v.best,0,100,0,true), stars:numIn(v.stars,0,3,0,true), tries:numIn(v.tries,0,99999,0,true)}; });
+  return out;
+}
+// Progreso completo validado; sin sesiones repetidas ni más de MAX_SESS (se mira solo el final de la lista para acotar el trabajo)
+function cleanProg(p){
+  const out=emptyProg(); if(!isObj(p)) return out;
+  out.levels=cleanLevels(p.levels);
+  const seen=new Set();
+  (Array.isArray(p.sessions) ? p.sessions.slice(-MAX_SESS*5) : []).forEach(x=>{ const r=cleanSession(x); if(r && !seen.has(r.id)){ seen.add(r.id); out.sessions.push(r); } });
+  out.sessions=out.sessions.slice(-MAX_SESS);
+  return out;
+}
+function loadProgLocal(){ try{ return cleanProg(JSON.parse(localStorage.getItem(PKEY)||'null')); }catch(e){} return emptyProg(); }
 function mergeProg(a,b){
   const out=emptyProg(); const byId=new Map();
-  [a,b].forEach(p=>{ if(!p) return;
-    (p.sessions||[]).forEach(x=>{ if(x && x.id && !byId.has(x.id)) byId.set(x.id,{...x}); });
-    Object.entries(p.levels||{}).forEach(([k,v])=>{ const o=out.levels[k]||{best:0,stars:0,tries:0};
-      out.levels[k]={best:Math.max(o.best,v.best||0),stars:Math.max(o.stars,v.stars||0),tries:Math.max(o.tries,v.tries||0)}; });
+  [a,b].forEach(p=>{ if(!p) return; p=cleanProg(p);
+    p.sessions.forEach(x=>{ if(!byId.has(x.id)) byId.set(x.id,x); });
+    Object.entries(p.levels).forEach(([k,v])=>{ const o=out.levels[k]||{best:0,stars:0,tries:0};
+      out.levels[k]={best:Math.max(o.best,v.best),stars:Math.max(o.stars,v.stars),tries:Math.max(o.tries,v.tries)}; });
   });
   out.sessions=[...byId.values()].sort((x,y)=>x.t-y.t).slice(-MAX_SESS);
   return out;
@@ -116,8 +149,8 @@ function renderProgress(){
   $('#pTiles').innerHTML=`
     <div class="tile"><div class="lbl">Prácticas guardadas</div><div class="big">${list.length}</div><div class="sub">${lastR?'Última: '+fmtDate(lastR.t)+', '+fmtTime(lastR.t):'Aún no hay ninguna'}</div></div>
     <div class="tile"><div class="lbl">Precisión reciente</div><div class="big">${list.length?Math.round(avg(last10))+'%':'—'}</div><div class="sub">${list.length?'Media de las últimas '+last10.length+'. ':''}${list.length?trend:''}</div></div>
-    <div class="tile"><div class="lbl">Mejor resultado</div><div class="big">${best?best.pct+'%':'—'}</div><div class="sub">${best?exName(best)+' · '+fmtDate(best.t):'—'}</div></div>
-    <div class="tile"><div class="lbl">Campaña</div><div class="big">${passed}<span style="font-size:18px;color:var(--muted)"> / ${LEVELS.length}</span></div><div class="sub">niveles superados · ${stars} de ${LEVELS.length*3} ★</div></div>`;
+    <div class="tile"><div class="lbl">Mejor resultado</div><div class="big">${best?esc(best.pct)+'%':'—'}</div><div class="sub">${best?exName(best)+' · '+fmtDate(best.t):'—'}</div></div>
+    <div class="tile"><div class="lbl">Campaña</div><div class="big">${esc(passed)}<span class="of"> / ${LEVELS.length}</span></div><div class="sub">niveles superados · ${esc(stars)} de ${LEVELS.length*3} ★</div></div>`;
   renderChart(list);
   // tabla
   $('#pCount').textContent = list.length>30 ? `Últimas 30 de ${list.length}` : '';
@@ -125,9 +158,10 @@ function renderProgress(){
   else {
     const rows=list.slice(-30).reverse().map(r=>{
       const dev = r.mean==null ? '—' : Math.abs(r.mean)<5 ? 'a tiempo' : `${Math.abs(r.mean)} ms ${r.mean>0?'tarde':'antes'}`;
-      return `<tr><td>${fmtDate(r.t)} <span class="hint" style="display:inline">${fmtTime(r.t)}</span></td><td>${exName(r)}</td><td>${r.sig}${r.grp?' ('+r.grp+')':''} · ${r.bars} c.</td><td class="num">${r.bpm}</td><td class="num">${r.pct}%<span class="pbar"><i style="width:${r.pct}%"></i></span></td><td class="num">${r.exact}/${r.n}</td><td class="num">${r.miss}</td><td>${dev}</td></tr>`;
+      return `<tr><td>${fmtDate(r.t)} <span class="hint">${fmtTime(r.t)}</span></td><td>${exName(r)}</td><td>${esc(r.sig)}${r.grp?' ('+esc(r.grp)+')':''} · ${esc(r.bars)} c.</td><td class="num">${esc(r.bpm)}</td><td class="num">${esc(r.pct)}%<span class="pbar"><i data-w="${esc(r.pct)}"></i></span></td><td class="num">${esc(r.exact)}/${esc(r.n)}</td><td class="num">${esc(r.miss)}</td><td>${esc(dev)}</td></tr>`;
     }).join('');
     $('#pTable').innerHTML=`<table><thead><tr><th>Fecha</th><th>Ejercicio</th><th>Compás</th><th class="num">Tempo</th><th class="num">Precisión</th><th class="num">Exactas</th><th class="num">Sin tocar</th><th>Desvío medio</th></tr></thead><tbody>${rows}</tbody></table>`;
+    $('#pTable').querySelectorAll('.pbar i').forEach(i=>{ i.style.width=Math.max(0,Math.min(100,+i.dataset.w||0))+'%'; });   // el ancho va por CSSOM (la CSP no admite style="")
   }
   renderStoreStatus();
 }
@@ -153,7 +187,7 @@ function renderChart(list){
   const tip=$('#pTip');
   host.querySelectorAll('.ch-hit').forEach(h=>{
     const show=()=>{ const i=+h.dataset.i, r=data[i];
-      tip.innerHTML=`<b>${r.pct}%</b> · ${fmtDate(r.t)} ${fmtTime(r.t)}<br>${exName(r)} · ${r.sig} · ${r.bpm} ppm`;
+      tip.innerHTML=`<b>${esc(r.pct)}%</b> · ${fmtDate(r.t)} ${fmtTime(r.t)}<br>${exName(r)} · ${esc(r.sig)} · ${esc(r.bpm)} ppm`;
       tip.style.left=Math.min(Math.max(X(i),90),W-90)+'px'; tip.style.top=Y(r.pct)+'px'; tip.hidden=false; };
     h.addEventListener('pointerenter',show); h.addEventListener('pointerdown',show);
     h.addEventListener('pointerleave',()=>{ tip.hidden=true; });

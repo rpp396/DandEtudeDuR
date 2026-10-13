@@ -82,10 +82,11 @@ $('#ownList').addEventListener('click',e=>{ const b=e.target.closest('.own-item'
 function ownNewEx(){
   let n=own.list.length+1; while(own.list.some(y=>y.name===`Ejercicio ${n}`)) n++;
   const base=own.cur||{sig:set.sig, grp:sigOf(set).grp, bpm:set.bpm};
-  ownAdd(cleanEx({name:`Ejercicio ${n}`, sig:base.sig, grp:base.grp, bpm:base.bpm, notation:''}));
+  return ownAdd(cleanEx({name:`Ejercicio ${n}`, sig:base.sig, grp:base.grp, bpm:base.bpm, notation:''}));
 }
 $('#ownNew').addEventListener('click',()=>{
-  ownNewEx(); ownMsg('');
+  if(!ownNewEx()) return;
+  ownMsg('');
   // en pantallas táctiles no se enfoca el nombre (abriría el teclado y quitaría la paleta fija): se lleva la vista a la partitura
   if(touchMQ.matches) $('.score-card').scrollIntoView({block:'start', behavior:'smooth'});
   else { $('#ownName').focus(); $('#ownName').select(); }
@@ -109,7 +110,7 @@ $('#ownCopyLink').addEventListener('click',async()=>{
 });
 $('#ownDelBox').addEventListener('click',e=>{
   const id=e.target.closest('button')?.id, x=own.cur; if(!x) return;
-  if(id==='ownDup'){ const c=cleanEx({...x, id:'', name:x.name+' (copia)', created:0, updated:0}); ownAdd(c); ownMsg(`Creada la copia «${c.name}».`); }
+  if(id==='ownDup'){ const c=cleanEx({...x, id:'', name:x.name+' (copia)', created:0, updated:0}); if(ownAdd(c)) ownMsg(`Creada la copia «${c.name}».`); }
   else if(id==='ownDel'){ $('#ownDelBox').innerHTML=`<span>¿Borrar «${esc(x.name)}»? Tus prácticas guardadas se conservan.</span><button class="btn warn" id="ownDelYes" type="button">Sí, borrar</button><button class="btn" id="ownDelNo" type="button">Cancelar</button>`; $('#ownDelNo').focus(); }
   else if(id==='ownDelYes'){ own.list=own.list.filter(y=>y!==x); saveOwn(); renderOwnDelBox(); if(own.list.length) ownOpen(own.list[0]); else ownNewEx(); ownMsg(`Borrado «${x.name}».`); say(`Borrado ${x.name}`); }
   else if(id==='ownDelNo'){ renderOwnDelBox(); $('#ownDel').focus(); }

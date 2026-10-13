@@ -114,17 +114,51 @@ function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.fig
 const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:false, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
   autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, countSub:true, sv:3};
-let set = load();
+/* ---------- Validación de lo guardado ---------- */
+// Todo lo que se lee de localStorage o del db de claude.ai (ajustes, sesiones, niveles, ejercicios) se trata como no fiable:
+// se copian solo campos conocidos, con su tipo y rango, y las claves salen de listas cerradas (nunca de propiedades heredadas).
+const has=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);     // Object.hasOwn sin depender del navegador: «constructor» y «__proto__» no cuentan
+const isObj=x=>!!x && typeof x==='object' && !Array.isArray(x);
+// Número finito dentro de [lo,hi] (acepta cadenas numéricas); si no, el valor por defecto d
+function numIn(v,lo,hi,d,int){ if(typeof v==='string' && v.trim()!=='') v=+v; if(typeof v!=='number' || !isFinite(v)) return d; v=Math.min(hi,Math.max(lo,v)); return int?Math.round(v):v; }
+const oneOf=(v,list,d)=>list.includes(v)?v:d;
+const strIn=(v,re,d)=>typeof v==='string' && re.test(v) ? v : d;
+function cleanSettings(o){
+  const D=DEFAULTS, s=freshSettings(); if(!isObj(o)) return s;
+  s.sig = typeof o.sig==='string' && has(SIGS,o.sig) ? o.sig : D.sig;
+  s.bars = numIn(o.bars,1,16,D.bars,true);
+  s.bpm = numIn(o.bpm,30,240,D.bpm,true);
+  s.offset = numIn(o.offset,-500,500,D.offset,true);
+  ['rhythmVol','metroVol','tapVol'].forEach(k=>{ s[k]=numIn(o[k],0,1,D[k]); });
+  s.timbre = oneOf(o.timbre,['tono','golpe'],D.timbre);
+  s.sub = oneOf(String(o.sub),['0','6','3','4'],D.sub);
+  s.countIn = oneOf(String(o.countIn),['0','1','2'],D.countIn);
+  ['sound','cursor','loop','metro','accent','autosave','penalize','hold','sync','ties','tapSound','fab','vibrate','seen','countSub'].forEach(k=>{ s[k]=typeof o[k]==='boolean' ? o[k] : D[k]; });
+  const keys=(a,ok)=>Array.isArray(a) ? [...new Set(a.filter(k=>typeof k==='string' && ok.includes(k)))] : [];
+  const figs=keys(o.figs,FIGS.map(f=>f.k)); s.figs = figs.length ? figs : [...D.figs];
+  // silencios: lista de claves (o el booleano antiguo = silencios de las figuras elegidas)
+  s.rests = o.rests===undefined ? [...D.rests] : keys(Array.isArray(o.rests) ? o.rests : o.rests ? s.figs : [], REST_KEYS);
+  s.view = oneOf(o.view,['libre','campana','propio'],D.view);
+  s.level = numIn(o.level,0,999,0,true);
+  s.levelId = strIn(o.levelId,/^L\d{1,3}$/,'');
+  s.ownId = strIn(o.ownId,/^[a-z0-9]{4,24}$/,'');
+  if(isObj(o.grp)) Object.keys(o.grp).forEach(k=>{ if(has(ODD_GROUPS,k) && ODD_GROUPS[k].includes(o.grp[k])) s.grp[k]=o.grp[k]; });
+  if(isObj(o.folds)) ['repro','metro','prac'].forEach(k=>{ if(typeof o.folds[k]==='boolean') s.folds[k]=o.folds[k]; });
+  s.sv = numIn(o.sv,0,99,0,true);
+  return s;
+}
 function load(){
-  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); const s = Object.assign({}, DEFAULTS, o); if(!SIGS[s.sig]) s.sig='4/4'; s.grp = (s.grp && typeof s.grp==='object') ? {...s.grp} : {}; s.folds = (s.folds && typeof s.folds==='object') ? {...s.folds} : {};if(!Array.isArray(s.figs)||!s.figs.length) s.figs=[...DEFAULTS.figs]; s.rests=restList(s).filter(k=>REST_KEYS.includes(k));
+  try{ const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw), s = cleanSettings(o);
+    // antes sync y ties eran una sola opción
+    if(!isObj(o) || o.sync===undefined) s.sync=!!s.ties;
     // sv 2: «Escuchar el ritmo» pasa a aplicarse solo a la práctica (apagado) y «Oír mis toques» viene activado
-    if(o.sync===undefined) s.sync=!!s.ties;
-    if((o.sv|0)<2){ s.sound=false; s.tapSound=true; s.sv=2; }
+    if(s.sv<2){ s.sound=false; s.tapSound=true; s.sv=2; }
     // sv 3: en la cuenta previa de compases compuestos y de amalgama suenan pulso y subdivisión
-    if((o.sv|0)<3){ s.countSub=true; s.sv=3; }
+    if(s.sv<3){ s.countSub=true; s.sv=3; }
     return s; } }catch(e){}
   return freshSettings();
 }
+let set = load();
 function freshSettings(){ return {...DEFAULTS, figs:[...DEFAULTS.figs], rests:[...DEFAULTS.rests], grp:{}, folds:{}}; }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(set)); }catch(e){ appWarn('store'); } }
 // Avisos persistentes arriba de la página (no se puede guardar, no hay audio)

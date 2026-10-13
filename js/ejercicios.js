@@ -5,7 +5,7 @@
 // Ejercicios que escribe el usuario: una lista de figuras («tokens») que se reparte en compases.
 // Token: {dur (ticks), rest, tie (ligada a la siguiente)} o {trip:true} (tresillo de corcheas, ocupa 12 ticks).
 // Se guardan como texto (notación): w h q e s, «.» puntillo, «r» silencio, «~» ligadura, «t» tresillo, «|» compás.
-const OKEY='solfeo-ritmico-ejercicios-v1', OWN_MAX_BARS=64, OWN_MAX_TEXT=4000, LINK_MAX=2000;
+const OKEY='solfeo-ritmico-ejercicios-v1', OWN_MAX_BARS=64, OWN_MAX_TEXT=4000, LINK_MAX=2000, OWN_MAX=200;   // OWN_MAX: ejercicios guardados como máximo (cada uno ocupa hasta ~4 KB en localStorage)
 const NOTE_DURS=[48,36,24,18,12,9,6,3], REST_DURS=[48,24,18,12,6,3];
 const D2L={48:'w',36:'h.',24:'h',18:'q.',12:'q',9:'e.',6:'e',3:'s'}, L2D={w:48,h:24,q:12,e:6,s:3};
 const TOKNAME={48:'redonda',36:'blanca con puntillo',24:'blanca',18:'negra con puntillo',12:'negra',9:'corchea con puntillo',6:'corchea',3:'semicorchea'};
@@ -19,16 +19,16 @@ function cleanName(n){ const s=String(n??'').replace(/[\u0000-\u001f\u007f]/g,' 
 // Normaliza un ejercicio guardado o importado: solo campos conocidos, con su tipo y rango (la notación se valida al leerla)
 function cleanEx(x){
   if(!x || typeof x!=='object') ownErr('El ejercicio no tiene un formato válido.');
-  const sig=String(x.sig??''); if(!SIGS[sig]) ownErr(`Compás desconocido: «${sig.slice(0,10)}».`);
+  const sig=String(x.sig??''); if(!has(SIGS,sig)) ownErr(`Compás desconocido: «${sig.slice(0,10)}».`);
   const opts=ODD_GROUPS[sig];
   if(opts && x.grp!=null && !opts.includes(x.grp)) ownErr(`La agrupación «${String(x.grp).slice(0,10)}» no existe en ${sig}.`);
   let bpm=Math.round(+x.bpm); if(!isFinite(bpm)) bpm=80;
   const notation=String(x.notation??''); if(notation.length>OWN_MAX_TEXT) ownErr('La notación es demasiado larga.');
   return {id: typeof x.id==='string' && /^[a-z0-9]{4,24}$/.test(x.id) ? x.id : newId(), name:cleanName(x.name), sig,
-    grp: opts ? (x.grp||opts[0]) : null, bpm:Math.max(30,Math.min(240,bpm)), notation, created:+x.created||Date.now(), updated:+x.updated||Date.now()};
+    grp: opts ? (x.grp||opts[0]) : null, bpm:Math.max(30,Math.min(240,bpm)), notation, created:numIn(x.created,1,8.64e15,Date.now()), updated:numIn(x.updated,1,8.64e15,Date.now())};
 }
 function loadOwn(){
-  try{ const o=JSON.parse(localStorage.getItem(OKEY)||'null'); if(o && Array.isArray(o.exercises)) return o.exercises.map(x=>{ try{ return cleanEx(x); }catch(e){ return null; } }).filter(Boolean); }catch(e){}
+  try{ const o=JSON.parse(localStorage.getItem(OKEY)||'null'); if(o && Array.isArray(o.exercises)) return o.exercises.slice(0,OWN_MAX).map(x=>{ try{ return cleanEx(x); }catch(e){ return null; } }).filter(Boolean); }catch(e){}
   return [];
 }
 function saveOwn(){ try{ localStorage.setItem(OKEY, JSON.stringify({v:1, exercises:own.list})); }catch(e){ appWarn('store'); } }
@@ -177,7 +177,10 @@ function ownOpen(x){
   if(stageMode==='propio' && score){ stop(); showTempo(); buildOwn(); }
 }
 function uniqueName(x){ let n=x.name, i=2; while(own.list.some(y=>y!==x && y.name===n)) n=`${x.name} (${i++})`; x.name=n.slice(0,60); }
-function ownAdd(x, open=true){ uniqueName(x); own.list.unshift(x); saveOwn(); if(open) ownOpen(x); else renderOwnList(); return x; }
+// null si la biblioteca está llena (OWN_MAX): quien llama no sigue y el aviso ya está en pantalla
+function ownAdd(x, open=true){
+  if(own.list.length>=OWN_MAX){ const m=`Tu biblioteca está llena (máximo ${OWN_MAX} ejercicios): borra alguno para añadir otro.`; ownMsg(m,true); say(m); return null; }
+  uniqueName(x); own.list.unshift(x); saveOwn(); if(open) ownOpen(x); else renderOwnList(); return x; }
 
 /* --- Editor: pintado --- */
 function renderOwnMeter(){
@@ -229,7 +232,7 @@ function renderOwnList(){
   if(!own.list.length){ box.innerHTML='<p class="hint">Aún no tienes ejercicios. Crea uno con «Nuevo ejercicio», impórtalo, o pulsa «Editar» sobre un ritmo de Práctica libre o de la campaña.</p>'; return; }
   const best={}; prog.sessions.forEach(r=>{ if(r.mode==='propio' && r.ex && !r.part) best[r.ex]=Math.max(best[r.ex]??0, r.pct); });
   box.innerHTML=own.list.map(x=>{ const inf=ownInfo(x);
-    return `<button type="button" class="own-item" data-id="${x.id}" aria-current="${!!own.cur && own.cur.id===x.id}"><span class="own-n">${esc(x.name)}</span><span class="own-m">${x.sig}${x.grp?' ('+x.grp+')':''} · ${inf.bars} ${inf.bars===1?'compás':'compases'} · ${x.bpm} ppm${inf.complete?'':' · <i>borrador</i>'}${best[x.id]!=null?` · mejor ${best[x.id]}%`:''}</span></button>`;
+    return `<button type="button" class="own-item" data-id="${esc(x.id)}" aria-current="${!!own.cur && own.cur.id===x.id}"><span class="own-n">${esc(x.name)}</span><span class="own-m">${x.sig}${x.grp?' ('+x.grp+')':''} · ${inf.bars} ${inf.bars===1?'compás':'compases'} · ${x.bpm} ppm${inf.complete?'':' · <i>borrador</i>'}${best[x.id]!=null?` · mejor ${best[x.id]}%`:''}</span></button>`;
   }).join('');
 }
 
@@ -274,7 +277,8 @@ function importAny(text){
   return [fromFields(lines[0], sl.sig, sl.grp, sl.bpm, lines.slice(2).join(' '))];
 }
 function ownImport(text){
-  let xs; try{ xs=importAny(text); }catch(e){ if(e instanceof OwnError){ ownMsg(e.message,true); return false; } throw e; }
+  let xs; try{ xs=importAny(text); }catch(e){ ownMsg(e instanceof OwnError ? e.message : 'No se pudo leer el archivo: no tiene el formato de «Mis ejercicios».', true); return false; }   // cualquier otro error (p. ej. TypeError) tampoco guarda nada
+  if(own.list.length+xs.length>OWN_MAX){ ownMsg(`No cabe: tienes ${own.list.length} ejercicios, importas ${xs.length} y el máximo es ${OWN_MAX}. Borra alguno o importa menos.`, true); return false; }
   xs.slice().reverse().forEach(x=>ownAdd(x,false));
   ownOpen(xs[0]);
   ownMsg(xs.length===1 ? `Importado «${xs[0].name}».` : `Importados ${xs.length} ejercicios.`);
@@ -285,19 +289,20 @@ function ownFromHash(){
   const m=/^#ej=([A-Za-z0-9_-]+)$/.exec(location.hash); if(!m) return false;
   ownLinking=true; try{ return ownLinkIn(m); } finally{ ownLinking=false; }
 }
+// Un enlace #ej= guarda el ejercicio al abrirlo (con el aviso en pantalla); la biblioteca tiene tope (OWN_MAX) y el enlace se valida entero (fromLinkCode)
 function ownLinkIn(m){
   try{ history.replaceState(null,'',location.href.split('#')[0]); }catch(e){}
-  try{
-    const x=fromLinkCode(m[1]);
-    const dup=own.list.find(y=>y.sig===x.sig && y.grp===x.grp && y.notation===x.notation && (y.name===x.name || y.name.startsWith(x.name+' (')));
-    setView('propio');
-    if(dup){ ownOpen(dup); ownMsg(`Ya tenías «${dup.name}» en Mis ejercicios.`); }
-    else { ownAdd(x); ownMsg(`Ejercicio «${x.name}» recibido por enlace y guardado en Mis ejercicios.`); }
-  }catch(e){
-    if(!(e instanceof OwnError)) throw e;
-    setView('propio'); ownMsg('El enlace del ejercicio no es válido: '+e.message, true);
+  let x;
+  try{ x=fromLinkCode(m[1]); }
+  catch(e){
+    setView('propio'); ownMsg('El enlace del ejercicio no es válido: '+(e instanceof OwnError ? e.message : 'formato desconocido.'), true);
     if(!own.list.length) ownNewEx();
+    return true;
   }
+  const dup=own.list.find(y=>y.sig===x.sig && y.grp===x.grp && y.notation===x.notation && (y.name===x.name || y.name.startsWith(x.name+' (')));
+  setView('propio');
+  if(dup){ ownOpen(dup); ownMsg(`Ya tenías «${dup.name}» en Mis ejercicios.`); }
+  else if(ownAdd(x)) ownMsg(`Ejercicio «${x.name}» recibido por enlace y guardado en Mis ejercicios (puedes borrarlo cuando quieras).`);
   return true;
 }
 async function copyText(t){
@@ -326,7 +331,8 @@ function editThis(){
   stop();
   const d=new Date(), x=cleanEx({name:`Ritmo del ${d.toLocaleDateString('es',{day:'numeric',month:'short'})} ${d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}`, sig:sc.key, grp:sc.grp, bpm:curBpm()});
   x.notation=serialize(scoreToToks(sc), x);
-  ownAdd(x,false); ownOpen(x);
+  if(!ownAdd(x,false)) return;
+  ownOpen(x);
   setView('propio');
   ownMsg('Ritmo copiado a Mis ejercicios: ya puedes cambiarlo.');
 }

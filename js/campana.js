@@ -42,7 +42,8 @@ let levelIdx = Math.max(0, lvById(set.levelId || 'L'+((set.level|0)+1)));
 function cfg(){ return stageMode==='campana' ? LEVELS[levelIdx] : stageMode==='propio' ? ownCfg() : set; }
 function curBpm(){ return stageMode==='campana' ? LEVELS[levelIdx].bpm : stageMode==='propio' && own.cur ? own.cur.bpm : set.bpm; }
 function starsFor(l,pct){ return pct>=l.s3?3:pct>=l.s2?2:pct>=l.goal?1:0; }
-function lvState(i){ return prog.levels[LEVELS[i].id] || {best:0,stars:0,tries:0}; }
+// siempre números (aunque prog traiga basura): se suman y se pintan
+function lvState(i){ const v=prog.levels[LEVELS[i].id]||{}; return {best:+v.best||0, stars:+v.stars||0, tries:+v.tries||0}; }
 function unlocked(i){ return i===0 || lvState(i-1).stars>0 || lvState(i).stars>0; }
 function starStr(n){ return [0,1,2].map(i=>`<span class="${i<n?'on':''}">★</span>`).join(''); }
 function showTempo(){
@@ -57,7 +58,7 @@ function renderLevelBar(){
   $('#lvTitle').textContent=l.title;
   $('#lvDesc').textContent=l.desc;
   const unit={12:'♩',24:'𝅗𝅥',18:'♩.',6:'♪'}[SIGS[l.sig].click];
-  $('#lvMeta').innerHTML=`<span>${l.sig}${l.grp?' ('+l.grp+')':''}</span><span>${l.bars} compases</span><span>${l.bpm} ppm</span><span>Objetivo ${l.goal}%</span><span>★★ ${l.s2}%</span><span>★★★ ${l.s3}%</span>${st.best?`<span>Mejor: ${st.best}%</span>`:''}`;
+  $('#lvMeta').innerHTML=`<span>${l.sig}${l.grp?' ('+l.grp+')':''}</span><span>${l.bars} compases</span><span>${l.bpm} ppm</span><span>Objetivo ${l.goal}%</span><span>★★ ${l.s2}%</span><span>★★★ ${l.s3}%</span>${st.best?`<span>Mejor: ${esc(st.best)}%</span>`:''}`;
   $('#lvStars').innerHTML=starStr(st.stars); $('#lvStars').setAttribute('aria-label',`${st.stars} de 3 estrellas`);
   $('#lvPrev').disabled=levelIdx===0;
   $('#lvNext').disabled=levelIdx>=LEVELS.length-1 || !unlocked(levelIdx+1);
@@ -65,7 +66,7 @@ function renderLevelBar(){
 function renderCampMap(){
   let passed=0, stars=0;
   LEVELS.forEach((l,i)=>{ const s=lvState(i); if(s.stars) passed++; stars+=s.stars; });
-  $('#campTotal').innerHTML=`<b>${passed}</b> de ${LEVELS.length} niveles superados · <b>${stars}</b> de ${LEVELS.length*3} ★`;
+  $('#campTotal').innerHTML=`<b>${esc(passed)}</b> de ${LEVELS.length} niveles superados · <b>${esc(stars)}</b> de ${LEVELS.length*3} ★`;
   const lock='<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="5.5" width="8" height="5.5" rx="1" fill="currentColor"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
   $('#campMap').innerHTML=CHAPTERS.map((c,ci)=>{
     const btns=LEVELS.map((l,i)=>({l,i})).filter(x=>x.l.ch===ci).map(({l,i})=>{

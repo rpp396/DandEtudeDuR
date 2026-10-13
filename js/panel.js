@@ -24,7 +24,7 @@ function renderFigs(){
 function renderSummary(){
   if(stageMode==='propio'){
     const x=own.cur, g=score.grp, n=$('#notice');
-    $('#summary').innerHTML = x ? `<b>${x.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${score.bars} ${score.bars===1?'compás':'compases'} · <span class="own-sum"></span>` : 'Ningún ejercicio abierto';
+    $('#summary').innerHTML = x ? `<b>${esc(x.sig)}</b>${g?` <span class="grp">(${esc(g)})</span>`:''} ${esc(score.bars)} ${score.bars===1?'compás':'compases'} · <span class="own-sum"></span>` : 'Ningún ejercicio abierto';
     if(x) $('#summary .own-sum').textContent=x.name;
     $('#bFull').hidden=!fullScore;
     if(score.part){ n.textContent=`Practicando solo el compás ${score.part} del ejercicio. Pulsa «Ritmo completo» para volver al ejercicio entero.`; n.hidden=false; }
@@ -38,7 +38,7 @@ function renderSummary(){
   const rn=RESTS.filter(r=>restList(C).includes(r.k)).map(r=>r.short);
   const rtxt = !rn.length ? '' : ' · silencios de '+(rn.length>1 ? rn.slice(0,-1).join(', ')+' y '+rn[rn.length-1] : rn[0]);
   const g=sigOf(C).grp;
-  $('#summary').innerHTML=`<b>${C.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${C.bars} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${rtxt}${C.sync?' · con síncopas':''}${C.ties?' · con ligaduras':''}`;
+  $('#summary').innerHTML=`<b>${esc(C.sig)}</b>${g?` <span class="grp">(${esc(g)})</span>`:''} ${esc(C.bars)} ${C.bars===1?'compás':'compases'} · ${names.join(', ')}${rtxt}${C.sync?' · con síncopas':''}${C.ties?' · con ligaduras':''}`;
   const n=$('#notice');
   const sig=SIGS[C.sig];
   const warnT = C.figs.includes('t') && sig.kind!=='simple';
