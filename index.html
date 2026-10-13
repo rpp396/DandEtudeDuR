@@ -25,6 +25,7 @@
   <nav class="tabs" role="tablist" aria-label="Secciones">
     <button class="tab" role="tab" id="tab-libre" data-view="libre" aria-selected="true" aria-controls="stageView" type="button"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="8" r="2" fill="currentColor"/></svg>Práctica libre</button>
     <button class="tab" role="tab" id="tab-campana" data-view="campana" aria-selected="false" aria-controls="stageView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M3 14V2.5M3 3h9l-2 3 2 3H3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Campaña</button>
+    <button class="tab" role="tab" id="tab-propio" data-view="propio" aria-selected="false" aria-controls="stageView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M3 13l1-3.5 7-7 2.5 2.5-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.5 4l2.5 2.5" stroke="currentColor" stroke-width="1.5"/></svg>Mis ejercicios</button>
     <button class="tab" role="tab" id="tab-progreso" data-view="progreso" aria-selected="false" aria-controls="progView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M2 13l4-5 3 3 5-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>Mi progreso</button>
   </nav>
 
@@ -39,6 +40,7 @@
           <li>Pulsa <b>Practicar</b> <span class="kb">(<kbd>P</kbd>)</span> o toca la partitura. Tras la cuenta previa, toca en cada nota: con el dedo, el ratón o la barra espaciadora.</li>
           <li>Al terminar verás tu precisión y, bajo cada nota, si llegaste antes o tarde.</li>
         </ol>
+        <p class="hint">En las pestañas de arriba tienes además la <b>Campaña</b> (niveles que se desbloquean con estrellas), <b>Mis ejercicios</b> (escribe tus propios ritmos figura a figura, guárdalos y compártelos con un enlace) y <b>Mi progreso</b> (tu historial de prácticas).</p>
         <p class="hint">Si usas auriculares Bluetooth o notas que siempre te marca «tarde», mide antes la latencia de tu equipo: tarda medio minuto.</p>
         <div class="res-actions">
           <button class="btn primary" id="welCalib" type="button">Medir latencia ahora</button>
@@ -79,6 +81,7 @@
             <p class="notice" id="notice" hidden></p>
           </div>
           <button class="btn" id="bFull" type="button" hidden>Ritmo completo</button>
+          <button class="btn" id="bEditThis" type="button" title="Copiar este ritmo a «Mis ejercicios» para cambiarlo"><svg viewBox="0 0 16 16"><path d="M3 13l1-3.5 7-7 2.5 2.5-7 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>Editar</button>
           <button class="btn" id="bNew" type="button"><svg viewBox="0 0 16 16"><path d="M13 5.5A5.5 5.5 0 1 0 13.5 10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M13.8 1.8v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="bNewLbl">Nuevo ritmo</span></button>
         </div>
         <div class="pad" id="pad" tabindex="0" role="button" aria-label="Partitura: toca sobre ella en cada nota">
@@ -151,6 +154,63 @@
     </section>
 
     <aside class="panel" aria-label="Opciones">
+      <div class="sec" id="secOwn" hidden>
+        <h2>Mis ejercicios</h2>
+        <div class="own-list" id="ownList"></div>
+        <div class="own-row">
+          <button class="btn primary" id="ownNew" type="button">Nuevo ejercicio</button>
+          <button class="btn" id="ownImpBtn" type="button" aria-expanded="false" aria-controls="ownImport">Importar</button>
+          <button class="btn" id="ownExpAll" type="button">Exportar todos</button>
+        </div>
+        <div class="own-import" id="ownImport" hidden>
+          <label for="ownImpText" class="rlabel">Pega el texto o el enlace de un ejercicio</label>
+          <textarea id="ownImpText" rows="4" spellcheck="false"></textarea>
+          <label for="ownImpFile" class="rlabel">O elige un archivo .json</label>
+          <input type="file" id="ownImpFile" accept=".json,application/json,.txt,text/plain">
+          <div class="own-row"><button class="btn primary" id="ownImpGo" type="button">Importar</button><button class="btn" id="ownImpCancel" type="button">Cancelar</button></div>
+        </div>
+        <p class="own-msg" id="ownMsg" role="status" hidden></p>
+      </div>
+      <div class="sec" id="secEdit" hidden>
+        <h2>Editar ejercicio</h2>
+        <div class="field"><label for="ownName">Nombre</label><input type="text" id="ownName" maxlength="60" autocomplete="off"></div>
+        <div class="two">
+          <div class="field"><label for="ownSig">Compás</label><select id="ownSig"></select></div>
+          <div class="field" id="ownGrpF"><label for="ownGrp">Agrupación</label><select id="ownGrp"></select></div>
+        </div>
+        <span class="rlabel pal-lbl">Figuras (se añaden tras la resaltada)</span>
+        <!-- en pantallas estrechas, mientras se edita, este bloque queda fijo abajo (body.dock-on) -->
+        <div class="own-dock" id="ownDock" role="group" aria-label="Paleta de figuras">
+          <div class="pal" id="ownPal" role="group" aria-label="Añadir figura"></div>
+          <div class="dock-row">
+            <div class="pal-mods" id="ownMods" role="group" aria-label="Modificadores para la siguiente figura">
+              <button type="button" data-mod="dot" aria-pressed="false">Puntillo <kbd>.</kbd></button>
+              <button type="button" data-mod="rest" aria-pressed="false">Silencio <kbd>S</kbd></button>
+              <button type="button" data-mod="tie" aria-pressed="false">Ligar <kbd>L</kbd></button>
+            </div>
+            <div class="own-row own-edit">
+              <button class="btn" id="ownUndo" type="button" title="Deshacer (Ctrl+Z)" aria-label="Deshacer"><svg viewBox="0 0 16 16"><path d="M5.5 3L2.5 6l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6h6.5a4 4 0 0 1 0 8H7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Deshacer</span></button>
+              <button class="btn" id="ownRedo" type="button" title="Rehacer (Ctrl+Y)" aria-label="Rehacer"><svg viewBox="0 0 16 16"><path d="M10.5 3l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 6H6.5a4 4 0 0 0 0 8H9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Rehacer</span></button>
+              <button class="btn" id="ownDelTok" type="button" title="Borrar la figura resaltada (Retroceso)" aria-label="Borrar figura"><svg viewBox="0 0 16 16"><path d="M6 3h8v10H6L2 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6l4 4M12 6l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Borrar figura</span></button>
+            </div>
+          </div>
+          <div class="dock-top">
+            <p class="own-status" id="ownStatus" aria-live="polite"></p>
+            <button class="btn primary" id="ownPractice" type="button"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>Practicar</button>
+          </div>
+        </div>
+        <div class="field"><label for="ownText">Notación</label><textarea id="ownText" rows="3" spellcheck="false"></textarea></div>
+        <div class="own-row"><button class="btn" id="ownTextApply" type="button">Aplicar texto</button></div>
+        <p class="hint">w redonda · h blanca · q negra · e corchea · s semicorchea · t tresillo · «.» detrás = puntillo · «r» delante = silencio · «~» detrás = ligada a la siguiente · «|» separa compases. Ejemplo: <code>q e~ e q q | h. q</code></p>
+        <h2 class="sub">Compartir</h2>
+        <div class="own-row">
+          <button class="btn" id="ownDl" type="button">Descargar .json</button>
+          <button class="btn" id="ownCopyText" type="button">Copiar texto</button>
+          <button class="btn" id="ownCopyLink" type="button">Copiar enlace</button>
+        </div>
+        <textarea id="ownOut" class="own-out" rows="3" readonly hidden aria-label="Texto o enlace para compartir"></textarea>
+        <div class="confirm own-row" id="ownDelBox"></div>
+      </div>
       <div class="sec" id="secCamp" hidden>
         <h2>Niveles</h2>
         <div class="camp-total" id="campTotal"></div>
@@ -243,6 +303,7 @@
           <button type="button" data-f="todo" aria-pressed="true">Todo</button>
           <button type="button" data-f="libre" aria-pressed="false">Libre</button>
           <button type="button" data-f="campana" aria-pressed="false">Campaña</button>
+          <button type="button" data-f="propio" aria-pressed="false">Propios</button>
         </div>
       </div>
       <div id="pChart"></div>
@@ -264,7 +325,7 @@
 <button type="button" class="fab-restart" id="fabRestart" hidden aria-label="Reiniciar: mantén pulsado medio segundo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg><span>Reiniciar</span></button>
 <div class="fab fab-post" id="postFab" role="group" aria-label="Después de la práctica" hidden>
   <button type="button" id="pfAgain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg>Repetir</button>
-  <button type="button" id="pfNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7h3.2c2 0 3.2.9 4.3 2.6l2.6 4.6c1 1.8 2.3 2.8 4.3 2.8h4.6"/><path d="M2.5 17h3.2c1.3 0 2.2-.4 3-1.1"/><path d="M14.4 8.1c.8-.7 1.7-1.1 3-1.1h4.1"/><path d="M18.5 4l3 3-3 3"/><path d="M18.5 14l3 3-3 3"/></svg>Nuevo ritmo</button>
+  <button type="button" id="pfNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7h3.2c2 0 3.2.9 4.3 2.6l2.6 4.6c1 1.8 2.3 2.8 4.3 2.8h4.6"/><path d="M2.5 17h3.2c1.3 0 2.2-.4 3-1.1"/><path d="M14.4 8.1c.8-.7 1.7-1.1 3-1.1h4.1"/><path d="M18.5 4l3 3-3 3"/><path d="M18.5 14l3 3-3 3"/></svg><span id="pfNewLbl">Nuevo ritmo</span></button>
   <button type="button" id="pfNext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg><span id="pfNextLbl">Listo</span></button>
 </div>
 
@@ -443,6 +504,7 @@ function genMeasure(sig, L){
 function figsUsed(measures){ const k=new Set(); measures.forEach(evs=>evs.forEach(e=>k.add((e.rest?'r':'')+DUR2K[e.dur]))); return k; }
 const hasNote = ms => ms.some(m=>m.evs.some(e=>!e.rest));
 function generate(){
+  if(stageMode==='propio'){ buildOwn(); return; }
   const C=cfg(), sig=sigOf(C), L=sum(sig.groups);
   const newBars=()=>Array.from({length:C.bars},()=>genMeasure(sig,L));
   let ms=newBars();
@@ -575,7 +637,7 @@ function renderScore(){
   const W=Math.max(280, Math.floor(host.clientWidth));
   const k=W<560?0.8:1;
   const {L,measures}=score;
-  const base=measures.map(evs=>{ const inner=sum(evs.map(evW)); return Math.max(inner*k, L*2.9*k)+26; });
+  const base=measures.map(evs=>{ const inner=measInner(evs); return Math.max(inner*k, L*2.9*k)+26; });
   const systems=[]; let cur=[], used=0;
   base.forEach((w,mi)=>{
     const avail=W-(systems.length===0?PF:PO)-4;
@@ -616,10 +678,13 @@ function renderScore(){
   evEls=[];
   host.querySelectorAll('.ev').forEach(g=>{ evEls[+g.dataset.i]=g; });
   if(S.running && S.nowI>=0 && set.cursor && evEls[S.nowI]) evEls[S.nowI].classList.add('now');
+  markSel();
 }
+// Ancho del contenido de un compás; si está a medias (ejercicio propio), cuenta también lo que falta
+function measInner(evs){ const rem=score.L-sum(evs.map(e=>e.dur)); return sum(evs.map(evW))+(rem>0?evW({dur:rem}):0); }
 function measureSVG(mi,mx,MW){
   const evs=score.measures[mi], ny=Y0+20;
-  const inner=sum(evs.map(evW)), sc=(MW-28)/inner;
+  const inner=measInner(evs), sc=(MW-28)/inner;
   let cum=0;
   evs.forEach(e=>{ e.x=mx+14+cum*sc+6; e.ny=ny; cum+=evW(e); });
   if(evs.length===1) evs[0].x=mx+MW/2-4;
@@ -637,6 +702,7 @@ function measureSVG(mi,mx,MW){
     const j=judg[e.i], jc=judg[e.head];
     s+=`<g class="ev${e.rest?' rest':''}${e.tie?' tied':''}${jc?' j-'+jc.cls:''}" data-i="${e.i}">`;
     s+= e.rest ? restSVG(e.x+1,Y0,e.dur) : noteSVG(e.x,ny,e.dur,beamed.has(e));
+    if(score.own) s+=`<rect class="evhit" x="${e.x-9}" y="${Y0-14}" width="22" height="62"/>`;
     s+='</g>';
     if(j){
       const my=Y0+56;
@@ -686,6 +752,17 @@ function renderFigs(){
   $('#figs').innerHTML=FIGS.map(f=>`<button type="button" class="fig" data-k="${f.k}" aria-pressed="${set.figs.includes(f.k)}">${miniFig(f.k)}<span class="fn">${f.name}</span><span class="fv">${f.val}</span></button>`).join('');
 }
 function renderSummary(){
+  if(stageMode==='propio'){
+    const x=own.cur, g=score.grp, n=$('#notice');
+    $('#summary').innerHTML = x ? `<b>${x.sig}</b>${g?` <span class="grp">(${g})</span>`:''} ${score.bars} ${score.bars===1?'compás':'compases'} · <span class="own-sum"></span>` : 'Ningún ejercicio abierto';
+    if(x) $('#summary .own-sum').textContent=x.name;
+    $('#bFull').hidden=!fullScore;
+    if(score.part){ n.textContent=`Practicando solo el compás ${score.part} del ejercicio. Pulsa «Ritmo completo» para volver al ejercicio entero.`; n.hidden=false; }
+    else if(!x){ n.textContent='Crea un ejercicio con «Nuevo ejercicio», impórtalo o elige uno de la lista.'; n.hidden=false; }
+    else if(!own.complete){ n.textContent = own.toks.length ? `El último compás está a medias (${remVerb(own.rem,score.sig)} ${fmtTicks(own.rem,score.sig)}): complétalo para poder practicar.` : 'El ejercicio está vacío: añade figuras con la paleta del panel.'; n.hidden=false; }
+    else n.hidden=true;
+    return;
+  }
   const C=cfg();
   const names=FIGS.filter(f=>C.figs.includes(f.k)).map(f=>f.name.toLowerCase());
   const rn=RESTS.filter(r=>restList(C).includes(r.k)).map(r=>r.short);
@@ -729,8 +806,8 @@ function tempoMark(b){
 }
 function setBpm(v, fromUser=true){
   if(stageMode==='campana'){ showTempo(); return; }
-  v=Math.round(+v); if(!isFinite(v)) v=set.bpm; v=Math.max(30,Math.min(240,v));
-  set.bpm=v; $('#bpm').value=v; $('#bpmRange').value=v; $('#bpmOut').textContent=v+' ppm'; $('#tMark').textContent=tempoMark(v);
+  v=Math.round(+v); if(!isFinite(v)) v=curBpm(); v=Math.max(30,Math.min(240,v));
+  if(stageMode==='propio'){ if(own.cur){ own.cur.bpm=v; saveOwn(); renderOwnList(); } } else set.bpm=v; $('#bpm').value=v; $('#bpmRange').value=v; $('#bpmOut').textContent=v+' ppm'; $('#tMark').textContent=tempoMark(v);
   if(fromUser){ save(); if(S.running && S.mode!=='metro') stop(); }
 }
 function syncControls(){
@@ -741,7 +818,7 @@ function syncControls(){
   $('#bars').textContent=set.bars;
   $('#autosave').checked=!!set.autosave; $('#penalize').checked=!!set.penalize;
   syncHold();
-  updOutputs(); setBpm(set.bpm,false);
+  updOutputs(); if(stageMode==='libre') setBpm(set.bpm,false); else showTempo();
 }
 function syncTapVol(){ $('#tapVolField').hidden=!set.tapSound; }
 function updOutputs(){
@@ -873,6 +950,10 @@ function schedulePass(p){
   if(S.mode==='play' || set.sound) score.flat.forEach(e=>{ if(!e.rest && !e.tie) noteSound(S.bus,base+e.abs*S.spt,e.len*S.spt); });
 }
 function start(mode){
+  if(mode==='practice' && stageMode==='propio' && !own.complete){
+    const t=own.cur ? 'Completa el último compás del ejercicio para poder practicarlo.' : 'Abre o crea un ejercicio para practicar.';
+    ownMsg(t,true); say(t); return;
+  }
   stop(); if(!ensureAudio()) return;
   const L=score.L, spt=60/(curBpm()*score.sig.click);
   const bus=ctx.createGain(); bus.connect(master);
@@ -989,7 +1070,7 @@ function updateTransport(){
   $('#bPlay').classList.toggle('active',r&&m==='play');
   $('#bPractice').classList.toggle('active',r&&m==='practice');
   // en pantallas táctiles «Practicar» no responde mientras se practica o se mide (un toque desviado la reiniciaría)
-  $('#bPractice').disabled = touchMQ.matches && r && (m==='practice'||m==='calib');
+  $('#bPractice').disabled = (touchMQ.matches && r && (m==='practice'||m==='calib')) || (stageMode==='propio' && !r && !own.complete);
   $('#bCalib').classList.toggle('active',r&&m==='calib');
   $('#bMetro').setAttribute('aria-pressed',String(r&&m==='metro'));
 }
@@ -1090,7 +1171,7 @@ function showResults(notes, holds, endT){
   const mean = errs.length ? Math.round(sum(errs)/errs.length) : null;
   afterPractice({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), t:Date.now(), mode:stageMode,
     lvl: stageMode==='campana'?levelIdx:null, lid: stageMode==='campana'?LEVELS[levelIdx].id:null, sig:score.key, grp:score.grp, bars:score.bars, bpm:curBpm(), pct, n:N,
-    exact:c.exact, good:c.good, near:c.near, miss:c.miss, extra:extras, mean, play:holdMode?'piano':'bateria', pen:!!set.penalize, ...(score.part?{part:true}:{})});
+    exact:c.exact, good:c.good, near:c.near, miss:c.miss, extra:extras, mean, play:holdMode?'piano':'bateria', pen:!!set.penalize, ...(score.part?{part:true}:{}), ...(stageMode==='propio'&&own.cur?{ex:own.cur.id, exn:own.cur.name}:{})});
   // compás más flojo (solo si hay varios y alguno baja del 90 %)
   weakM=-1; let weakPct=101;
   mp.forEach((m,i)=>{ if(!m.n) return; const p=Math.max(0,Math.round(m.pts/m.n)); if(p<weakPct){ weakPct=p; weakM=i; } });
@@ -1119,10 +1200,20 @@ const fabWanted = () => !!set.fab && touchMQ.matches;
 // En reposo el botón dice «Practicar» (solo si la partitura está a la vista); durante la práctica o la medición, «Toca aquí»
 // Con los resultados a la vista pasa a ser el botón de tres partes (#postFab)
 let padInView=false, postSince=0;
+// Paleta de «Mis ejercicios» fija abajo en pantallas estrechas (panel bajo la partitura) con un ejercicio abierto.
+// Se oculta (sin volver a su sitio en el panel, para que la página no salte) al practicar o reproducir, con resultados
+// o la medición a la vista y mientras se escribe en un campo, para no quedar encima del teclado
+const narrowMQ = matchMedia('(max-width: 920px)');
+let fieldFocus=false;
+const dockWanted = () => narrowMQ.matches && stageMode==='propio' && !!own.cur && !$('#stageView').hidden;
+const dockShown = () => dockWanted() && !S.running && !fieldFocus && $('#results').hidden && $('#calib').hidden;
 function updateFab(){
   const f=$('#tapFab'), fm=$('#fabMain'), pf=$('#postFab'), live=S.running && (S.mode==='practice'||S.mode==='calib');
   const post=fabWanted() && !S.running && !$('#results').hidden && !$('#stageView').hidden;
-  const on=fabWanted() && !post && (live || (!S.running && padInView));
+  const dock=dockShown();
+  document.body.classList.toggle('dock-on',dockWanted()); document.body.classList.toggle('dock-away',!dock);
+  if(dock) document.body.style.setProperty('--dockH',$('#ownDock').offsetHeight+'px');
+  const on=fabWanted() && !post && (live || (!S.running && padInView && !dock));
   if(post){ if(pf.hidden){ pf.hidden=false; postSince=performance.now(); } syncPostFab(); } else pf.hidden=true;
   f.hidden=!on; document.body.classList.toggle('fab-on',on||post); f.classList.toggle('idle',on && !live);
   f.classList.toggle('split',on && live); $('#fabRestart').hidden=!(on && live);
@@ -1135,6 +1226,7 @@ function updateFab(){
 function syncPostFab(){
   const camp=stageMode==='campana', b=$('#pfNext');
   $('#pfNextLbl').textContent=camp?'Siguiente':'Listo';
+  $('#pfNewLbl').textContent=stageMode==='propio'?'Editar':'Nuevo ritmo';
   b.disabled = camp && $('#rcNext').hidden;
   b.setAttribute('aria-label', camp ? 'Siguiente nivel' : 'Listo: cerrar los resultados');
 }
@@ -1142,7 +1234,10 @@ function syncPostFab(){
 function closeResults(){ $('#results').hidden=true; judg=[]; extras=0; extraTks=[]; renderScore(); updateFab(); }
 new IntersectionObserver(es=>{ padInView=es[es.length-1].isIntersecting; updateFab(); }).observe($('#pad'));
 // Alto de la parte inferior de la pantalla que tapa el botón flotante (para el seguimiento de la partitura)
-function fabReserve(){ const f=[$('#tapFab'),$('#postFab')].find(x=>!x.hidden); return f ? innerHeight-f.getBoundingClientRect().top+12 : 8; }
+function fabReserve(){
+  const f=[$('#tapFab'),$('#postFab')].find(x=>!x.hidden) || (dockShown() && $('#ownDock'));
+  return f ? innerHeight-f.getBoundingClientRect().top+12 : 8;
+}
 function showPad(){
   updateFab();
   const p=$('#pad'), r=p.getBoundingClientRect();
@@ -1152,6 +1247,11 @@ function showPad(){
 }
 function padIdle(){
   $('#pad').classList.remove('live');
+  if(stageMode==='propio'){
+    $('#padMain').textContent='Toca una figura para seleccionarla: lo nuevo se añade detrás de ella';
+    $('#padSub').textContent='Con teclado: 1, 2, 4, 8 y 6 añaden redonda, blanca, negra, corchea y semicorchea; T tresillo; «.» puntillo, S silencio, L ligadura; Retroceso borra; las flechas mueven la selección. P practica y R reproduce.';
+    return;
+  }
   $('#padMain').textContent='Toca la partitura (o «Practicar») para empezar, y luego toca sobre ella en cada nota';
   $('#padSub').textContent='Con teclado: P empieza y, tras la cuenta, tocas con la barra espaciadora o cualquier tecla menos Esc, que detiene. Fuera de la práctica, P, R y N son atajos (practicar, reproducir, nuevo ritmo).';
 }
@@ -1281,10 +1381,10 @@ const LEVELS = [
 // Los id son fijos: el avance (prog.levels) se guarda por id y los niveles nuevos no deben moverlo.
 LEVELS.forEach(l=>{ l.s2=Math.min(l.goal+12,90); l.s3=95; });
 const lvById = id => LEVELS.findIndex(l=>l.id===id);
-let stageMode = set.view==='campana' ? 'campana' : 'libre';
+let stageMode = ['campana','propio'].includes(set.view) ? set.view : 'libre';
 let levelIdx = Math.max(0, lvById(set.levelId || 'L'+((set.level|0)+1)));
-function cfg(){ return stageMode==='campana' ? LEVELS[levelIdx] : set; }
-function curBpm(){ return stageMode==='campana' ? LEVELS[levelIdx].bpm : set.bpm; }
+function cfg(){ return stageMode==='campana' ? LEVELS[levelIdx] : stageMode==='propio' ? ownCfg() : set; }
+function curBpm(){ return stageMode==='campana' ? LEVELS[levelIdx].bpm : stageMode==='propio' && own.cur ? own.cur.bpm : set.bpm; }
 function starsFor(l,pct){ return pct>=l.s3?3:pct>=l.s2?2:pct>=l.goal?1:0; }
 function lvState(i){ return prog.levels[LEVELS[i].id] || {best:0,stars:0,tries:0}; }
 function unlocked(i){ return i===0 || lvState(i-1).stars>0 || lvState(i).stars>0; }
@@ -1337,8 +1437,12 @@ function centerScore(){
   scrollTo({top:scrollY+top, behavior:'smooth'});
 }
 function applyStageMode(){
-  const camp=stageMode==='campana';
-  $('#secSig').hidden=camp; $('#secFigs').hidden=camp; $('#secCamp').hidden=!camp; $('#levelBar').hidden=!camp;
+  const camp=stageMode==='campana', mine=stageMode==='propio';
+  $('#secSig').hidden=camp||mine; $('#secFigs').hidden=camp||mine; $('#secCamp').hidden=!camp; $('#levelBar').hidden=!camp;
+  $('#secOwn').hidden=!mine; if(!mine) $('#secEdit').hidden=true;
+  $('#bNew').hidden=mine; $('#bEditThis').hidden=mine; $('#rNew').hidden=mine;
+  if(mine){ renderOwnList(); renderOwnMeter(); renderPalette(); }
+  if(!S.running) padIdle();
   $('#bNewLbl').textContent=camp?'Otro ritmo del nivel':'Nuevo ritmo';
   if(camp){ if(!unlocked(levelIdx)) levelIdx=firstOpenLevel(); renderLevelBar(); renderCampMap(); }
   showTempo(); generate();
@@ -1352,6 +1456,331 @@ function setView(v){
   if(v==='progreso'){ renderProgress(); return; }
   set.view=v; save();
   if(v!==stageMode || !score){ stageMode=v; applyStageMode(); }
+}
+
+/* ---------- Mis ejercicios ---------- */
+// Ejercicios que escribe el usuario: una lista de figuras («tokens») que se reparte en compases.
+// Token: {dur (ticks), rest, tie (ligada a la siguiente)} o {trip:true} (tresillo de corcheas, ocupa 12 ticks).
+// Se guardan como texto (notación): w h q e s, «.» puntillo, «r» silencio, «~» ligadura, «t» tresillo, «|» compás.
+const OKEY='solfeo-ritmico-ejercicios-v1', OWN_MAX_BARS=64, OWN_MAX_TEXT=4000, LINK_MAX=2000;
+const NOTE_DURS=[48,36,24,18,12,9,6,3], REST_DURS=[48,24,18,12,6,3];
+const D2L={48:'w',36:'h.',24:'h',18:'q.',12:'q',9:'e.',6:'e',3:'s'}, L2D={w:48,h:24,q:12,e:6,s:3};
+const TOKNAME={48:'redonda',36:'blanca con puntillo',24:'blanca',18:'negra con puntillo',12:'negra',9:'corchea con puntillo',6:'corchea',3:'semicorchea'};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+class OwnError extends Error{}
+const ownErr=m=>{ throw new OwnError(m); };
+const newId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const tokTicks=t=>t.trip?12:t.dur;
+
+function cleanName(n){ const s=String(n??'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,60); return s||'Ejercicio sin nombre'; }
+// Normaliza un ejercicio guardado o importado: solo campos conocidos, con su tipo y rango (la notación se valida al leerla)
+function cleanEx(x){
+  if(!x || typeof x!=='object') ownErr('El ejercicio no tiene un formato válido.');
+  const sig=String(x.sig??''); if(!SIGS[sig]) ownErr(`Compás desconocido: «${sig.slice(0,10)}».`);
+  const opts=ODD_GROUPS[sig];
+  if(opts && x.grp!=null && !opts.includes(x.grp)) ownErr(`La agrupación «${String(x.grp).slice(0,10)}» no existe en ${sig}.`);
+  let bpm=Math.round(+x.bpm); if(!isFinite(bpm)) bpm=80;
+  const notation=String(x.notation??''); if(notation.length>OWN_MAX_TEXT) ownErr('La notación es demasiado larga.');
+  return {id: typeof x.id==='string' && /^[a-z0-9]{4,24}$/.test(x.id) ? x.id : newId(), name:cleanName(x.name), sig,
+    grp: opts ? (x.grp||opts[0]) : null, bpm:Math.max(30,Math.min(240,bpm)), notation, created:+x.created||Date.now(), updated:+x.updated||Date.now()};
+}
+function loadOwn(){
+  try{ const o=JSON.parse(localStorage.getItem(OKEY)||'null'); if(o && Array.isArray(o.exercises)) return o.exercises.map(x=>{ try{ return cleanEx(x); }catch(e){ return null; } }).filter(Boolean); }catch(e){}
+  return [];
+}
+function saveOwn(){ try{ localStorage.setItem(OKEY, JSON.stringify({v:1, exercises:own.list})); }catch(e){ appWarn('store'); } }
+let own={list:loadOwn(), cur:null, toks:[], cursor:0, undo:[], redo:[], mods:{dot:false,rest:false,tie:false}, evTok:[], rem:48, complete:false};
+
+// Duración legible: en negras en los compases simples, en corcheas en los demás
+function fmtTicks(t,sig){
+  const u=sig.kind==='simple'?12:6, n=Math.floor(t/u), f=t%u, fr={0:'',3:u===12?'¼':'½',6:'½',9:'¾'}[f];
+  return `${n||!fr?n:''}${fr} ${u===12?(t>u?'negras':'negra'):(t>u?'corcheas':'corchea')}`;
+}
+const remVerb=(t,sig)=>t>(sig.kind==='simple'?12:6)?'faltan':'falta';
+function decomp(t,rest){ const vals=rest?REST_DURS:NOTE_DURS, r=[]; while(t>0){ const v=vals.find(v=>v<=t); r.push(v); t-=v; } return r; }
+// Reparte los tokens en compases: la nota que cruza la barra se parte en notas ligadas; el silencio, en silencios.
+// Devuelve los tokens resultantes y, para cada token de entrada, dónde empieza en la salida (para colocar el cursor).
+function reflow(toks, ex){
+  const sig=sigOf(ex), L=sum(sig.groups), out=[], map=[]; let pos=0;
+  toks.forEach((t,ti)=>{
+    map[ti]=out.length;
+    if(t.trip){
+      if(sig.kind!=='simple') ownErr('Los tresillos solo se usan en compases simples (2/4, 3/4, 4/4, 5/4, 2/2 y 3/2).');
+      if(pos%12) ownErr('Un tresillo tiene que empezar en un tiempo.');
+      out.push({trip:true}); pos=(pos+12)%L; return;
+    }
+    let d=t.dur; const parts=[];
+    while(d>0){ const take=Math.min(d,L-pos); parts.push(take); d-=take; pos=(pos+take)%L; }
+    const pieces=parts.flatMap(p=>decomp(p,t.rest));
+    pieces.forEach((p,i)=>out.push({dur:p, rest:!!t.rest, tie:!t.rest && (i<pieces.length-1 || !!t.tie)}));
+  });
+  map[toks.length]=out.length;
+  // una ligadura solo une dos notas: si lo siguiente es un silencio o un tresillo, se quita
+  out.forEach((t,i)=>{ const nx=out[i+1]; if(t.tie && nx && (nx.trip || nx.rest)) t.tie=false; });
+  if(Math.ceil(sum(out.map(tokTicks))/L)>OWN_MAX_BARS) ownErr(`Un ejercicio puede tener como máximo ${OWN_MAX_BARS} compases.`);
+  return {toks:out, map};
+}
+// Texto → tokens. Si el texto trae «|», cada compás tiene que sumar justo lo que dura (el último puede quedar a medias).
+function parseNotation(text, ex){
+  const raw=String(text).trim(); if(!raw) return [];
+  if(raw.length>OWN_MAX_TEXT) ownErr('La notación es demasiado larga.');
+  const sig=sigOf(ex), L=sum(sig.groups), segs=raw.split('|'), toks=[], lens=[];
+  segs.forEach((seg,si)=>{
+    let len=0;
+    seg.trim().split(/\s+/).filter(Boolean).forEach(w=>{
+      if(toks.length>=1024) ownErr('El ejercicio tiene demasiadas figuras.');
+      const t=w.toLowerCase();
+      if(t==='t'){ toks.push({trip:true}); len+=12; return; }
+      const m=/^(r?)([whqes])(\.?)(~?)$/.exec(t);
+      if(!m) ownErr(`No entiendo «${w.slice(0,12)}» (compás ${si+1}).`);
+      const rest=!!m[1], d=L2D[m[2]]*(m[3]?1.5:1);
+      if(!(rest?REST_DURS:NOTE_DURS).includes(d)) ownErr(rest ? `«${w}» no existe: el único silencio con puntillo es rq. (negra con puntillo).` : `«${w}» no existe: solo la blanca, la negra y la corchea llevan puntillo.`);
+      if(rest && m[4]) ownErr(`«${w}»: un silencio no se liga.`);
+      toks.push({dur:d, rest, tie:!!m[4]}); len+=d;
+    });
+    lens.push(len);
+  });
+  if(segs.length>1) lens.forEach((len,i)=>{
+    const last=i===lens.length-1;
+    if(last ? len>L : len!==L) ownErr(`El compás ${i+1} dura ${fmtTicks(len,sig)} y en ${ex.sig} debe durar ${fmtTicks(L,sig)}.`);
+  });
+  return reflow(toks, ex).toks;
+}
+function tokStr(t){ return t.trip ? 't' : (t.rest?'r':'')+D2L[t.dur]+(t.tie?'~':''); }
+function serialize(toks, ex){
+  const L=sum(sigOf(ex).groups); let pos=0, s='';
+  toks.forEach((t,i)=>{ if(i) s+= pos===0 ? ' | ' : ' '; s+=tokStr(t); pos=(pos+tokTicks(t))%L; });
+  return s;
+}
+function ownInfo(x){ try{ const t=parseNotation(x.notation,x), L=sum(sigOf(x).groups), tot=sum(t.map(tokTicks)); return {bars:Math.ceil(tot/L), complete: t.length>0 && tot%L===0}; }catch(e){ return {bars:0, complete:false}; } }
+
+// Partitura a partir de los tokens: misma estructura que los ritmos generados (las barras se agrupan por tiempos)
+function ownScore(){
+  const ex=own.cur||{sig:'4/4',grp:null}, sig=sigOf(ex), L=sum(sig.groups), starts=[]; let a=0; sig.groups.forEach(g=>{ starts.push(a); a+=g; });
+  const cellAt=p=>{ let c=0; starts.forEach((s0,i)=>{ if(p>=s0) c=i; }); return c; };
+  const measures=[[]], flat=[], evTok=[]; let pos=0, prevTie=false, tc=100;
+  own.toks.forEach((t,ti)=>{
+    if(pos===L){ measures.push([]); pos=0; }
+    const m=measures.length-1, push=e=>{ e.m=m; e.abs=m*L+e.start; e.i=flat.length; flat.push(e); measures[m].push(e); evTok.push(ti); };
+    if(t.trip){ const c=tc++; for(let k=0;k<3;k++){ push({dur:4,rest:false,tuplet:true,cell:c,start:pos}); pos+=4; } prevTie=false; return; }
+    push({dur:t.dur, rest:t.rest, tuplet:false, cell:cellAt(pos), start:pos, tie:prevTie && !t.rest});
+    prevTie=t.tie && !t.rest; pos+=t.dur;
+  });
+  chainTies(flat);
+  return {score:{key:ex.sig, grp:sig.grp, bars:measures.length, sig, L, measures, flat, fb:false, own:true}, evTok, rem:L-pos, complete:own.toks.length>0 && pos===L};
+}
+function ownCfg(){
+  const ex=own.cur||{sig:'4/4',grp:null}, figs=new Set(), rests=new Set(); let ties=false;
+  own.toks.forEach(t=>{ if(t.trip) figs.add('t'); else (t.rest?rests:figs).add(DUR2K[t.dur]); if(t.tie) ties=true; });
+  return {sig:ex.sig, grp:ex.grp, bars:Math.max(1,score&&score.own?score.bars:1), figs:[...figs], rests:[...rests], sync:false, ties};
+}
+function buildOwn(){
+  const r=ownScore(); score=r.score; own.evTok=r.evTok; own.rem=r.rem; own.complete=r.complete;
+  fullScore=null; judg=[]; extras=0; extraTks=[]; $('#results').hidden=true;
+  renderScore(); renderSummary(); renderLights(); renderTempoGlyph(); renderOwnEditor(); updateTransport();
+}
+// Resalta la figura tras la que se insertará la siguiente
+function markSel(){
+  if(stageMode!=='propio' || S.running || judg.length) return;
+  const ti=own.cursor-1;
+  own.evTok.forEach((t,i)=>{ if(evEls[i]) evEls[i].classList.toggle('sel', t===ti); });
+}
+function ownMsg(t,bad){ const m=$('#ownMsg'); m.textContent=t||''; m.hidden=!t; m.classList.toggle('bad',!!bad); }
+function ownSnap(){ return {toks:own.toks, cursor:own.cursor, sig:own.cur.sig, grp:own.cur.grp}; }
+function ownCommit(){
+  own.cur.notation=serialize(own.toks, own.cur); own.cur.updated=Date.now(); saveOwn();
+  if(S.running) stop();
+  buildOwn(); renderOwnList();
+}
+// Aplica una lista nueva de tokens (sin repartir) y coloca el cursor antes del token de entrada «at»
+function ownApply(toks, at){
+  if(!own.cur) return false;
+  let r; try{ r=reflow(toks, own.cur); }catch(e){ if(e instanceof OwnError){ ownMsg(e.message,true); say(e.message); return false; } throw e; }
+  own.undo.push(ownSnap()); if(own.undo.length>100) own.undo.shift(); own.redo=[];
+  own.toks=r.toks; own.cursor=r.map[Math.min(at,toks.length)]; ownMsg(''); ownCommit(); return true;
+}
+function ownInsert(k){
+  if(!own.cur) return;
+  let tok;
+  if(k==='t') tok={trip:true};
+  else {
+    const rest=own.mods.rest, d=L2D[k]*(own.mods.dot?1.5:1);
+    if(!(rest?REST_DURS:NOTE_DURS).includes(d)){ ownMsg(rest&&own.mods.dot ? 'El único silencio con puntillo es el de negra.' : 'Solo la blanca, la negra y la corchea llevan puntillo.', true); return; }
+    tok={dur:d, rest, tie:!rest && own.mods.tie};
+  }
+  const c=own.cursor;
+  if(ownApply([...own.toks.slice(0,c), tok, ...own.toks.slice(c)], c+1)){
+    own.mods={dot:false,rest:false,tie:false}; renderPalette();
+    say(tok.trip ? 'Tresillo añadido' : `${tok.rest?'Silencio de ':''}${TOKNAME[tok.dur]}${tok.tie?' ligada':''} añadida`);
+  }
+}
+function ownDelete(){
+  if(!own.cur || own.cursor<1) return;
+  const c=own.cursor-1;
+  ownApply([...own.toks.slice(0,c), ...own.toks.slice(c+1)], c);
+}
+function ownMove(d){ own.cursor=Math.max(0,Math.min(own.toks.length, own.cursor+d)); markSel(); renderOwnStatus(); }
+function ownUndoRedo(from, to){
+  if(!own.cur || !from.length) return;
+  to.push(ownSnap()); const s=from.pop();
+  own.toks=s.toks; own.cursor=s.cursor; own.cur.sig=s.sig; own.cur.grp=s.grp; ownMsg(''); ownCommit(); renderOwnMeter();
+}
+function ownOpen(x){
+  own.cur=x||null; own.undo=[]; own.redo=[]; own.mods={dot:false,rest:false,tie:false};
+  try{ own.toks = x ? parseNotation(x.notation, x) : []; }catch(e){ own.toks=[]; ownMsg('No se pudo leer la notación guardada de este ejercicio: '+e.message, true); }
+  own.cursor=own.toks.length;
+  set.ownId = x ? x.id : ''; save();
+  renderOwnMeter(); renderPalette(); renderOwnList();
+  if(stageMode==='propio' && score){ stop(); showTempo(); buildOwn(); }
+}
+function uniqueName(x){ let n=x.name, i=2; while(own.list.some(y=>y!==x && y.name===n)) n=`${x.name} (${i++})`; x.name=n.slice(0,60); }
+function ownAdd(x, open=true){ uniqueName(x); own.list.unshift(x); saveOwn(); if(open) ownOpen(x); else renderOwnList(); return x; }
+
+/* --- Editor: pintado --- */
+function renderOwnMeter(){
+  const x=own.cur; if(!x) return;
+  $('#ownSig').value=x.sig;
+  const opts=ODD_GROUPS[x.sig]; $('#ownGrpF').hidden=!opts;
+  $('#ownGrp').innerHTML = opts ? opts.map(g=>`<option value="${g}"${g===x.grp?' selected':''}>${g}</option>`).join('') : '';
+  if(document.activeElement!==$('#ownName')) $('#ownName').value=x.name;
+}
+function renderPalette(){
+  const m=own.mods, simple=own.cur ? sigOf(own.cur).kind==='simple' : true;
+  const keys={w:'1',h:'2',q:'4',e:'8',s:'6',t:'T'};
+  $('#ownPal').innerHTML=['w','h','q','e','s','t'].map(k=>{
+    let ok=true, icon, name;
+    if(k==='t'){ ok=simple && !m.rest && !m.dot; icon=miniFig('t'); name='Tresillo de corcheas'; }
+    else {
+      const d=L2D[k]*(m.dot?1.5:1); ok=(m.rest?REST_DURS:NOTE_DURS).includes(d);
+      const fk = m.dot ? {h:'hd',q:'qd',e:'ed'}[k] : k;
+      icon = !ok ? miniFig(k) : m.rest ? miniRest(fk) : miniFig(fk);
+      name = (m.rest?'Silencio de ':'')+(TOKNAME[d]||TOKNAME[L2D[k]]);
+    }
+    return `<button type="button" class="pal-b" data-k="${k}" ${ok?'':'disabled'} aria-label="${name} (tecla ${keys[k]})" title="${name} · tecla ${keys[k]}">${icon}<kbd>${keys[k]}</kbd></button>`;
+  }).join('');
+  document.querySelectorAll('#ownMods button').forEach(b=>b.setAttribute('aria-pressed',String(!!m[b.dataset.mod])));
+}
+function renderOwnStatus(){
+  const st=$('#ownStatus'); if(!own.cur){ st.textContent=''; return; }
+  const sig=sigOf(own.cur), bars=score&&score.own?score.bars:1;
+  let t;
+  if(!own.toks.length) t='Añade figuras con la paleta o el teclado, o escribe la notación y pulsa «Aplicar texto».';
+  else if(!own.complete) t=`Compás ${bars}: ${remVerb(own.rem,sig)} ${fmtTicks(own.rem,sig)}. Complétalo para poder practicar.`;
+  else t=`${bars} ${bars===1?'compás completo':'compases completos'}: listo para practicar.`;
+  if(own.toks.length) t += own.cursor===0 ? ' Lo nuevo se añade al principio.' : own.cursor<own.toks.length ? ' Lo nuevo se añade tras la figura resaltada.' : '';
+  st.textContent=t;
+  $('#ownPractice').disabled=!own.complete;
+  updateFab();   // el alto de la paleta fija puede cambiar con el texto
+}
+function renderOwnEditor(){
+  $('#secEdit').hidden=!own.cur;
+  if(!own.cur){ updateFab(); return; }
+  renderOwnStatus();
+  if(document.activeElement!==$('#ownText')) $('#ownText').value=own.cur.notation;
+  $('#ownUndo').disabled=!own.undo.length; $('#ownRedo').disabled=!own.redo.length; $('#ownDelTok').disabled=own.cursor<1;
+  if(!$('#ownDelBox').querySelector('#ownDelYes')) renderOwnDelBox();
+}
+function renderOwnDelBox(){ $('#ownDelBox').innerHTML='<button class="btn" id="ownDup" type="button">Duplicar</button><button class="btn warn" id="ownDel" type="button">Borrar ejercicio</button>'; }
+function renderOwnList(){
+  const box=$('#ownList');
+  if(!own.list.length){ box.innerHTML='<p class="hint">Aún no tienes ejercicios. Crea uno con «Nuevo ejercicio», impórtalo, o pulsa «Editar» sobre un ritmo de Práctica libre o de la campaña.</p>'; return; }
+  const best={}; prog.sessions.forEach(r=>{ if(r.mode==='propio' && r.ex && !r.part) best[r.ex]=Math.max(best[r.ex]??0, r.pct); });
+  box.innerHTML=own.list.map(x=>{ const inf=ownInfo(x);
+    return `<button type="button" class="own-item" data-id="${x.id}" aria-current="${!!own.cur && own.cur.id===x.id}"><span class="own-n">${esc(x.name)}</span><span class="own-m">${x.sig}${x.grp?' ('+x.grp+')':''} · ${inf.bars} ${inf.bars===1?'compás':'compases'} · ${x.bpm} ppm${inf.complete?'':' · <i>borrador</i>'}${best[x.id]!=null?` · mejor ${best[x.id]}%`:''}</span></button>`;
+  }).join('');
+}
+
+/* --- Exportar e importar --- */
+const sigLine=x=>`${x.sig}${x.grp?' ('+x.grp+')':''}`;
+function exJSON(list){ return JSON.stringify({formato:'solfeo-ritmico-ejercicios', version:1, ejercicios:list.map(x=>({nombre:x.name, compas:x.sig, ...(x.grp?{agrupacion:x.grp}:{}), tempo:x.bpm, notacion:x.notation}))}, null, 2); }
+function exText(x){ return `${x.name}\n${sigLine(x)} · ${x.bpm} ppm\n${x.notation}`; }
+// Enlace: el ejercicio va tras «#ej=» (no se envía al servidor) en base64url, que solo usa letras, números, «-» y «_»,
+// caracteres que ningún navegador ni servicio de mensajería corta al reconocer el enlace
+function b64url(s){ let b=''; new TextEncoder().encode(s).forEach(c=>b+=String.fromCharCode(c)); return btoa(b).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function unb64url(c){ const b=atob(c.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((c.length+3)%4)); return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(b,ch=>ch.charCodeAt(0))); }
+function exLink(x){ return location.href.split('#')[0]+'#ej='+b64url(['1',x.name,sigLine(x),String(x.bpm),x.notation].join('\n')); }
+function parseSigLine(line){
+  const m=/^\s*(\d{1,2}\/\d{1,2})\s*(?:\(\s*([0-9+]+)\s*\))?\s*(?:[·,;-]\s*)?(\d{2,3})?/.exec(line||'');
+  if(!m) ownErr('Falta el compás y el tempo, por ejemplo «4/4 · 80 ppm».');
+  return {sig:m[1], grp:m[2]||null, bpm:m[3]?+m[3]:80};
+}
+function fromFields(name, sig, grp, bpm, notation){
+  const x=cleanEx({name, sig, grp, bpm, notation:String(notation??'')});
+  x.notation=serialize(parseNotation(x.notation, x), x);
+  return x;
+}
+function fromLinkCode(code){
+  let txt; try{ txt=unb64url(code); }catch(e){ ownErr('El enlace está incompleto o dañado.'); }
+  const l=txt.split('\n'); if(l[0]!=='1' || l.length<5) ownErr('El enlace no es de un ejercicio de esta app.');
+  const sl=parseSigLine(l[2]);
+  return fromFields(l[1], sl.sig, sl.grp, +l[3], l.slice(4).join(' '));
+}
+function importAny(text){
+  const s=String(text).trim(); if(!s) ownErr('No hay nada que importar.');
+  const hm=/#ej=([A-Za-z0-9_-]+)/.exec(s); if(hm) return [fromLinkCode(hm[1])];
+  if(s[0]==='{'){
+    let o; try{ o=JSON.parse(s); }catch(e){ ownErr('El archivo no es un JSON válido.'); }
+    if(!o || o.formato!=='solfeo-ritmico-ejercicios' || !Array.isArray(o.ejercicios)) ownErr('Este archivo no es una exportación de «Mis ejercicios».');
+    if(o.ejercicios.length>500) ownErr('El archivo tiene demasiados ejercicios (máximo 500).');
+    return o.ejercicios.map((e,i)=>{ try{ e=e||{}; return fromFields(e.nombre, e.compas, e.agrupacion, e.tempo, e.notacion); }
+      catch(err){ if(err instanceof OwnError) ownErr(`Ejercicio ${i+1}: ${err.message}`); throw err; } });
+  }
+  const lines=s.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  if(lines.length<3) ownErr('Pega el ejercicio completo: el nombre, el compás y el tempo, y la notación (tres líneas).');
+  const sl=parseSigLine(lines[1]);
+  return [fromFields(lines[0], sl.sig, sl.grp, sl.bpm, lines.slice(2).join(' '))];
+}
+function ownImport(text){
+  let xs; try{ xs=importAny(text); }catch(e){ if(e instanceof OwnError){ ownMsg(e.message,true); return false; } throw e; }
+  xs.slice().reverse().forEach(x=>ownAdd(x,false));
+  ownOpen(xs[0]);
+  ownMsg(xs.length===1 ? `Importado «${xs[0].name}».` : `Importados ${xs.length} ejercicios.`);
+  return true;
+}
+function ownFromHash(){
+  const m=/^#ej=([A-Za-z0-9_-]+)$/.exec(location.hash); if(!m) return false;
+  try{ history.replaceState(null,'',location.href.split('#')[0]); }catch(e){}
+  try{
+    const x=fromLinkCode(m[1]);
+    const dup=own.list.find(y=>y.sig===x.sig && y.grp===x.grp && y.notation===x.notation && (y.name===x.name || y.name.startsWith(x.name+' (')));
+    setView('propio');
+    if(dup){ ownOpen(dup); ownMsg(`Ya tenías «${dup.name}» en Mis ejercicios.`); }
+    else { ownAdd(x); ownMsg(`Ejercicio «${x.name}» recibido por enlace y guardado en Mis ejercicios.`); }
+  }catch(e){
+    if(!(e instanceof OwnError)) throw e;
+    setView('propio'); ownMsg('El enlace del ejercicio no es válido: '+e.message, true);
+  }
+  return true;
+}
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }
+  catch(e){ const ta=document.createElement('textarea'); ta.value=t; ta.style.cssText='position:fixed;opacity:0;top:0'; document.body.appendChild(ta); ta.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(_){} ta.remove(); return ok; }
+}
+function showOut(t){ const o=$('#ownOut'); o.value=t; o.hidden=false; }
+function download(name, text){
+  const u=URL.createObjectURL(new Blob([text],{type:'application/json'})), a=document.createElement('a');
+  a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),1000);
+}
+const slug=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase().slice(0,40)||'ejercicio';
+// «Editar» en Práctica libre y en la campaña: copia el ritmo a Mis ejercicios
+function scoreToToks(sc){
+  const toks=[];
+  for(let i=0;i<sc.flat.length;i++){
+    const e=sc.flat[i];
+    if(e.tuplet){ toks.push({trip:true}); i+=2; continue; }
+    if(e.tie && toks.length && !toks[toks.length-1].trip) toks[toks.length-1].tie=true;
+    toks.push({dur:e.dur, rest:e.rest, tie:false});
+  }
+  return toks;
+}
+function editThis(){
+  const sc=fullScore||score; if(!sc) return;
+  stop();
+  const d=new Date(), x=cleanEx({name:`Ritmo del ${d.toLocaleDateString('es',{day:'numeric',month:'short'})} ${d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}`, sig:sc.key, grp:sc.grp, bpm:curBpm()});
+  x.notation=serialize(scoreToToks(sc), x);
+  ownAdd(x,false); ownOpen(x);
+  setView('propio');
+  ownMsg('Ritmo copiado a Mis ejercicios: ya puedes cambiarlo.');
 }
 
 /* ---------- Guardado del progreso ---------- */
@@ -1445,6 +1874,7 @@ function saveSession(r){
   if(prog.sessions.some(x=>x.id===r.id)) return;
   prog.sessions.push(r); if(prog.sessions.length>MAX_SESS) prog.sessions=prog.sessions.slice(-MAX_SESS);
   commitProg();
+  if(r.mode==='propio') renderOwnList();
 }
 
 /* ---------- Vista de progreso ---------- */
@@ -1453,7 +1883,7 @@ const fmtDate=t=>new Date(t).toLocaleDateString('es',{day:'numeric',month:'short
 const fmtTime=t=>new Date(t).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
 // Las sesiones antiguas solo guardan el índice (lvl); antes de añadir niveles el índice i era el id L(i+1)
 function sessLevel(r){ return r.mode==='campana' ? lvById(r.lid || 'L'+(r.lvl+1)) : -1; }
-function exName(r){ const i=sessLevel(r); return (i>=0 ? `Nivel ${i+1} · ${LEVELS[i].title}` : 'Práctica libre') + (r.part?' · un compás':'') + (r.play==='piano'?' · piano':''); }
+function exName(r){ const i=sessLevel(r); return esc((r.mode==='propio' ? `«${r.exn||'Ejercicio propio'}»` : i>=0 ? `Nivel ${i+1} · ${LEVELS[i].title}` : 'Práctica libre') + (r.part?' · un compás':'') + (r.play==='piano'?' · piano':'')); }
 const avg=a=>a.length?sum(a)/a.length:0;
 function renderProgress(){
   const all=prog.sessions, list=all.filter(r=>pFilter==='todo'||r.mode===pFilter);
@@ -1575,7 +2005,13 @@ function bindTapZone(el,pre){
   // En reposo, un clic (no un arrastre para desplazar la página) empieza la práctica. Se ignora el clic que
   // cierra un toque empezado durante la práctica, para no volver a empezar al soltar después del final.
   let downWhileRunning=false;
-  el.addEventListener('click',()=>{ if(!S.running && !downWhileRunning) start('practice'); downWhileRunning=false; });
+  el.addEventListener('click',e=>{
+    if(!S.running && !downWhileRunning){
+      if(el.id==='pad' && stageMode==='propio' && !judg.length){ const g=e.target.closest('.ev'); if(g){ own.cursor=own.evTok[+g.dataset.i]+1; markSel(); renderOwnStatus(); $('#ownDelTok').disabled=false; } }
+      else start('practice');
+    }
+    downWhileRunning=false;
+  });
   el.addEventListener('pointerdown',e=>{
     downWhileRunning=S.running;
     if(!S.running || (S.mode!=='practice' && S.mode!=='calib')) return;
@@ -1614,6 +2050,7 @@ $('#pfNext').addEventListener('click',()=>{
 $('#fab').addEventListener('change',e=>{ set.fab=e.target.checked; save(); updateFab(); });
 const isField=el=>el && (el.tagName==='INPUT'||el.tagName==='SELECT'||el.tagName==='TEXTAREA');
 document.addEventListener('keydown',e=>{
+  if(ownKeys(e)) return;
   if(e.metaKey||e.ctrlKey||e.altKey||e.repeat) return;
   if(e.key==='Escape' && S.running){ e.preventDefault(); if(S.mode==='practice') finish(); else stop(); return; }
   const practicing=S.running && (S.mode==='practice'||S.mode==='calib');
@@ -1625,7 +2062,7 @@ document.addEventListener('keydown',e=>{
   if((e.code==='Space'||e.code==='Enter') && e.target===$('#pad')){ e.preventDefault(); if(S.running) tap('k'+e.code); else start('practice'); return; }
   if($('#stageView').hidden) return;
   const k=e.key.toLowerCase();
-  if(k==='n'){ if(S.running && S.mode!=='metro') stop(); generate(); }
+  if(k==='n'){ if(stageMode==='propio') return; if(S.running && S.mode!=='metro') stop(); generate(); }
   else if(k==='p'){ e.preventDefault(); start('practice'); }
   else if(k==='r'){ e.preventDefault(); start('play'); }
 });
@@ -1694,10 +2131,105 @@ $('#pClearBox').addEventListener('click',e=>{
   else if(id==='pClearYes'){ prog=emptyProg(); commitProg(); box.innerHTML='<button class="btn warn" id="pClear" type="button">Borrar historial</button>'; renderProgress(); $('#pClear').focus(); say('Historial borrado'); }
   else if(id==='pClearNo'){ box.innerHTML='<button class="btn warn" id="pClear" type="button">Borrar historial</button>'; $('#pClear').focus(); }
 });
+// Editor de «Mis ejercicios»
+function ownKeys(e){
+  if(stageMode!=='propio' || S.running || !own.cur || $('#stageView').hidden || isField(e.target)) return false;
+  const k=e.key.toLowerCase();
+  if(e.ctrlKey||e.metaKey){
+    if(k==='z'){ e.preventDefault(); e.shiftKey ? ownUndoRedo(own.redo,own.undo) : ownUndoRedo(own.undo,own.redo); return true; }
+    if(k==='y'){ e.preventDefault(); ownUndoRedo(own.redo,own.undo); return true; }
+    return false;
+  }
+  if(e.altKey) return false;
+  const fig={'1':'w','2':'h','4':'q','8':'e','6':'s','t':'t'}[k];
+  if(fig && !e.repeat){ e.preventDefault(); ownInsert(fig); return true; }
+  const mod={'.':'dot','s':'rest','l':'tie'}[k];
+  if(mod && !e.repeat){ e.preventDefault(); own.mods[mod]=!own.mods[mod]; renderPalette(); return true; }
+  if(k==='backspace'||k==='delete'){ e.preventDefault(); ownDelete(); return true; }
+  if(k==='arrowleft'||k==='arrowright'){ if(e.target.closest && e.target.closest('.tabs')) return false; e.preventDefault(); ownMove(k==='arrowleft'?-1:1); return true; }
+  return false;
+}
+$('#ownSig').innerHTML=Object.keys(SIGS).map(k=>`<option value="${k}">${k}</option>`).join('');
+// Con la paleta fija abajo, la figura resaltada debe quedar a la vista por encima de ella
+function ownReveal(){
+  if(!dockShown()) return;
+  const el=document.querySelector('#score .ev.sel') || [...document.querySelectorAll('#score .ev')].pop(); if(!el) return;
+  const r=el.getBoundingClientRect(), room=innerHeight-fabReserve();
+  if(r.bottom+40>room) scrollTo({top:scrollY+r.bottom+40-room, behavior:'smooth'});
+  else if(r.top<40) scrollTo({top:scrollY+r.top-40, behavior:'smooth'});
+}
+$('#ownPal').addEventListener('click',e=>{ const b=e.target.closest('.pal-b'); if(b && !b.disabled){ ownInsert(b.dataset.k); ownReveal(); } });
+$('#ownMods').addEventListener('click',e=>{ const b=e.target.closest('button[data-mod]'); if(!b) return; own.mods[b.dataset.mod]=!own.mods[b.dataset.mod]; renderPalette(); });
+$('#ownUndo').addEventListener('click',()=>{ ownUndoRedo(own.undo,own.redo); ownReveal(); });
+$('#ownRedo').addEventListener('click',()=>{ ownUndoRedo(own.redo,own.undo); ownReveal(); });
+$('#ownDelTok').addEventListener('click',()=>{ ownDelete(); ownReveal(); });
+$('#ownPractice').addEventListener('click',()=>start('practice'));
+// Mientras se escribe en un campo (nombre, notación…) la paleta fija se quita, para no tapar ni quedar sobre el teclado
+const isTyping = el => !!el && el.matches && el.matches('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea,select');
+document.addEventListener('focusin',e=>{ const f=isTyping(e.target); if(f!==fieldFocus){ fieldFocus=f; updateFab(); } });
+document.addEventListener('focusout',()=>{ setTimeout(()=>{ const f=isTyping(document.activeElement); if(f!==fieldFocus){ fieldFocus=f; updateFab(); } }); });
+narrowMQ.addEventListener('change',updateFab);
+$('#ownName').addEventListener('input',e=>{ if(!own.cur) return; own.cur.name=cleanName(e.target.value); saveOwn(); renderOwnList(); renderSummary(); });
+$('#ownName').addEventListener('change',e=>{ if(own.cur){ uniqueName(own.cur); e.target.value=own.cur.name; saveOwn(); renderOwnList(); renderSummary(); } });
+function ownChangeMeter(sig, grp){
+  const x=own.cur; if(!x) return;
+  const nx={...x, sig, grp};
+  let r; try{ r=reflow(own.toks, nx); }catch(err){ if(!(err instanceof OwnError)) throw err; ownMsg(err.message,true); renderOwnMeter(); return; }
+  own.undo.push(ownSnap()); own.redo=[];
+  x.sig=sig; x.grp=grp; own.toks=r.toks; own.cursor=r.map[Math.min(own.cursor,own.toks.length)]??r.toks.length;
+  ownMsg(''); renderOwnMeter(); renderPalette(); stop(); ownCommit(); renderTempoGlyph();
+}
+$('#ownSig').addEventListener('change',e=>{ const sg=e.target.value, o=ODD_GROUPS[sg]; ownChangeMeter(sg, o?o[0]:null); });
+$('#ownGrp').addEventListener('change',e=>ownChangeMeter(own.cur.sig, e.target.value));
+$('#ownTextApply').addEventListener('click',()=>{
+  if(!own.cur) return;
+  let t; try{ t=parseNotation($('#ownText').value, own.cur); }catch(err){ if(!(err instanceof OwnError)) throw err; ownMsg(err.message,true); return; }
+  own.undo.push(ownSnap()); own.redo=[]; own.toks=t; own.cursor=t.length; ownMsg('Notación aplicada.'); ownCommit();
+});
+$('#ownList').addEventListener('click',e=>{ const b=e.target.closest('.own-item'); if(!b) return; const x=own.list.find(y=>y.id===b.dataset.id); if(x){ ownMsg(''); ownOpen(x); } });
+$('#ownNew').addEventListener('click',()=>{
+  let n=own.list.length+1; while(own.list.some(y=>y.name===`Ejercicio ${n}`)) n++;
+  const base=own.cur||{sig:set.sig, grp:sigOf(set).grp, bpm:set.bpm};
+  ownAdd(cleanEx({name:`Ejercicio ${n}`, sig:base.sig, grp:base.grp, bpm:base.bpm, notation:''}));
+  ownMsg('');
+  // en pantallas táctiles no se enfoca el nombre (abriría el teclado y quitaría la paleta fija): se lleva la vista a la partitura
+  if(touchMQ.matches) $('.score-card').scrollIntoView({block:'start', behavior:'smooth'});
+  else { $('#ownName').focus(); $('#ownName').select(); }
+});
+$('#ownImpBtn').addEventListener('click',()=>{ const b=$('#ownImport'); b.hidden=!b.hidden; $('#ownImpBtn').setAttribute('aria-expanded',String(!b.hidden)); if(!b.hidden) $('#ownImpText').focus(); });
+$('#ownImpCancel').addEventListener('click',()=>{ $('#ownImport').hidden=true; $('#ownImpBtn').setAttribute('aria-expanded','false'); $('#ownImpText').value=''; $('#ownImpFile').value=''; });
+$('#ownImpGo').addEventListener('click',()=>{ if(ownImport($('#ownImpText').value)){ $('#ownImpCancel').click(); } });
+$('#ownImpFile').addEventListener('change',async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  if(f.size>1e6){ ownMsg('El archivo es demasiado grande (máximo 1 MB).',true); e.target.value=''; return; }
+  if(ownImport(await f.text())) $('#ownImpCancel').click(); else e.target.value='';
+});
+$('#ownExpAll').addEventListener('click',()=>{ if(!own.list.length){ ownMsg('No hay ejercicios que exportar.',true); return; } download('mis-ejercicios.json', exJSON(own.list)); ownMsg(`Descargado mis-ejercicios.json con ${own.list.length} ${own.list.length===1?'ejercicio':'ejercicios'}.`); });
+$('#ownDl').addEventListener('click',()=>{ if(!own.cur) return; const f=slug(own.cur.name)+'.json'; download(f, exJSON([own.cur])); ownMsg(`Descargado ${f}.`); });
+$('#ownCopyText').addEventListener('click',async()=>{ if(!own.cur) return; const t=exText(own.cur); showOut(t); ownMsg(await copyText(t) ? 'Texto copiado: pégalo donde quieras compartirlo.' : 'No se pudo copiar: selecciona el texto de abajo y cópialo.', false); });
+$('#ownCopyLink').addEventListener('click',async()=>{
+  if(!own.cur) return;
+  const u=exLink(own.cur);
+  if(u.length>LINK_MAX){ $('#ownOut').hidden=true; ownMsg(`Este ejercicio es demasiado largo para un enlace (${u.length} caracteres; el máximo seguro es ${LINK_MAX}). Compártelo como archivo .json o como texto.`, true); return; }
+  showOut(u); ownMsg(await copyText(u) ? `Enlace copiado (${u.length} caracteres).` : 'No se pudo copiar: selecciona el enlace de abajo y cópialo.', false);
+});
+$('#ownDelBox').addEventListener('click',e=>{
+  const id=e.target.closest('button')?.id, x=own.cur; if(!x) return;
+  if(id==='ownDup'){ const c=cleanEx({...x, id:'', name:x.name+' (copia)', created:0, updated:0}); ownAdd(c); ownMsg(`Creada la copia «${c.name}».`); }
+  else if(id==='ownDel'){ $('#ownDelBox').innerHTML=`<span>¿Borrar «${esc(x.name)}»? Tus prácticas guardadas se conservan.</span><button class="btn warn" id="ownDelYes" type="button">Sí, borrar</button><button class="btn" id="ownDelNo" type="button">Cancelar</button>`; $('#ownDelNo').focus(); }
+  else if(id==='ownDelYes'){ own.list=own.list.filter(y=>y!==x); saveOwn(); renderOwnDelBox(); ownOpen(own.list[0]||null); ownMsg(`Borrado «${x.name}».`); say(`Borrado ${x.name}`); }
+  else if(id==='ownDelNo'){ renderOwnDelBox(); $('#ownDel').focus(); }
+});
+$('#bEditThis').addEventListener('click',editThis);
+$('#pfNew').addEventListener('click',()=>{ if(postOk() && stageMode==='propio') document.querySelector('#secOwn').scrollIntoView({block:'start',behavior:'smooth'}); });
+addEventListener('hashchange',ownFromHash);
+
 new ResizeObserver(()=>{ if(!$('#progView').hidden) renderChart(prog.sessions.filter(r=>pFilter==='todo'||r.mode===pFilter)); }).observe($('#progView'));
 
 renderSigs(); renderGrp(); renderFigs(); renderRests(); syncControls(); syncFolds(); padIdle();
+const ownLast=own.list.find(x=>x.id===set.ownId)||own.list[0]; if(ownLast) ownOpen(ownLast);
 setView(stageMode);
+ownFromHash();
 if(!set.seen && !prog.sessions.length) $('#welcome').hidden=false;
 initStore();
 })();
