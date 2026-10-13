@@ -1,7 +1,7 @@
 // Paleta fija (#ownDock) de «Mis ejercicios» en el móvil
 const { suite } = require('./lib');
 
-suite('Paleta fija de Mis ejercicios (móvil)', async ({ b, URL, ok, MOB, page, open, until, wf, settle, postReady, waitRunning, waitResults }) => {
+suite('Paleta fija de Mis ejercicios (móvil)', async ({ b, URL, ok, MOB, page, open, until, wf, settle, postReady, waitRunning, waitResults, tapAndStop }) => {
   const m = await page(b, MOB); await open(m, URL);
   const st = () => m.evaluate(() => {
     const d = document.querySelector('#ownDock'), r = d.getBoundingClientRect();
@@ -46,7 +46,7 @@ suite('Paleta fija de Mis ejercicios (móvil)', async ({ b, URL, ok, MOB, page, 
   // practicar: la paleta se aparta; con resultados también
   await m.tap('#ownPractice'); await waitRunning(m, 'practice');
   ok((await st()).away, 'practicando: la paleta se aparta');
-  await m.keyboard.press('Escape'); await waitResults(m);
+  await tapAndStop(m); await waitResults(m);
   s = await st();
   ok(s.away && s.post, 'con resultados: paleta apartada y botón de tres partes ' + JSON.stringify({ away: s.away, post: s.post }));
   await m.evaluate(() => __t.setView('libre'));
@@ -76,7 +76,7 @@ suite('Paleta fija de Mis ejercicios (móvil)', async ({ b, URL, ok, MOB, page, 
   await t.tap('#ownText'); await t.fill('#ownText', 'q q h'); await t.tap('#ownTextApply');
   ok(await until(t, () => __t.own.cur.notation === 'q q h'), 'aplicar texto con el teclado abierto: ' + await t.evaluate(() => __t.own.cur.notation));
   await t.tap('#ownPractice'); await waitRunning(t, 'practice');
-  await t.keyboard.press('Escape'); await waitResults(t); await postReady(t);
+  await tapAndStop(t); await waitResults(t); await postReady(t);
   ok(await t.evaluate(() => document.body.classList.contains('dock-away') && !document.querySelector('#postFab').hidden), 'resultados: paleta apartada y botón de tres partes');
   ok(await t.textContent('#pfNewLbl') === 'Editar', 'el botón central dice «Editar»');
   await t.tap('#pfNew');

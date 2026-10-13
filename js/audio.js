@@ -23,16 +23,31 @@ function stopTimed(){ if(S.running && (S.mode==='practice'||S.mode==='calib')) s
 // Al salir de la página se corta la práctica o la medición; al volver, el audio se reanuda
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) stopTimed(); else if(ctx && ctx.state!=='running') ctx.resume().catch(()=>{}); });
 addEventListener('pageshow',()=>{ if(ctx && ctx.state!=='running') ctx.resume().catch(()=>{}); });
+// Hora del audio (reloj de ctx) que sonaba por el altavoz en el instante ts (ms de performance.now(), p. ej. e.timeStamp;
+// por defecto, ahora). getOutputTimestamp ya descuenta la latencia de salida (leída en cada momento, no al crear el contexto,
+// cuando aún vale 0) y no va a saltos como currentTime; si no da datos, currentTime menos la latencia de salida.
+function heardAt(ts){
+  const pn=performance.now(); let p=+ts; if(!(p>pn-1000 && p<=pn)) p=pn; // sin hora del evento o en otra base: ahora
+  try{ const o=ctx.getOutputTimestamp && ctx.getOutputTimestamp();
+    if(o && o.contextTime>0 && o.performanceTime>0 && Math.abs(pn-o.performanceTime)<500) return o.contextTime+(p-o.performanceTime)/1000; }catch(e){}
+  return ctx.currentTime-(pn-p)/1000-(ctx.outputLatency||ctx.baseLatency||0);
+}
+// Fuentes programadas y aún sin terminar: stop() las para (desconectar el bus no basta: seguirían gastando CPU hasta su hora)
+const liveSrc=new Set();
+function track(...ns){ ns.forEach(n=>{ liveSrc.add(n); n.onended=()=>liveSrc.delete(n); }); }
+function stopSources(){ const t=ctx.currentTime+0.03; liveSrc.forEach(n=>{ try{ n.stop(t); }catch(e){} }); liveSrc.clear(); }
+// lo que ya pasó no se programa (tras una pausa del hilo principal sonaría todo de golpe)
+const tooLate=t=>t<ctx.currentTime-0.02;
 const CLICK_F={accent:1760,beat:1250,weak:1040,sub:880}, CLICK_V={accent:1,beat:0.7,weak:0.45,sub:0.28};
 function click(bus,t,level,vol){
-  const v=CLICK_V[level]*(vol==null?set.metroVol:vol); if(v<=0.001) return;
+  const v=CLICK_V[level]*(vol==null?set.metroVol:vol); if(v<=0.001 || tooLate(t)) return;
   const o=ctx.createOscillator(), g=ctx.createGain();
   o.type='triangle'; o.frequency.setValueAtTime(CLICK_F[level],t);
   g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v*0.9,t+0.002); g.gain.exponentialRampToValueAtTime(0.0001,t+0.055);
-  o.connect(g); g.connect(bus); o.start(t); o.stop(t+0.07);
+  o.connect(g); g.connect(bus); o.start(t); o.stop(t+0.07); track(o);
 }
-function noteSound(bus,t,dsec){
-  const v=set.rhythmVol; if(v<=0.001) return;
+function noteSound(bus,t,dsec,vol){
+  const v=vol==null?set.rhythmVol:vol; if(v<=0.001 || tooLate(t)) return;
   if(set.timbre==='tono'){
     const o=ctx.createOscillator(), o2=ctx.createOscillator(), g=ctx.createGain(), g2=ctx.createGain();
     o.type='triangle'; o.frequency.value=440; o2.type='sine'; o2.frequency.value=880; g2.gain.value=0.25;
@@ -40,7 +55,7 @@ function noteSound(bus,t,dsec){
     const end=t+Math.max(0.06,dsec*0.86), mid=Math.min(end,t+0.1);
     g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.5*v,t+0.006);
     g.gain.linearRampToValueAtTime(0.32*v,mid); g.gain.setValueAtTime(0.32*v,end); g.gain.linearRampToValueAtTime(0,end+0.035);
-    o.start(t); o2.start(t); o.stop(end+0.05); o2.stop(end+0.05);
+    o.start(t); o2.start(t); o.stop(end+0.05); o2.stop(end+0.05); track(o,o2);
   } else {
     const n=ctx.createBufferSource(); n.buffer=noiseBuf;
     const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2300; bp.Q.value=2.5;
@@ -48,7 +63,7 @@ function noteSound(bus,t,dsec){
     n.connect(bp); bp.connect(g); g.connect(bus); n.start(t); n.stop(t+0.08);
     const o=ctx.createOscillator(), g2=ctx.createGain(); o.frequency.setValueAtTime(620,t); o.frequency.exponentialRampToValueAtTime(300,t+0.08);
     g2.gain.setValueAtTime(0.6*v,t); g2.gain.exponentialRampToValueAtTime(0.0001,t+0.1);
-    o.connect(g2); g2.connect(bus); o.start(t); o.stop(t+0.12);
+    o.connect(g2); g2.connect(bus); o.start(t); o.stop(t+0.12); track(n,o);
   }
 }
 

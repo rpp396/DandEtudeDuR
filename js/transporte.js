@@ -12,13 +12,13 @@ function barClicks(tb,spt,countIn,force){
     for(let tk=0; tk<L; tk+=6){
       const t=tb+tk*spt, isPulse=starts.has(tk);
       if(isPulse) pulse++;
-      click(S.bus,t, tk===0 ? (set.accent?'accent':'beat') : isPulse ? 'beat' : 'weak');
+      click(S.mBus,t, tk===0 ? (set.accent?'accent':'beat') : isPulse ? 'beat' : 'weak', 1);
       if(tk%sig.click===0) S.vis.push({t,idx:light++,count:pulse});
     }
     return;
   }
   const audible = countIn || force || set.metro;
-  const sb=+set.sub;
+  const sb=subTicks(sig);
   // Amalgama fuera de la cuenta previa: por defecto solo suenan los pulsos (inicio de cada grupo);
   // las demás corcheas, solo si se elige una subdivisión
   const oddPulses = sig.kind==='odd' && !countIn;
@@ -26,19 +26,34 @@ function barClicks(tb,spt,countIn,force){
   for(let tk=0; tk<L; tk+=sig.click){
     const lvl = tk===0 ? (set.accent?'accent':'beat') : (sig.kind==='odd' ? (starts.has(tk)?'beat':'weak') : 'beat');
     const t=tb+tk*spt;
-    if(audible && (!oddPulses || starts.has(tk) || sb>0)) click(S.bus,t,lvl);
+    if(audible && (!oddPulses || starts.has(tk) || sb>0)) click(S.mBus,t,lvl,1);
     S.vis.push({t,idx:n,count:countIn?n+1:0});
     n++;
   }
   if(audible && !countIn && sb>0 && sb<sig.click && sig.click%sb===0){
-    for(let tk=0; tk<L; tk+=sb) if(tk%sig.click) click(S.bus,tb+tk*spt,'sub');
+    for(let tk=0; tk<L; tk+=sb) if(tk%sig.click) click(S.mBus,tb+tk*spt,'sub',1);
   }
 }
-function schedulePass(p){
-  const base=S.passStart+p*S.passDur;
-  for(let b=0;b<score.bars;b++) barClicks(base+b*score.L*S.spt,S.spt,false,false);
+const AHEAD=1; // s que se programan por adelantado: el resto, compás a compás (pocos nodos vivos aunque el ritmo sea largo)
+// Subdivisión efectiva del metrónomo: los tresillos solo dividen el pulso en compases simples; en compuestos y amalgama
+// el pulso ya se divide en corcheas, así que «Tresillos» suena como «Corcheas» (y en el panel está deshabilitado)
+const subTicks=sig=>{ const sb=+set.sub; return sb===4 && sig.kind!=='simple' ? 6 : sb; };
+// Inicio del compás g, contado desde el primero de la cuenta previa
+function barAt(g){
+  const c=S.countBars, bl=score.L*S.spt; if(g<c) return S.t0+g*bl;
+  const k=g-c; return S.passStart+Math.floor(k/score.bars)*S.passDur+(k%score.bars)*bl;
+}
+function schedBar(g){
+  const t=barAt(g); if(g<S.countBars){ barClicks(t,S.spt,true,true); return; }
+  barClicks(t,S.spt,false,false);
   // «Reproducir» siempre hace sonar el ritmo; en la práctica depende de «Escuchar el ritmo al practicar»
-  if(S.mode==='play' || set.sound) score.flat.forEach(e=>{ if(!e.rest && !e.tie) noteSound(S.bus,base+e.abs*S.spt,e.len*S.spt); });
+  if(S.mode==='play' || set.sound){ const b=(g-S.countBars)%score.bars, base=t-b*score.L*S.spt;
+    S.byBar[b].forEach(e=>noteSound(S.rBus,base+e.abs*S.spt,e.len*S.spt,1)); }
+}
+// Volumen en vivo: el metrónomo y el ritmo van por su propio bus (las envolventes, a volumen 1)
+function liveVol(){
+  if(!S.running || !S.mBus) return; const t=ctx.currentTime;
+  S.mBus.gain.setTargetAtTime(set.metroVol,t,0.02); S.rBus.gain.setTargetAtTime(set.rhythmVol,t,0.02);
 }
 function start(mode){
   if(mode==='practice' && stageMode==='propio' && !own.complete){
@@ -48,42 +63,58 @@ function start(mode){
   stop(); if(!ensureAudio()) return;
   const L=score.L, spt=60/(curBpm()*score.sig.click);
   const bus=ctx.createGain(); bus.connect(master);
-  const lat=(ctx.outputLatency||ctx.baseLatency||0);
+  const mBus=ctx.createGain(), rBus=ctx.createGain(); mBus.gain.value=set.metroVol; rBus.gain.value=set.rhythmVol; mBus.connect(bus); rBus.connect(bus);
   const t0=ctx.currentTime+0.15;
-  const countBars = mode==='metro'?0:(+set.countIn);
-  S={mode,running:true,bus,spt,lat,t0,passStart:t0+countBars*L*spt,passDur:score.bars*L*spt,
-     loop:mode==='play'&&set.loop,vis:[],visPtr:0,genPass:0,nextBar:t0,nowI:-1,light:-1,notes:[]};
+  // al practicar suena al menos un compás de cuenta: sin ella la primera nota llegaría 150 ms después de pulsar
+  const countBars = mode==='metro'?0 : mode==='practice'?Math.max(1,+set.countIn) : +set.countIn;
+  const loop=mode==='play'&&set.loop;
+  S={mode,running:true,bus,mBus,rBus,spt,t0,countBars,passStart:t0+countBars*L*spt,passDur:score.bars*L*spt,off:set.offset/1000,
+     loop,vis:[],visPtr:0,nextG:0,endG:loop?Infinity:countBars+score.bars,nextBar:t0,nowI:-1,light:-1,notes:[],taps:[],
+     byBar:score.measures.map(()=>[])};
+  score.flat.forEach(e=>{ if(!e.rest && !e.tie) S.byBar[e.m].push(e); });
   judg=[]; extras=0; extraTks=[]; $('#results').hidden=true; if(mode==='practice') $('#calib').hidden=true;
-  if(mode!=='metro'){
-    for(let b=0;b<countBars;b++) barClicks(t0+b*L*spt,spt,true,true);
-    schedulePass(0); S.genPass=1;
-    renderScore();
-  }
+  if(mode!=='metro') renderScore();
   const pad=$('#pad');
   if(mode==='practice'){
-    const ns=score.flat.filter(e=>!e.rest && !e.tie).map(e=>({i:e.i,t:S.passStart+e.abs*spt+lat+set.offset/1000,dsec:e.len*spt,done:false}));
-    S.hold=!!set.hold; S.holds=new Map();
+    // n.t: hora (en el reloj del audio) en que se oye la nota, más la corrección del usuario; la latencia de salida
+    // la descuenta heardAt() en cada toque
+    const ns=score.flat.filter(e=>!e.rest && !e.tie).map(e=>({i:e.i,t:S.passStart+e.abs*spt+S.off,dsec:e.len*spt,done:false}));
+    S.hold=!!set.hold; S.holds=new Map(); S.recent=[];
     ns.forEach((n,j)=>{ const pg=j>0?n.t-ns[j-1].t:1, ng=j<ns.length-1?ns[j+1].t-n.t:1; n.win=Math.max(0.05,Math.min(0.18,Math.min(pg,ng)/2)); });
     S.notes=ns;
+    // antes de esto los toques son de la cuenta previa y no cuentan (con la corrección del usuario y sin pisar la ventana de la primera nota)
+    const beat=score.sig.click*spt;
+    S.tapFrom=Math.min(ns.length?ns[0].t-ns[0].win:Infinity, S.passStart+S.off-Math.min(0.25,beat/2));
     pad.classList.add('live'); $('#padMain').textContent=set.hold?'Pulsa en cada nota y mantén mientras dure':'Toca en cada nota'; $('#padSub').textContent='Escucha la cuenta y empieza en el primer tiempo.';
     say(`Práctica${set.hold?' en modo piano':''}: escucha la cuenta y toca en cada nota. Esc para terminar.`);
     showPad();
-  } else if(document.activeElement && document.activeElement.blur && mode!=='metro') { /* keep focus */ }
+  }
+  schedTick();
   S.timer=setInterval(schedTick,40);
   S.raf=requestAnimationFrame(frame);
   updateTransport();
 }
 function schedTick(){
   if(!S.running) return;
+  const now=ctx.currentTime;
   if(S.mode==='metro'){
-    while(S.nextBar < ctx.currentTime+0.3){
+    // tras una pausa del hilo principal (segundo plano, tarea larga) se salta lo atrasado en vez de hacerlo sonar de golpe
+    const bar=score.L*60/(curBpm()*score.sig.click);
+    if(S.nextBar<now) S.nextBar+=Math.ceil((now-S.nextBar)/bar)*bar;
+    while(S.nextBar < now+0.3){
       const spt=60/(curBpm()*score.sig.click);
       barClicks(S.nextBar,spt,false,true);
       S.nextBar+=score.L*spt;
     }
-  } else if(S.loop){
-    while(S.passStart+S.genPass*S.passDur < ctx.currentTime+0.6){ schedulePass(S.genPass++); }
+  } else {
+    const bl=score.L*S.spt;
+    while(S.nextG<S.endG){
+      const t=barAt(S.nextG); if(t>=now+AHEAD) break;
+      if(t+bl>now) schedBar(S.nextG); // un compás ya pasado entero se salta; de uno empezado solo suena lo que falta
+      S.nextG++;
+    }
   }
+  if(S.visPtr>256){ S.vis.splice(0,S.visPtr); S.visPtr=0; }
 }
 function setNow(i){
   if(i===S.nowI) return;
@@ -113,7 +144,7 @@ function showCount(c){
 }
 function frame(){
   if(!S.running) return;
-  const heard=ctx.currentTime-S.lat;
+  const heard=heardAt();
   while(S.visPtr+1<S.vis.length && S.vis[S.visPtr+1].t<=heard) S.visPtr++;
   const v=S.vis[S.visPtr];
   if(v && v.t<=heard) setLight(v.idx);
@@ -141,18 +172,22 @@ function stop(){
     clearInterval(S.timer); cancelAnimationFrame(S.raf);
     const bus=S.bus;
     try{ bus.gain.setTargetAtTime(0,ctx.currentTime,0.01); setTimeout(()=>{ try{bus.disconnect();}catch(e){} },300); }catch(e){}
+    stopSources();
   }
   setNow(-1); setLight(-1); showCount('');
   S.running=false;
   padIdle();
   updateTransport();
 }
-function finish(){
+// manual: «Detener» o Esc. Si aún no se ha tocado nada (p. ej. durante la cuenta previa) se para sin resultados ni sesión
+function finish(manual){
   const wasPractice=S.mode==='practice';
-  const notes=S.notes, holds=S.hold?[...S.holds.values()]:null, endT=ctx?ctx.currentTime:0;
+  const r={notes:S.notes, taps:S.taps, hold:!!S.hold, endT:ctx?heardAt():0, passStart:S.passStart, off:S.off, spt:S.spt};
   stop();
   setHeld(false);
-  if(wasPractice) showResults(notes, holds, endT);
+  if(!wasPractice) return;
+  if(manual && !r.taps.length){ say('Práctica detenida, sin resultados.'); return; }
+  showResults(r);
 }
 function updateTransport(){
   updateFab();

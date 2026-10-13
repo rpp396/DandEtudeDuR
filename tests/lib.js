@@ -24,7 +24,7 @@ function loadPlaywright() {
 const { chromium } = loadPlaywright();
 
 // Estado interno expuesto a las pruebas (js/test-hook.js, cargado después de inicio.js)
-const HOOK = "window.__t={get own(){return own}, get ownApi(){ return typeof parseNotation==='function' ? {parseNotation,serialize,reflow,importAny,exLink,exText,exJSON,fromLinkCode,ownInsert,ownOpen} : null; }, get fullScore(){return fullScore}, setLevelForTest(i){ levelIdx=i; stageMode='campana'; }, get score(){return score}, generate, figsUsed, restList, get set(){return set}, SIGS, LEVELS, selectLevel, setView, cfg, get levelIdx(){return levelIdx}, get S(){return S}, get ctx(){return ctx}, tapVoices, renderScore, get prog(){return prog}};\n";
+const HOOK = "window.__t={get own(){return own}, get ownApi(){ return typeof parseNotation==='function' ? {parseNotation,serialize,reflow,importAny,exLink,exText,exJSON,fromLinkCode,ownInsert,ownOpen} : null; }, get fullScore(){return fullScore}, setLevelForTest(i){ levelIdx=i; stageMode='campana'; }, get score(){return score}, generate, figsUsed, restList, get set(){return set}, SIGS, LEVELS, selectLevel, setView, cfg, get levelIdx(){return levelIdx}, get S(){return S}, get ctx(){return ctx}, tapVoices, renderScore, get prog(){return prog}, heardAt, alignTaps, liveSrc, curBpm, start, stop, get K(){return K}};\n";
 
 let tmpDir = null;
 function tmp() {
@@ -91,15 +91,24 @@ async function page(b, opts = {}) {
 // Programa toques con la barra espaciadora a la hora de cada nota, con un desvío (ms) por nota; null = no tocar
 async function scheduleTaps(p, offs, extraAt) {
   return p.evaluate(([offs, extraAt]) => {
-    const T = __t, sc = T.score, spt = T.S.spt, c = T.ctx, base = T.S.passStart + T.S.lat;
+    // horas en el reloj del audio tal como se oye (heardAt descuenta la latencia de salida)
+    const T = __t, sc = T.score, spt = T.S.spt, base = T.S.passStart;
     const heads = sc.flat.filter(e => !e.rest && !e.tie);
-    const fire = (when, fn) => { const iv = setInterval(() => { if (c.currentTime >= when) { clearInterval(iv); fn(); } }, 2); };
+    const fire = (when, fn) => { const iv = setInterval(() => { if (T.heardAt() >= when) { clearInterval(iv); fn(); } }, 2); };
     const key = t => document.dispatchEvent(new KeyboardEvent(t, { code: 'Space', key: ' ', bubbles: true }));
     heads.forEach((e, k) => { const o = offs[k % offs.length]; if (o == null) return; const at = base + e.abs * spt + o / 1000;
       fire(at, () => key('keydown')); fire(at + Math.min(0.12, e.len * spt * 0.5), () => key('keyup')); });
     if (extraAt != null) { const at = base + extraAt * spt; fire(at, () => key('keydown')); fire(at + 0.05, () => key('keyup')); }
     return { heads: heads.length, passStart: T.S.passStart };
   }, [offs, extraAt]);
+}
+
+// Termina la práctica en curso con Esc mostrando resultados: «Detener» sin haber tocado nada (p. ej. en la cuenta previa)
+// para sin resultados, así que antes se toca una vez, pasada la cuenta
+async function tapAndStop(p) {
+  await p.waitForFunction(() => __t.S.running && __t.S.mode === 'practice' && __t.heardAt() > __t.S.tapFrom + 0.02, null, { timeout: 15000 });
+  await p.evaluate(() => { const k = t => document.dispatchEvent(new KeyboardEvent(t, { code: 'Space', key: ' ', bubbles: true })); k('keydown'); k('keyup'); });
+  await p.keyboard.press('Escape');
 }
 
 // Pasa a la pagina de la app y espera a que esté lista (script ejecutado, fuentes, __t disponible)
@@ -143,7 +152,7 @@ function suite(name, fn) {
     try {
       const L = await launch(); b = L.b; server = L.server;
       b.on('disconnected', () => { if (!closing) console.log('FAIL Chromium se cerró inesperadamente (proceso terminado por el sistema?)'); });
-      await fn({ b, URL: L.URL, ok, tmp, MOB, page, open, ready, wf, until, settle, postReady, vis, scheduleTaps, waitResults, waitRunning, waitStopped });
+      await fn({ b, URL: L.URL, ok, tmp, MOB, page, open, ready, wf, until, settle, postReady, vis, scheduleTaps, tapAndStop, waitResults, waitRunning, waitStopped });
     } catch (e) {
       fail++; console.log('FAIL excepción en la suite: ' + (e && e.stack || e));
     } finally {

@@ -1,7 +1,7 @@
 // Teclado, accesibilidad, bienvenida, compás más flojo, paneles plegables, restablecer, avisos y móvil
 const { suite } = require('./lib');
 
-suite('Teclado, accesibilidad y ajustes', async ({ b, URL, ok, MOB, page, open, until, wf, vis, waitRunning, waitStopped, waitResults }) => {
+suite('Teclado, accesibilidad y ajustes', async ({ b, URL, ok, MOB, page, open, until, wf, vis, waitRunning, waitStopped, waitResults, tapAndStop }) => {
   let p = await page(b, { welcome: true });
   await open(p, URL);
   const focusIs = (q, id) => until(q, id => document.activeElement && document.activeElement.id === id, id);
@@ -12,7 +12,7 @@ suite('Teclado, accesibilidad y ajustes', async ({ b, URL, ok, MOB, page, open, 
   // P empieza, Esc termina
   await p.keyboard.press('p'); await waitRunning(p, 'practice');
   ok(await p.evaluate(() => __t.S.running && __t.S.mode === 'practice'), 'P empieza la práctica');
-  await p.keyboard.press('Escape'); await waitResults(p);
+  await tapAndStop(p); await waitResults(p);
   ok(await p.isVisible('#results'), 'Esc termina y muestra resultados');
   ok(await focusIs(p, 'results'), 'foco en los resultados');
   ok(await until(p, () => document.querySelector('#srLive').textContent.startsWith('Resultado:')), 'anuncio aria-live del resultado: ' + (await p.textContent('#srLive')).slice(0, 80));
@@ -23,7 +23,7 @@ suite('Teclado, accesibilidad y ajustes', async ({ b, URL, ok, MOB, page, open, 
   await p.click('#rWeakBtn'); await waitRunning(p, 'practice');
   ok(await p.evaluate(() => __t.S.mode === 'practice' && __t.score.bars === 1 && __t.score.part === 1), 'practica solo el compás 1');
   ok(await p.isVisible('#bFull') && (await p.textContent('#notice')).includes('solo el compás 1'), 'botón «Ritmo completo» y aviso');
-  await p.keyboard.press('Escape'); await waitResults(p);
+  await tapAndStop(p); await waitResults(p);
   ok(!(await p.isVisible('#rWeak')), 'sin compás flojo en un solo compás');
   ok(await p.evaluate(() => __t.prog.sessions.at(-1).part === true && __t.prog.sessions.at(-1).bars === 1), 'sesión guardada con part');
   await p.click('#bFull');
@@ -39,7 +39,7 @@ suite('Teclado, accesibilidad y ajustes', async ({ b, URL, ok, MOB, page, open, 
   // Espacio sobre la partitura en reposo empieza
   await p.focus('#pad'); await p.keyboard.press('Space');
   ok(await until(p, () => __t.S.mode === 'practice' && __t.S.running), 'Espacio sobre la partitura empieza la práctica');
-  await p.keyboard.press('Escape'); await waitResults(p);
+  await tapAndStop(p); await waitResults(p);
 
   // pestañas con flechas
   await p.focus('#tab-libre'); await p.keyboard.press('ArrowRight');
