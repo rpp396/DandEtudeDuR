@@ -1,7 +1,7 @@
 // «Reiniciar» (mantener pulsado 500 ms) en el botón flotante durante la práctica y la medición de latencia
 const { suite } = require('./lib');
 
-suite('Reiniciar con pulsación larga (móvil)', async ({ b, URL, ok, MOB, page, open, until, vis, waitRunning, waitResults }) => {
+suite('Reiniciar con pulsación larga (móvil)', async ({ b, URL, ok, MOB, page, open, until, vis, waitRunning, waitResults, tapAndStop }) => {
   const center = (p, sel) => p.$eval(sel, e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
   const passStart = p => p.evaluate(() => __t.S.passStart);
   async function press(p, sel) { const r = await center(p, sel); await p.mouse.move(r.x, r.y); await p.mouse.down(); }
@@ -30,7 +30,7 @@ suite('Reiniciar con pulsación larga (móvil)', async ({ b, URL, ok, MOB, page,
   await p.mouse.up();
   ok(await p.evaluate(() => __t.S.running && __t.S.mode === 'practice') && !(await vis(p, '#results')), 'el reinicio sigue en práctica y sin resultados');
   ok(await p.evaluate(() => __t.prog.sessions.length) === 0, 'el reinicio no guarda sesión');
-  await p.keyboard.press('Escape'); await waitResults(p);
+  await tapAndStop(p); await waitResults(p);
   ok(!(await vis(p, '#fabRestart')) && !(await p.$eval('#bPractice', e => e.disabled)), 'al terminar: sin «Reiniciar» y «Practicar» habilitado');
 
   // medición de latencia

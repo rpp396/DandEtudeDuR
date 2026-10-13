@@ -73,7 +73,19 @@ function renderLights(){
   let h='';
   for(let i=0;i<n;i++){ const tk=i*sig.click; h+=`<span class="light${i===0?' first':''}${sig.kind==='odd'&&starts.has(tk)?' gs':''}"></span>`; }
   $('#lights').innerHTML=h;
+  syncSub();
 }
+// «Tresillos» solo divide el pulso en compases simples: en compuestos y amalgama la opción se deshabilita y,
+// si ya estaba elegida, suenan las corcheas (subTicks) y lo explica #subHint
+function syncSub(){
+  const simple=!score || score.sig.kind==='simple';
+  $('#sub option[value="4"]').disabled=!simple; $('#subHint').hidden=simple || set.sub!=='4';
+}
+function syncCount(){ $('#countHint').hidden=set.countIn!=='0'; }
+// Tempo máximo según la unidad del compás: el equivalente a negra = 240 (6/8, 9/8, 12/8: 160; 2/2 y 3/2: 120),
+// para que las semicorcheas no queden más juntas que en 4/4 a 240 (62 ms)
+const bpmMax=k=>Math.round(240*12/Math.max(12,SIGS[k].click));
+function tempoLimits(){ const mx=bpmMax(cfg().sig); $('#bpm').max=mx; $('#bpmRange').max=mx; return mx; }
 function renderTempoGlyph(){
   const k={12:'q',24:'h',18:'qd',6:'e'}[SIGS[cfg().sig].click];
   $('#tGlyph').innerHTML=miniFig(k);
@@ -84,14 +96,14 @@ function tempoMark(b){
 }
 function setBpm(v, fromUser=true){
   if(stageMode==='campana'){ showTempo(); return; }
-  v=Math.round(+v); if(!isFinite(v)) v=curBpm(); v=Math.max(30,Math.min(240,v));
+  v=Math.round(+v); if(!isFinite(v)) v=curBpm(); v=Math.max(30,Math.min(tempoLimits(),v));
   if(stageMode==='propio'){ if(own.cur){ own.cur.bpm=v; saveOwn(); renderOwnList(); } } else set.bpm=v; $('#bpm').value=v; $('#bpmRange').value=v; $('#bpmOut').textContent=v+' ppm'; $('#tMark').textContent=tempoMark(v);
   if(fromUser){ save(); if(S.running && S.mode!=='metro') stop(); }
 }
 function syncControls(){
   ['sync','ties','sound','cursor','loop','metro','accent','tapSound','fab','vibrate','countSub'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
   $('#vibrateRow').hidden=!('vibrate' in navigator && touchMQ.matches);
-  $('#timbre').value=set.timbre; $('#sub').value=set.sub; $('#countIn').value=set.countIn;
+  $('#timbre').value=set.timbre; $('#sub').value=set.sub; $('#countIn').value=set.countIn; syncSub(); syncCount();
   $('#rhythmVol').value=set.rhythmVol; $('#metroVol').value=set.metroVol; $('#tapVol').value=set.tapVol; syncTapVol(); $('#offset').value=set.offset;
   $('#bars').textContent=set.bars;
   $('#autosave').checked=!!set.autosave; $('#penalize').checked=!!set.penalize;

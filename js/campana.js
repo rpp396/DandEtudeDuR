@@ -40,14 +40,14 @@ const lvById = id => LEVELS.findIndex(l=>l.id===id);
 let stageMode = ['campana','propio'].includes(set.view) ? set.view : 'libre';
 let levelIdx = Math.max(0, lvById(set.levelId || 'L'+((set.level|0)+1)));
 function cfg(){ return stageMode==='campana' ? LEVELS[levelIdx] : stageMode==='propio' ? ownCfg() : set; }
-function curBpm(){ return stageMode==='campana' ? LEVELS[levelIdx].bpm : stageMode==='propio' && own.cur ? own.cur.bpm : set.bpm; }
+function curBpm(){ return Math.min(bpmMax(cfg().sig), stageMode==='campana' ? LEVELS[levelIdx].bpm : stageMode==='propio' && own.cur ? own.cur.bpm : set.bpm); }
 function starsFor(l,pct){ return pct>=l.s3?3:pct>=l.s2?2:pct>=l.goal?1:0; }
 // siempre números (aunque prog traiga basura): se suman y se pintan
 function lvState(i){ const v=prog.levels[LEVELS[i].id]||{}; return {best:+v.best||0, stars:+v.stars||0, tries:+v.tries||0}; }
 function unlocked(i){ return i===0 || lvState(i-1).stars>0 || lvState(i).stars>0; }
 function starStr(n){ return [0,1,2].map(i=>`<span class="${i<n?'on':''}">★</span>`).join(''); }
 function showTempo(){
-  const b=curBpm(), camp=stageMode==='campana';
+  const b=curBpm(), camp=stageMode==='campana'; tempoLimits();
   $('#bpm').value=b; $('#bpmRange').value=b; $('#bpmOut').textContent=b+' ppm'; $('#tMark').textContent=tempoMark(b);
   ['#bpm','#bpmUp','#bpmDown','#bpmRange','#tapTempo'].forEach(id=>{ $(id).disabled=camp; });
   $('#tLock').hidden=!camp; $('#tLockHint').hidden=!camp;
@@ -115,4 +115,5 @@ function setView(v){
   if(v==='progreso'){ renderProgress(); return; }
   set.view=v; save();
   if(v!==stageMode || !score){ stageMode=v; applyStageMode(); }
+  updateTransport(); // stop() lo calculó con la pestaña anterior (p. ej. «Practicar» deshabilitado por un ejercicio a medias)
 }

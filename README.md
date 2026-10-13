@@ -9,7 +9,7 @@ Genera ritmos en partitura según el compás y las figuras que elijas, los repro
 - **Práctica libre:** compases 2/4, 3/4, 4/4, 5/4, 2/2, 3/2, 3/8, 6/8, 9/8, 12/8, 5/8, 7/8 y 8/8 (en los de amalgama eliges la agrupación: 3+2 o 2+3; 2+2+3, 2+3+2 o 3+2+2; 3+3+2, 3+2+3 o 2+3+3); de 1 a 16 compases; redonda, blanca, negra, corchea y semicorchea (con y sin puntillo) y tresillos.
 - **Silencios a elección:** se eligen uno por uno, igual que las figuras: de redonda, blanca, negra, negra con puntillo, corchea y semicorchea.
 - **Síncopas y ligaduras:** dos opciones independientes. Las notas ligadas no se vuelven a tocar.
-- **Reproducir y metrónomo:** escucha el ritmo antes de tocarlo. Tempo de 30 a 240 ppm con indicación italiana, acento, subdivisión, cuenta previa y marcado de tempo con toques.
+- **Reproducir y metrónomo:** escucha el ritmo antes de tocarlo. Tempo de 30 a 240 ppm (en 6/8, 9/8 y 12/8 hasta 160, y en 2/2 y 3/2 hasta 120, lo mismo que negra = 240) con indicación italiana, acento, subdivisión, cuenta previa y marcado de tempo con toques.
 - **Práctica con evaluación:** en modo batería se mide el ataque de cada nota; en modo piano también cuánto la mantienes. Puedes oír tus propios toques, y los golpes de más se pueden penalizar o solo contar.
 - **Resultados sobre la partitura:** cada nota muestra tu desvío, las notas sin tocar se marcan con una ✕ y los golpes de más con un triángulo en el lugar donde tocaste.
 - **Medición de latencia:** calcula la corrección para tu equipo, por ejemplo con auriculares Bluetooth.
@@ -75,6 +75,9 @@ Las tres secciones se pliegan y despliegan pulsando su título (en el móvil emp
 2. **Metrónomo:** tempo, marcar el tempo con toques, sonar durante el ritmo, acento en el primer tiempo, subdivisión, compases de cuenta previa y volumen.
    - *Subdivisión en la cuenta previa* (activada por defecto): en compases compuestos (3/8, 6/8, 9/8, 12/8) y de amalgama (5/8, 7/8, 8/8), la cuenta marca el pulso y, más suaves, las corcheas.
    - En amalgama, durante el ejercicio el metrónomo marca solo los pulsos (el inicio de cada grupo); elige *Corcheas* en *Subdivisión* para oír también las demás corcheas.
+   - *Tresillos* solo se puede elegir en compases simples: en los compuestos y de amalgama el pulso ya se divide en corcheas.
+   - *Sin cuenta* solo vale para *Reproducir*: al practicar suena siempre al menos un compás de cuenta.
+   - El volumen del metrónomo y el del ritmo cambian al momento, también mientras suena.
 3. **Práctica:**
    - *Penalizar golpes de más:* cada golpe donde no hay nota resta puntos; si lo desactivas, solo se cuentan.
    - *Modo piano:* igual que el selector Batería / Piano.
@@ -201,7 +204,7 @@ En *Mis ejercicios*, mientras editas, en lugar del botón *Practicar* aparece ab
 
 - <kbd>P</kbd>: practicar (también <kbd>Espacio</kbd> o <kbd>Enter</kbd> con la partitura enfocada).
 - <kbd>R</kbd>: reproducir.
-- <kbd>Esc</kbd>: detener (en la práctica, termina y muestra el resultado).
+- <kbd>Esc</kbd>: detener (en la práctica, termina y muestra el resultado; si aún no has tocado nada, por ejemplo durante la cuenta, para sin resultados).
 - <kbd>Espacio</kbd> o cualquier tecla: tocar durante la práctica o la medición de latencia.
 - <kbd>N</kbd>: nuevo ritmo.
 - En las pestañas, <kbd>←</kbd> <kbd>→</kbd>, <kbd>Inicio</kbd> y <kbd>Fin</kbd> cambian de sección.

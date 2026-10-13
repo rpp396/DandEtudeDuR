@@ -1,13 +1,13 @@
 // Botón de tres partes de después de practicar (#postFab): Repetir / Nuevo ritmo / Listo|Siguiente
 const { suite } = require('./lib');
 
-suite('Botón posterior a la práctica (móvil)', async ({ b, URL, ok, MOB, page, open, until, wf, vis, scheduleTaps, waitRunning, waitResults, settle, postReady }) => {
+suite('Botón posterior a la práctica (móvil)', async ({ b, URL, ok, MOB, page, open, until, wf, vis, scheduleTaps, waitRunning, waitResults, settle, postReady, tapAndStop }) => {
   const dur = p => p.evaluate(() => JSON.stringify(__t.score.flat.map(e => e.dur)));
   const postVisible = p => until(p, () => !document.querySelector('#postFab').hidden);
   // Practica y termina con Esc; devuelve cuando los resultados y el botón ya se ven
   const practiceAndStop = async p => {
     await p.click('#bPractice'); await waitRunning(p, 'practice'); await settle(p);
-    await p.keyboard.press('Escape'); await waitResults(p);
+    await tapAndStop(p); await waitResults(p);
     await wf(p, () => !document.querySelector('#postFab').hidden);
   };
 
@@ -16,7 +16,7 @@ suite('Botón posterior a la práctica (móvil)', async ({ b, URL, ok, MOB, page
   await p.click('#bPractice'); await waitRunning(p, 'practice'); await settle(p);
   await wf(p, () => !document.querySelector('#tapFab').hidden);
   ok(await vis(p, '#tapFab') && !(await vis(p, '#postFab')), 'durante la práctica: «Toca aquí»');
-  await p.keyboard.press('Escape');
+  await tapAndStop(p);
   ok(await postVisible(p) && !(await vis(p, '#tapFab')), 'al terminar: botón de tres partes');
   ok(await p.textContent('#pfNextLbl') === 'Listo' && !(await p.$eval('#pfNext', e => e.disabled)), 'práctica libre: «Listo» activo');
   await postReady(p);
@@ -35,7 +35,7 @@ suite('Botón posterior a la práctica (móvil)', async ({ b, URL, ok, MOB, page
   await practiceAndStop(p); await postReady(p);
   await p.tap('#pfAgain');
   ok(await until(p, () => __t.S.running && __t.S.mode === 'practice'), '«Repetir» empieza la práctica');
-  await p.keyboard.press('Escape'); await waitResults(p); await postReady(p);
+  await tapAndStop(p); await waitResults(p); await postReady(p);
   ok(await p.$$eval('.mk,.mkx', a => a.length) > 0, 'marcas en la partitura antes de «Listo»');
   await p.tap('#pfNext');
   ok(await until(p, () => document.querySelector('#results').hidden && document.querySelector('#postFab').hidden && !document.querySelector('.mk,.mkx')), '«Listo» cierra resultados y limpia marcas');
@@ -66,6 +66,6 @@ suite('Botón posterior a la práctica (móvil)', async ({ b, URL, ok, MOB, page
   // escritorio: nunca aparece
   p = await page(b); await open(p, URL);
   await p.click('#bPractice'); await waitRunning(p, 'practice');
-  await p.keyboard.press('Escape'); await waitResults(p);
+  await tapAndStop(p); await waitResults(p);
   ok(!(await vis(p, '#postFab')) && !(await vis(p, '#tapFab')), 'escritorio sin botón flotante');
 });

@@ -7,8 +7,10 @@ let K={suggest:null};
 function startCalib(){
   stop(); if(!ensureAudio()) return;
   const period=60/K_BPM, bus=ctx.createGain(); bus.connect(master);
-  const lat=(ctx.outputLatency||ctx.baseLatency||0), t0=ctx.currentTime+0.2;
-  S={mode:'calib',running:true,bus,lat,t0,period,passStart:t0+K_LEAD*period,taps:[],vis:[],visPtr:0,nowI:-1,light:-1};
+  // los toques se comparan con la hora a la que se oye cada clic (heardAt, igual que en la práctica): la corrección
+  // sugerida no absorbe la latencia de salida, que la práctica ya descuenta por su cuenta
+  const t0=ctx.currentTime+0.2;
+  S={mode:'calib',running:true,bus,t0,period,passStart:t0+K_LEAD*period,taps:[],vis:[],visPtr:0,nowI:-1,light:-1};
   const vol=Math.max(set.metroVol,0.6);
   for(let i=0;i<K_LEAD+K_N;i++){
     const t=t0+i*period;
@@ -36,8 +38,8 @@ function calibFrame(heard){
   if(heard > S.passStart+K_N*S.period+0.2){ finishCalib(); return; }
   S.raf=requestAnimationFrame(frame);
 }
-function calibTap(){
-  const now=ctx.currentTime, rel=now-S.lat-S.passStart;
+function calibTap(ts){
+  const rel=heardAt(ts)-S.passStart;
   if(rel < -S.period/2) return; // durante la cuenta
   const k=Math.round(rel/S.period);
   if(k<0 || k>=K_N) return;

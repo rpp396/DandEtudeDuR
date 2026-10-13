@@ -5,7 +5,7 @@
 function rhythmChanged(){ save(); if(S.running && S.mode!=='metro') stop(); generate(); if(S.running && S.mode==='metro') renderLights(); }
 $('#sigs').addEventListener('click',e=>{
   const b=e.target.closest('.sig'); if(!b) return;
-  set.sig=b.dataset.sig; renderSigs(); renderGrp(); rhythmChanged();
+  set.sig=b.dataset.sig; renderSigs(); renderGrp(); setBpm(set.bpm,false); rhythmChanged();
 });
 $('#grpSeg').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
@@ -30,9 +30,9 @@ $('#restFigs').addEventListener('click',e=>{
 });
 ['sound','loop','metro','accent','countSub'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.checked; save(); if(S.running && S.mode!=='metro') stop(); }));
 $('#cursor').addEventListener('change',e=>{ set.cursor=e.target.checked; save(); if(!set.cursor && S.nowI>=0 && evEls[S.nowI]) evEls[S.nowI].classList.remove('now'); });
-['timbre','sub','countIn'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.value; save(); if(S.running && S.mode!=='metro') stop(); }));
+['timbre','sub','countIn'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.value; save(); syncSub(); syncCount(); if(S.running && S.mode!=='metro') stop(); }));
 $('#tapSound').addEventListener('change',e=>{ set.tapSound=e.target.checked; save(); syncTapVol(); });
-['rhythmVol','metroVol','tapVol'].forEach(id=>$('#'+id).addEventListener('input',e=>{ set[id]=+e.target.value; updOutputs(); save(); }));
+['rhythmVol','metroVol','tapVol'].forEach(id=>$('#'+id).addEventListener('input',e=>{ set[id]=+e.target.value; updOutputs(); save(); liveVol(); }));
 $('#offset').addEventListener('input',e=>{ set.offset=+e.target.value; updOutputs(); save(); });
 $('#bpm').addEventListener('change',e=>setBpm(e.target.value));
 $('#bpmRange').addEventListener('input',e=>setBpm(e.target.value));
@@ -47,7 +47,7 @@ $('#tapTempo').addEventListener('click',()=>{
 });
 $('#bPlay').addEventListener('click',()=>start('play'));
 $('#bPractice').addEventListener('click',()=>start('practice'));
-$('#bStop').addEventListener('click',()=>{ if(S.running && S.mode==='practice') finish(); else stop(); });
+$('#bStop').addEventListener('click',()=>{ if(S.running && S.mode==='practice') finish(true); else stop(); });
 $('#bMetro').addEventListener('click',()=>{ if(S.running && S.mode==='metro') stop(); else start('metro'); });
 $('#bNew').addEventListener('click',()=>{ if(S.running && S.mode!=='metro') stop(); generate(); });
 $('#rNew').addEventListener('click',()=>{ generate(); });
@@ -75,9 +75,9 @@ function bindTapZone(el,pre){
     downWhileRunning=S.running;
     if(!S.running || (S.mode!=='practice' && S.mode!=='calib')) return;
     if(e.button>0) return;
-    e.preventDefault(); try{ el.setPointerCapture(e.pointerId); }catch(_){} tap(pre+e.pointerId);
+    e.preventDefault(); try{ el.setPointerCapture(e.pointerId); }catch(_){} tap(pre+e.pointerId,e.timeStamp);
   });
-  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>el.addEventListener(t,e=>release(pre+e.pointerId)));
+  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>el.addEventListener(t,e=>release(pre+e.pointerId,e.timeStamp)));
   el.addEventListener('contextmenu',e=>{ if(S.running) e.preventDefault(); });
 }
 bindTapZone($('#pad'),'p'); bindTapZone($('#tapFab'),'f');
@@ -111,22 +111,22 @@ const isField=el=>el && (el.tagName==='INPUT'||el.tagName==='SELECT'||el.tagName
 document.addEventListener('keydown',e=>{
   if(ownKeys(e)) return;
   if(e.metaKey||e.ctrlKey||e.altKey||e.repeat) return;
-  if(e.key==='Escape' && S.running){ e.preventDefault(); if(S.mode==='practice') finish(); else stop(); return; }
+  if(e.key==='Escape' && S.running){ e.preventDefault(); if(S.mode==='practice') finish(true); else stop(); return; }
   const practicing=S.running && (S.mode==='practice'||S.mode==='calib');
   if(practicing && (e.code==='Space'||e.code==='Enter'||(e.key.length===1 && !isField(e.target)))){
     if(isField(e.target) && e.code!=='Space') return;
-    e.preventDefault(); tap('k'+e.code); return;
+    e.preventDefault(); tap('k'+e.code,e.timeStamp); return;
   }
   if(isField(e.target)) return;
-  if((e.code==='Space'||e.code==='Enter') && e.target===$('#pad')){ e.preventDefault(); if(S.running) tap('k'+e.code); else start('practice'); return; }
+  if((e.code==='Space'||e.code==='Enter') && e.target===$('#pad')){ e.preventDefault(); if(S.running) tap('k'+e.code,e.timeStamp); else start('practice'); return; }
   if($('#stageView').hidden) return;
   const k=e.key.toLowerCase();
   if(k==='n'){ if(stageMode==='propio') return; if(S.running && S.mode!=='metro') stop(); generate(); }
   else if(k==='p'){ e.preventDefault(); start('practice'); }
   else if(k==='r'){ e.preventDefault(); start('play'); }
 });
-document.addEventListener('keyup',e=>{ if(S.running && (S.mode==='practice'||S.mode==='calib') && e.code==='Space') e.preventDefault(); release('k'+e.code); });
-window.addEventListener('blur',()=>{ if(S.running && S.hold) [...S.holds.keys()].forEach(release); [...tapVoices.keys()].forEach(tapSoundOff); });
+document.addEventListener('keyup',e=>{ if(S.running && (S.mode==='practice'||S.mode==='calib') && e.code==='Space') e.preventDefault(); release('k'+e.code,e.timeStamp); });
+window.addEventListener('blur',()=>{ if(S.running && S.hold) [...S.holds.keys()].forEach(k=>release(k)); [...tapVoices.keys()].forEach(tapSoundOff); });
 function syncHold(){
   $('#holdSw').checked=!!set.hold;
   document.querySelectorAll('#modeSeg button').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.hold==='1')===!!set.hold)));
