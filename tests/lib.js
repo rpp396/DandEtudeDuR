@@ -1,8 +1,8 @@
 // Ayudantes comunes de las pruebas de navegador (Playwright + Chromium).
 //
-// - Construye una copia de index.html, styles.css y js/ en un directorio temporal (fuera del repo) con `window.__t`
+// - Construye una copia de index.html, styles.css, js/ y fonts/ en un directorio temporal (fuera del repo) con `window.__t`
 //   en un script extra (js/test-hook.js) cargado después de los de la app, para dar acceso a su estado interno.
-// - Las fuentes de Google se sirven vacías: las pruebas no dependen de la red.
+// - La app no pide nada fuera de 127.0.0.1 (fuentes locales + CSP): cada página anota en p.ext las peticiones externas y en p.csp() las violaciones de CSP.
 // - Cada archivo *.test.js define una suite con `suite(nombre, async ctx => {...})`.
 'use strict';
 const fs = require('fs');
@@ -50,13 +50,14 @@ async function buildTestPage() {
   fs.writeFileSync(path.join(d, 'test.html'), s);
   fs.copyFileSync(path.join(REPO, 'styles.css'), path.join(d, 'styles.css'));
   fs.cpSync(path.join(REPO, 'js'), path.join(d, 'js'), { recursive: true });
+  fs.cpSync(path.join(REPO, 'fonts'), path.join(d, 'fonts'), { recursive: true });
   fs.writeFileSync(path.join(d, 'js', 'test-hook.js'), HOOK);
-  const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8' };
+  const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8' };
   const server = http.createServer((req, res) => {
     const name = decodeURIComponent(new url.URL(req.url, 'http://x').pathname).replace(/^\/+/, '') || 'test.html';
     const f = path.join(d, name);
-    // solo archivos de la raíz o de js/, sin «..»
-    if (!/^(js\/)?[\w.-]+$/.test(name) || name.includes('..') || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+    // solo archivos de la raíz, de js/ o de fonts/, sin «..»
+    if (!/^((js|fonts)\/)?[\w.-]+$/.test(name) || name.includes('..') || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
     res.writeHead(200, { 'content-type': types[path.extname(f)] || 'application/octet-stream', 'cache-control': 'no-store' });
     res.end(fs.readFileSync(f));
   });
@@ -76,11 +77,14 @@ const MOB = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTo
 async function page(b, opts = {}) {
   const { welcome, ...o } = opts;
   const ctx = await b.newContext({ viewport: { width: 1200, height: 900 }, deviceScaleFactor: 1, locale: 'es-ES', ...o });
-  await ctx.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: '' }));
-  await ctx.route('https://fonts.gstatic.com/**', r => r.fulfill({ contentType: 'font/woff2', body: '' }));
+  // violaciones de CSP (el listener se instala antes que los scripts de la página)
+  await ctx.addInitScript(() => { window.__csp = []; document.addEventListener('securitypolicyviolation', e => window.__csp.push(e.violatedDirective + ' ' + (e.blockedURI || '') + ' ' + (e.sourceFile || '') + ':' + e.lineNumber)); });
   if (!welcome) await ctx.addInitScript(() => { if (!localStorage.getItem('solfeo-ritmico-v1')) localStorage.setItem('solfeo-ritmico-v1', JSON.stringify({ seen: true, sv: 2 })); });
   const p = await ctx.newPage();
   p.errs = [];
+  p.ext = [];   // peticiones fuera de 127.0.0.1 (no debería haber ninguna)
+  p.on('request', r => { if (!/^(http:\/\/127\.0\.0\.1[:/]|data:|blob:|about:)/.test(r.url())) p.ext.push(r.url()); });
+  p.csp = () => p.evaluate(() => window.__csp || []);
   p.on('pageerror', e => p.errs.push(e.message));
   p.on('console', m => { if (m.type() === 'error') p.errs.push(m.text()); });
   p.on('crash', () => console.log('FAIL la página de Chromium se cerró de golpe (crash)'));

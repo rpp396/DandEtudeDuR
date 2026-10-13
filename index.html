@@ -2,11 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Solfeo Rítmico</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&family=Young+Serif&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -137,17 +136,17 @@
           <button class="btn" id="rWeakBtn" type="button"></button>
         </div>
         <ul class="counts">
-          <li><span class="sw-dot" style="background:var(--good)"></span>Exacto (±40 ms)<span class="n" id="cExact">0</span></li>
-          <li><span class="sw-dot" style="background:var(--ok)"></span>Bien (±90 ms)<span class="n" id="cGood">0</span></li>
-          <li><span class="sw-dot" style="background:var(--near)"></span>Cerca<span class="n" id="cNear">0</span></li>
-          <li><span class="sw-dot" style="background:var(--bad)"></span>Sin tocar<span class="n" id="cMiss">0</span></li>
-          <li><span class="sw-dot tri" style="background:var(--muted)"></span>Golpes de más<span class="n" id="cExtra">0</span></li>
+          <li><span class="sw-dot c-good"></span>Exacto (±40 ms)<span class="n" id="cExact">0</span></li>
+          <li><span class="sw-dot c-ok"></span>Bien (±90 ms)<span class="n" id="cGood">0</span></li>
+          <li><span class="sw-dot c-near"></span>Cerca<span class="n" id="cNear">0</span></li>
+          <li><span class="sw-dot c-bad"></span>Sin tocar<span class="n" id="cMiss">0</span></li>
+          <li><span class="sw-dot tri c-muted"></span>Golpes de más<span class="n" id="cExtra">0</span></li>
         </ul>
         <ul class="counts" id="durCounts" hidden>
-          <li><span class="sw-dot" style="background:var(--good)"></span>Duración justa<span class="n" id="dExact">0</span></li>
-          <li><span class="sw-dot" style="background:var(--ok)"></span>Duración aceptable<span class="n" id="dOk">0</span></li>
-          <li><span class="sw-dot" style="background:var(--near)"></span>Soltaste antes<span class="n" id="dShort">0</span></li>
-          <li><span class="sw-dot" style="background:var(--near)"></span>Soltaste tarde<span class="n" id="dLong">0</span></li>
+          <li><span class="sw-dot c-good"></span>Duración justa<span class="n" id="dExact">0</span></li>
+          <li><span class="sw-dot c-ok"></span>Duración aceptable<span class="n" id="dOk">0</span></li>
+          <li><span class="sw-dot c-near"></span>Soltaste antes<span class="n" id="dShort">0</span></li>
+          <li><span class="sw-dot c-near"></span>Soltaste tarde<span class="n" id="dLong">0</span></li>
         </ul>
         <p class="res-note">Los puntos bajo cada nota muestran tu desvío: a la izquierda de la rayita tocaste antes, a la derecha tocaste tarde. Los triángulos grises marcan dónde tocaste sin que hubiera nota (golpes de más).<span id="durNote" hidden> En modo piano, la barra de debajo compara cuánto mantuviste la nota (color) con lo que debía durar (gris); la rayita marca dónde tenías que soltar.</span></p>
       </section>
