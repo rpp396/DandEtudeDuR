@@ -11,7 +11,8 @@ Genera ritmos en partitura según el compás y las figuras que elijas, los repro
 - **Escritura según el pulso:** las figuras y los silencios se escriben sin tapar el pulso ni la mitad del compás, y las barras de las corcheas se agrupan por pulso (por blanca en 2/2 y 3/2).
 - **Síncopas y ligaduras:** dos opciones independientes. Las notas ligadas no se vuelven a tocar.
 - **Reproducir y metrónomo:** escucha el ritmo antes de tocarlo. Tempo de 30 a 240 ppm (en 6/8, 9/8 y 12/8 hasta 160, y en 2/2 y 3/2 hasta 120, lo mismo que negra = 240) con indicación italiana, acento, subdivisión, cuenta previa y marcado de tempo con toques.
-- **Práctica con evaluación:** en modo batería se mide el ataque de cada nota; en modo piano también cuánto la mantienes. Puedes oír tus propios toques, y los golpes de más se pueden penalizar o solo contar.
+- **Dos formas de tocar:** en **Piano** (la de por defecto) mantienes pulsada cada nota lo que dura y se mide tanto el ataque como cuándo la sueltas; en **Batería** solo cuenta el golpe, que suena como un redoblante. Se elige justo encima de *Practicar*.
+- **Práctica con evaluación:** puedes oír tus propios toques, y los golpes de más se pueden penalizar o solo contar.
 - **Resultados sobre la partitura:** cada nota muestra tu desvío, las notas sin tocar se marcan con una ✕ y los golpes de más con un triángulo en el lugar donde tocaste.
 - **Análisis de tus toques:** regularidad, si aceleras o te retrasas, el error a tiempo, a contratiempo y tras un silencio, y un consejo concreto.
 - **Para afianzar el pulso:** práctica en bucle que sube el tempo cuando llegas a la precisión elegida, y metrónomo que calla en algunos compases.
@@ -30,7 +31,7 @@ Abre `index.html` en el navegador. Necesita a su lado, en la misma carpeta, `sty
 
 ### 1. La pantalla principal
 
-La primera vez, una tarjeta explica cómo se practica y presenta las demás pestañas (*Campaña*, *Mis ejercicios* y *Mi progreso*):
+La primera vez, una tarjeta explica cómo se practica (incluida la forma de tocar: *Piano* o *Batería*) y presenta las demás pestañas (*Campaña*, *Mis ejercicios* y *Mi progreso*):
 
 ![Tarjeta de bienvenida de la primera vez](docs/capturas/bienvenida.png)
 
@@ -47,7 +48,7 @@ Después, la pantalla principal queda así:
 4. **Reproducir:** hace sonar el ritmo con el metrónomo para que lo oigas antes de practicarlo. *Nuevo ritmo* (o la tecla <kbd>N</kbd>) genera otro.
 5. **Partitura:** además de leerla, es donde tocas. Tocarla en reposo también empieza la práctica.
 6. **Practicar:** empieza la cuenta previa y la evaluación.
-7. **Batería / Piano:** en *Batería* solo cuenta cuándo tocas cada nota; en *Piano* también cuánto la mantienes pulsada.
+7. **Forma de tocar:** *Piano* (viene así) mide cuándo tocas cada nota y cuánto la mantienes pulsada; *Batería* solo cuándo la tocas, con sonido de redoblante.
 
 ### 2. Opciones del ritmo
 
@@ -75,7 +76,7 @@ El resumen encima de la partitura recuerda siempre qué está activo. Un ejemplo
 
 Las tres secciones se pliegan y despliegan pulsando su título (en el móvil empiezan plegadas); la app recuerda cómo las dejaste.
 
-1. **Reproducción:** *Reproducir* siempre hace sonar el ritmo; *Escuchar el ritmo al practicar* lo hace sonar también mientras practicas (viene apagada, para que lo leas tú). También: resaltar la nota actual, repetir en bucle, sonido de las notas (tono sostenido o golpe) y volumen.
+1. **Reproducción:** *Reproducir* siempre hace sonar el ritmo; *Escuchar el ritmo al practicar* lo hace sonar también mientras practicas (viene apagada, para que lo leas tú). También: resaltar la nota actual, repetir en bucle, sonido de las notas (tono sostenido o golpe de redoblante) y volumen.
 2. **Metrónomo:** tempo, marcar el tempo con toques, sonar durante el ritmo, acento en el primer tiempo, subdivisión, compases de cuenta previa y volumen.
    - *Subdivisión en la cuenta previa* (activada por defecto): en compases compuestos (3/8, 6/8, 9/8, 12/8) y de amalgama (5/8, 7/8, 8/8), la cuenta marca el pulso y, más suaves, las corcheas.
    - En amalgama, durante el ejercicio el metrónomo marca solo los pulsos (el inicio de cada grupo); elige *Corcheas* en *Subdivisión* para oír también las demás corcheas.
@@ -85,8 +86,8 @@ Las tres secciones se pliegan y despliegan pulsando su título (en el móvil emp
    - *Compases en silencio* (suena siempre, 1·1, 2·2, 3·1 o 1·3): el metrónomo calla en algunos compases para que mantengas tú el pulso; nunca en la cuenta previa. Mientras calla, las luces se ven huecas.
 3. **Práctica:**
    - *Penalizar golpes de más:* cada golpe donde no hay nota resta puntos; si lo desactivas, solo se cuentan.
-   - *Modo piano:* igual que el selector Batería / Piano.
-   - *Oír mis toques* (activado por defecto) y su volumen: en modo piano suena mientras mantienes.
+   - *Modo piano:* igual que el selector *Forma de tocar* (activado por defecto).
+   - *Oír mis toques* (activado por defecto) y su volumen: en modo piano suena un tono mientras mantienes; en batería, un golpe de redoblante.
    - *Botón flotante para tocar:* en móvil y tableta (ver más abajo).
    - *Vibrar al tocar:* solo en pantallas táctiles que lo admiten.
    - *Guardar cada práctica automáticamente* en *Mi progreso*.

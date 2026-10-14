@@ -79,7 +79,7 @@ async function page(b, opts = {}) {
   const ctx = await b.newContext({ viewport: { width: 1200, height: 900 }, deviceScaleFactor: 1, locale: 'es-ES', ...o });
   // violaciones de CSP (el listener se instala antes que los scripts de la página)
   await ctx.addInitScript(() => { window.__csp = []; document.addEventListener('securitypolicyviolation', e => window.__csp.push(e.violatedDirective + ' ' + (e.blockedURI || '') + ' ' + (e.sourceFile || '') + ':' + e.lineNumber)); });
-  if (!welcome) await ctx.addInitScript(() => { if (!localStorage.getItem('solfeo-ritmico-v1')) localStorage.setItem('solfeo-ritmico-v1', JSON.stringify({ seen: true, sv: 2 })); });
+  if (!welcome) await ctx.addInitScript(() => { if (!localStorage.getItem('solfeo-ritmico-v1')) localStorage.setItem('solfeo-ritmico-v1', JSON.stringify({ seen: true, sv: 4, hold: false })); });   // las suites tocan en modo batería salvo que digan otra cosa
   const p = await ctx.newPage();
   p.errs = [];
   p.ext = [];   // peticiones fuera de 127.0.0.1 (no debería haber ninguna)

@@ -10,7 +10,7 @@ function ensureAudio(){
     const AC=window.AudioContext||window.webkitAudioContext;
     try{ ctx=new AC({latencyHint:'interactive'}); }catch(e){ ctx=null; appWarn('audio'); return false; }
     master=ctx.createGain(); master.gain.value=0.9; master.connect(ctx.destination);
-    noiseBuf=ctx.createBuffer(1, Math.floor(ctx.sampleRate*0.1), ctx.sampleRate);
+    noiseBuf=ctx.createBuffer(1, Math.floor(ctx.sampleRate*0.3), ctx.sampleRate);
     const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
     // una llamada, Siri o bloquear la pantalla detienen el reloj del audio: la práctica o la medición en curso ya no valen
     ctx.addEventListener('statechange',()=>{ if(ctx.state!=='running') stopTimed(); });
@@ -46,6 +46,21 @@ function click(bus,t,level,vol){
   g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v*0.9,t+0.002); g.gain.exponentialRampToValueAtTime(0.0001,t+0.055);
   o.connect(g); g.connect(bus); o.start(t); o.stop(t+0.07); track(o);
 }
+// Golpe de redoblante: la bordonera (ruido con paso alto y un poco de cuerpo en banda) más el parche (tono corto que baja).
+// v ≈ volumen (0–1); devuelve las fuentes para poder pararlas
+function snare(dest,t,v){
+  const n=ctx.createBufferSource(); n.buffer=noiseBuf;
+  const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=1200;
+  const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=3200; bp.Q.value=0.7;
+  const gn=ctx.createGain(); gn.gain.setValueAtTime(0.0001,t); gn.gain.exponentialRampToValueAtTime(0.9*v,t+0.002); gn.gain.exponentialRampToValueAtTime(0.0001,t+0.19);
+  n.connect(hp); hp.connect(bp); bp.connect(gn); gn.connect(dest); n.start(t); n.stop(t+0.22);
+  const o=ctx.createOscillator(), o2=ctx.createOscillator(), gb=ctx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(230,t); o.frequency.exponentialRampToValueAtTime(165,t+0.06);
+  o2.type='sine'; o2.frequency.setValueAtTime(340,t); o2.frequency.exponentialRampToValueAtTime(280,t+0.05);
+  gb.gain.setValueAtTime(0.0001,t); gb.gain.exponentialRampToValueAtTime(0.75*v,t+0.002); gb.gain.exponentialRampToValueAtTime(0.0001,t+0.1);
+  o.connect(gb); o2.connect(gb); gb.connect(dest); o.start(t); o2.start(t); o.stop(t+0.12); o2.stop(t+0.12);
+  return [n,o,o2];
+}
 function noteSound(bus,t,dsec,vol){
   const v=vol==null?set.rhythmVol:vol; if(v<=0.001 || tooLate(t)) return;
   if(set.timbre==='tono'){
@@ -57,13 +72,7 @@ function noteSound(bus,t,dsec,vol){
     g.gain.linearRampToValueAtTime(0.32*v,mid); g.gain.setValueAtTime(0.32*v,end); g.gain.linearRampToValueAtTime(0,end+0.035);
     o.start(t); o2.start(t); o.stop(end+0.05); o2.stop(end+0.05); track(o,o2);
   } else {
-    const n=ctx.createBufferSource(); n.buffer=noiseBuf;
-    const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2300; bp.Q.value=2.5;
-    const g=ctx.createGain(); g.gain.setValueAtTime(1.3*v,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.06);
-    n.connect(bp); bp.connect(g); g.connect(bus); n.start(t); n.stop(t+0.08);
-    const o=ctx.createOscillator(), g2=ctx.createGain(); o.frequency.setValueAtTime(620,t); o.frequency.exponentialRampToValueAtTime(300,t+0.08);
-    g2.gain.setValueAtTime(0.6*v,t); g2.gain.exponentialRampToValueAtTime(0.0001,t+0.1);
-    o.connect(g2); g2.connect(bus); o.start(t); o.stop(t+0.12); track(n,o);
+    track(...snare(bus,t,v));
   }
 }
 
@@ -84,9 +93,7 @@ function tapSoundOn(src){
     o.start(t); o2.start(t);
     tapVoices.set(src,{g,oscs:[o,o2]});
   } else {
-    o.type='sine'; o.frequency.setValueAtTime(1180,t); o.frequency.exponentialRampToValueAtTime(700,t+0.05);
-    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.8*v,t+0.002); g.gain.exponentialRampToValueAtTime(0.0001,t+0.09);
-    o.start(t); o.stop(t+0.1);
+    o.disconnect(); snare(g,t,v); g.gain.value=1;   // golpe de redoblante
   }
 }
 function tapSoundOff(src){

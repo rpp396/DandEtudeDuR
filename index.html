@@ -37,6 +37,7 @@
         <h2 id="welTitle">Cómo se practica</h2>
         <ol>
           <li>Pulsa <b>Reproducir</b> <span class="kb">(<kbd>R</kbd>)</span> para escuchar el ritmo con el metrónomo.</li>
+          <li>Elige cómo tocar: en <b>Piano</b> (viene así) mantienes pulsada cada nota lo que dura y también se mide cuándo la sueltas; en <b>Batería</b> solo cuenta el golpe.</li>
           <li>Pulsa <b>Practicar</b> <span class="kb">(<kbd>P</kbd>)</span> o toca la partitura. Tras la cuenta previa, toca en cada nota: con el dedo o el ratón<span class="kb">, o con la barra espaciadora</span>.</li>
           <li>Al terminar verás tu precisión, bajo cada nota si llegaste antes o tarde, y un consejo según cómo tocaste.</li>
         </ol>
@@ -94,13 +95,16 @@
       </div>
 
       <div class="practice">
+        <div class="mode-pick">
+          <span class="mode-lbl" id="modeLbl">Forma de tocar</span>
+          <div class="modeseg" id="modeSeg" role="group" aria-labelledby="modeLbl">
+            <button type="button" data-hold="1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 4.5v15M13 4.5v15M18 4.5v15" stroke="currentColor" stroke-width="1.4"/><path d="M6.6 4.5h2.8v8.5H6.6zM11.6 4.5h2.8v8.5h-2.8zM16.6 4.5h2.8v8.5h-2.8z" fill="currentColor"/></svg><span><b>Piano</b><small>Mantén cada nota lo que dura</small></span></button>
+            <button type="button" data-hold="0"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="11" rx="8.5" ry="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 11v5.5c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3V11" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 13.6v5M10 14.2v5.2M14 14.2v5.2M18 13.6v5" stroke="currentColor" stroke-width="1.1"/><path d="M5 2.5l7 7M19 2.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span><b>Batería</b><small>Solo cuenta el golpe</small></span></button>
+          </div>
+        </div>
         <div class="p-actions">
           <button class="btn primary big" id="bPractice" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>Practicar</button>
           <button class="btn" id="bCalib" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9V5.8M6.5 1.8h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Medir latencia</button>
-          <div class="modeseg" id="modeSeg" role="group" aria-label="Forma de tocar">
-            <button type="button" data-hold="0" title="Solo cuenta el momento del golpe">Batería</button>
-            <button type="button" data-hold="1" title="También cuenta cuánto mantienes pulsada cada nota">Piano</button>
-          </div>
           <span class="p-offset">Corrección actual: <b id="offsetNow">0 ms</b></span>
         </div>
       </div>
@@ -274,7 +278,7 @@
         <label class="sw"><input type="checkbox" id="cursor"><span class="track"></span><span>Resaltar la nota actual</span></label>
         <label class="sw"><input type="checkbox" id="loop"><span class="track"></span><span>Repetir en bucle<small>Solo al reproducir</small></span></label>
         <div class="field"><label for="timbre">Sonido de las notas</label>
-          <select id="timbre"><option value="tono">Tono sostenido (se oye la duración)</option><option value="golpe">Golpe de percusión</option></select></div>
+          <select id="timbre"><option value="tono">Tono sostenido (se oye la duración)</option><option value="golpe">Golpe de redoblante</option></select></div>
         <div class="field"><span class="rlabel">Volumen del ritmo <output id="rhythmVolOut"></output></span><input type="range" id="rhythmVol" min="0" max="1" step="0.05" aria-label="Volumen del ritmo"></div>
         </div>
       </details>
