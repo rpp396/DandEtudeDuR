@@ -104,7 +104,7 @@ function afterPractice(r){
     const wasLocked = r.lvl<LEVELS.length-1 && !unlocked(r.lvl+1);
     prog.levels[l.id]={best:Math.max(prev.best,r.pct),stars:Math.max(prev.stars,st),tries:(prev.tries||0)+1};
     rc.hidden=false;
-    $('#rcStars').innerHTML=starStr(st);
+    $('#rcStars').innerHTML=starStr(st); $('#rcStars').setAttribute('aria-label',starsTxt(st));
     const next=$('#rcNext');
     if(st>0){
       const nowOpen = r.lvl<LEVELS.length-1;
@@ -150,7 +150,7 @@ function renderProgress(){
     <div class="tile"><div class="lbl">Prácticas guardadas</div><div class="big">${list.length}</div><div class="sub">${lastR?'Última: '+fmtDate(lastR.t)+', '+fmtTime(lastR.t):'Aún no hay ninguna'}</div></div>
     <div class="tile"><div class="lbl">Precisión reciente</div><div class="big">${list.length?Math.round(avg(last10))+'%':'—'}</div><div class="sub">${list.length?'Media de las últimas '+last10.length+'. ':''}${list.length?trend:''}</div></div>
     <div class="tile"><div class="lbl">Mejor resultado</div><div class="big">${best?esc(best.pct)+'%':'—'}</div><div class="sub">${best?exName(best)+' · '+fmtDate(best.t):'—'}</div></div>
-    <div class="tile"><div class="lbl">Campaña</div><div class="big">${esc(passed)}<span class="of"> / ${LEVELS.length}</span></div><div class="sub">niveles superados · ${esc(stars)} de ${LEVELS.length*3} ★</div></div>`;
+    <div class="tile"><div class="lbl">Campaña</div><div class="big">${esc(passed)}<span class="of"> / ${LEVELS.length}</span></div><div class="sub">niveles superados · ${esc(stars)} de ${LEVELS.length*3} ${STAR_SR}</div></div>`;
   renderChart(list);
   // tabla
   $('#pCount').textContent = list.length>30 ? `Últimas 30 de ${list.length}` : '';

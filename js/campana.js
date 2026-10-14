@@ -45,10 +45,13 @@ function starsFor(l,pct){ return pct>=l.s3?3:pct>=l.s2?2:pct>=l.goal?1:0; }
 // siempre números (aunque prog traiga basura): se suman y se pintan
 function lvState(i){ const v=prog.levels[LEVELS[i].id]||{}; return {best:+v.best||0, stars:+v.stars||0, tries:+v.tries||0}; }
 function unlocked(i){ return i===0 || lvState(i-1).stars>0 || lvState(i).stars>0; }
-function starStr(n){ return [0,1,2].map(i=>`<span class="${i<n?'on':''}">★</span>`).join(''); }
+// Estrellas ganadas llenas (★) y las que faltan vacías (☆): se distinguen por la forma, no solo por el color; el nombre accesible va en quien las contiene
+function starStr(n){ return [0,1,2].map(i=>i<n?'<span class="on">★</span>':'<span>☆</span>').join(''); }
+const starsTxt = n => `${n} de 3 estrellas`;
+const STAR_SR = '<span aria-hidden="true">★</span><span class="sr-only"> estrellas</span>';
 function showTempo(){
   const b=curBpm(), camp=stageMode==='campana'; tempoLimits();
-  $('#bpm').value=b; $('#bpmRange').value=b; $('#bpmOut').textContent=b+' ppm'; $('#tMark').textContent=tempoMark(b);
+  $('#bpm').value=b; $('#bpmRange').value=b; $('#bpmOut').textContent=b+' ppm'; $('#bpmRange').setAttribute('aria-valuetext',b+' ppm'); $('#tMark').textContent=tempoMark(b);
   ['#bpm','#bpmUp','#bpmDown','#bpmRange','#tapTempo'].forEach(id=>{ $(id).disabled=camp; });
   $('#tLock').hidden=!camp; $('#tLockHint').hidden=!camp;
 }
@@ -58,23 +61,27 @@ function renderLevelBar(){
   $('#lvTitle').textContent=l.title;
   $('#lvDesc').textContent=l.desc;
   const unit={12:'♩',24:'𝅗𝅥',18:'♩.',6:'♪'}[SIGS[l.sig].click];
-  $('#lvMeta').innerHTML=`<span>${l.sig}${l.grp?' ('+l.grp+')':''}</span><span>${l.bars} compases</span><span>${l.bpm} ppm</span><span>Objetivo ${l.goal}%</span><span>★★ ${l.s2}%</span><span>★★★ ${l.s3}%</span>${st.best?`<span>Mejor: ${esc(st.best)}%</span>`:''}`;
-  $('#lvStars').innerHTML=starStr(st.stars); $('#lvStars').setAttribute('aria-label',`${st.stars} de 3 estrellas`);
+  $('#lvMeta').innerHTML=`<span>${l.sig}${l.grp?' ('+l.grp+')':''}</span><span>${l.bars} compases</span><span>${l.bpm} ppm</span><span>Objetivo ${l.goal}%</span><span><span aria-hidden="true">★★</span><span class="sr-only">Dos estrellas: </span>${l.s2}%</span><span><span aria-hidden="true">★★★</span><span class="sr-only">Tres estrellas: </span>${l.s3}%</span>${st.best?`<span>Mejor: ${esc(st.best)}%</span>`:''}`;
+  $('#lvStars').innerHTML=starStr(st.stars); $('#lvStars').setAttribute('aria-label',starsTxt(st.stars));
+  const a=document.activeElement;
   $('#lvPrev').disabled=levelIdx===0;
   $('#lvNext').disabled=levelIdx>=LEVELS.length-1 || !unlocked(levelIdx+1);
+  // si el botón que tenía el foco se apaga (primer o último nivel abierto), el foco pasa al otro
+  if(a && a.disabled && (a.id==='lvPrev'||a.id==='lvNext')) $(a.id==='lvPrev'?'#lvNext':'#lvPrev').focus({preventScroll:true});
 }
 function renderCampMap(){
   let passed=0, stars=0;
   LEVELS.forEach((l,i)=>{ const s=lvState(i); if(s.stars) passed++; stars+=s.stars; });
-  $('#campTotal').innerHTML=`<b>${esc(passed)}</b> de ${LEVELS.length} niveles superados · <b>${esc(stars)}</b> de ${LEVELS.length*3} ★`;
+  $('#campTotal').innerHTML=`<b>${esc(passed)}</b> de ${LEVELS.length} niveles superados · <b>${esc(stars)}</b> de ${LEVELS.length*3} ${STAR_SR}`;
   const lock='<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="5.5" width="8" height="5.5" rx="1" fill="currentColor"/><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
-  $('#campMap').innerHTML=CHAPTERS.map((c,ci)=>{
+  // nombre accesible completo («Nivel 3: título, 2 de 3 estrellas, superado»); los bloqueados siguen enfocables (aria-disabled) para poder descubrirlos con el teclado
+  keepFocus($('#campMap'),()=>{ $('#campMap').innerHTML=CHAPTERS.map((c,ci)=>{
     const btns=LEVELS.map((l,i)=>({l,i})).filter(x=>x.l.ch===ci).map(({l,i})=>{
-      const s=lvState(i), un=unlocked(i);
-      return `<button type="button" class="lv${s.stars?' done':''}" data-lv="${i}" ${un?'':'disabled'} aria-current="${i===levelIdx}" title="Nivel ${i+1}: ${l.title}${un?'':' (bloqueado)'}">${i+1}<small class="stars">${un?starStr(s.stars):lock}</small></button>`;
+      const s=lvState(i), un=unlocked(i), nm=`Nivel ${i+1}: ${l.title}, ${un ? starsTxt(s.stars)+', '+(s.stars?'superado':'sin superar') : 'bloqueado'}`;
+      return `<button type="button" class="lv${s.stars?' done':''}" data-lv="${i}" ${un?'':'aria-disabled="true"'} aria-current="${i===levelIdx}" aria-label="${esc(nm)}" title="${esc(nm)}">${i+1}<small class="stars" aria-hidden="true">${un?starStr(s.stars):lock}</small></button>`;
     }).join('');
     return `<div class="chap"><h3>${ci+1}. ${c}</h3><div class="lv-grid">${btns}</div></div>`;
-  }).join('');
+  }).join(''); });
 }
 function firstOpenLevel(){ for(let i=0;i<LEVELS.length;i++){ if(!lvState(i).stars) return i; } return LEVELS.length-1; }
 function selectLevel(i){
@@ -91,7 +98,7 @@ function centerScore(){
   const reserve = fabWanted() ? Math.max(fabReserve(), 100) : 8, room=innerHeight-reserve;
   if(r.top>=8 && r.bottom<=room) return;
   const top = r.height<room-16 ? r.top-(room-r.height)/2 : r.top-8;
-  scrollTo({top:scrollY+top, behavior:'smooth'});
+  scrollTo({top:scrollY+top, behavior:smooth()});
 }
 function applyStageMode(){
   const camp=stageMode==='campana', mine=stageMode==='propio';

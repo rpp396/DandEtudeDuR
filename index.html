@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
+<a class="skip" id="skip" href="#pad">Saltar a la partitura</a>
 <div class="wrap">
   <header class="top">
     <div>
@@ -21,16 +21,17 @@
 
   <p class="app-warn" id="appWarn" role="alert" hidden></p>
 
-  <nav class="tabs" role="tablist" aria-label="Secciones">
-    <button class="tab" role="tab" id="tab-libre" data-view="libre" aria-selected="true" aria-controls="stageView" type="button"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="8" r="2" fill="currentColor"/></svg>Práctica libre</button>
-    <button class="tab" role="tab" id="tab-campana" data-view="campana" aria-selected="false" aria-controls="stageView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M3 14V2.5M3 3h9l-2 3 2 3H3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Campaña</button>
-    <button class="tab" role="tab" id="tab-propio" data-view="propio" aria-selected="false" aria-controls="stageView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M3 13l1-3.5 7-7 2.5 2.5-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.5 4l2.5 2.5" stroke="currentColor" stroke-width="1.5"/></svg>Mis ejercicios</button>
-    <button class="tab" role="tab" id="tab-progreso" data-view="progreso" aria-selected="false" aria-controls="progView" tabindex="-1" type="button"><svg viewBox="0 0 16 16"><path d="M2 13l4-5 3 3 5-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>Mi progreso</button>
-  </nav>
-
   <div class="sr-only" id="srLive" role="status" aria-live="polite"></div>
 
-  <main class="layout" id="stageView" role="tabpanel" aria-labelledby="tab-libre">
+  <main class="main" id="main" tabindex="-1">
+  <div class="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab" role="tab" id="tab-libre" data-view="libre" aria-selected="true" aria-controls="stageView" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="8" r="2" fill="currentColor"/></svg>Práctica libre</button>
+    <button class="tab" role="tab" id="tab-campana" data-view="campana" aria-selected="false" aria-controls="stageView" tabindex="-1" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 14V2.5M3 3h9l-2 3 2 3H3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Campaña</button>
+    <button class="tab" role="tab" id="tab-propio" data-view="propio" aria-selected="false" aria-controls="stageView" tabindex="-1" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13l1-3.5 7-7 2.5 2.5-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.5 4l2.5 2.5" stroke="currentColor" stroke-width="1.5"/></svg>Mis ejercicios</button>
+    <button class="tab" role="tab" id="tab-progreso" data-view="progreso" aria-selected="false" aria-controls="progView" tabindex="-1" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 13l4-5 3 3 5-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>Mi progreso</button>
+  </div>
+
+  <div class="layout" id="stageView" role="tabpanel" aria-labelledby="tab-libre">
     <section class="stage">
       <section class="welcome" id="welcome" aria-labelledby="welTitle" hidden>
         <h2 id="welTitle">Cómo se practica</h2>
@@ -49,7 +50,7 @@
       <div class="level-bar" id="levelBar" hidden>
         <button class="step" id="lvPrev" type="button" aria-label="Nivel anterior">‹</button>
         <div>
-          <div class="lv-top"><span class="lv-eyebrow" id="lvEyebrow"></span><span class="stars lv-stars" id="lvStars" aria-label=""></span></div>
+          <div class="lv-top"><span class="lv-eyebrow" id="lvEyebrow"></span><span class="stars lv-stars" id="lvStars" role="img" aria-label=""></span></div>
           <h2 id="lvTitle"></h2>
           <p class="lv-desc" id="lvDesc"></p>
           <div class="lv-meta" id="lvMeta"></div>
@@ -58,9 +59,9 @@
       </div>
       <div class="transport">
         <div class="tbtns">
-          <button class="btn primary" id="bPlay" type="button"><svg viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>Reproducir</button>
-          <button class="btn" id="bStop" type="button" disabled><svg viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="currentColor"/></svg>Detener</button>
-          <button class="btn" id="bMetro" type="button" aria-pressed="false"><svg viewBox="0 0 16 16"><path d="M5.5 1.5h5l3 13h-11z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 11.5L11.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Solo metrónomo</button>
+          <button class="btn primary" id="bPlay" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>Reproducir</button>
+          <button class="btn" id="bStop" type="button" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="currentColor"/></svg>Detener</button>
+          <button class="btn" id="bMetro" type="button" aria-pressed="false"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 1.5h5l3 13h-11z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 11.5L11.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Solo metrónomo</button>
         </div>
         <div class="tempo">
           <span class="glyph" id="tGlyph"></span><span class="eq">=</span>
@@ -81,20 +82,20 @@
             <p class="notice pulse-warn" id="pulseWarn" hidden><span id="pulseWarnTxt"></span> <button class="btn" id="ownFix" type="button">Reescribir según el pulso</button></p>
           </div>
           <button class="btn" id="bFull" type="button" hidden>Ritmo completo</button>
-          <button class="btn" id="bEditThis" type="button" title="Copiar este ritmo a «Mis ejercicios» para cambiarlo"><svg viewBox="0 0 16 16"><path d="M3 13l1-3.5 7-7 2.5 2.5-7 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>Editar</button>
-          <button class="btn" id="bNew" type="button"><svg viewBox="0 0 16 16"><path d="M13 5.5A5.5 5.5 0 1 0 13.5 10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M13.8 1.8v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="bNewLbl">Nuevo ritmo</span></button>
+          <button class="btn" id="bEditThis" type="button" title="Copiar este ritmo a «Mis ejercicios» para cambiarlo"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13l1-3.5 7-7 2.5 2.5-7 7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>Editar</button>
+          <button class="btn" id="bNew" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 5.5A5.5 5.5 0 1 0 13.5 10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M13.8 1.8v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="bNewLbl">Nuevo ritmo</span></button>
         </div>
-        <div class="pad" id="pad" tabindex="0" role="button" aria-label="Partitura: toca sobre ella en cada nota">
-          <div id="score" aria-label="Partitura del ritmo"></div>
-          <div class="pad-count" id="padCount" hidden></div>
+        <div class="pad" id="pad" tabindex="0" role="group" aria-label="Partitura" aria-describedby="padMain padSub">
+          <div id="score"></div>
+          <div class="pad-count" id="padCount" hidden aria-hidden="true"></div>
           <div class="pad-status"><span class="pad-main" id="padMain"></span><span class="pad-sub" id="padSub"></span></div>
         </div>
       </div>
 
       <div class="practice">
         <div class="p-actions">
-          <button class="btn primary big" id="bPractice" type="button"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>Practicar</button>
-          <button class="btn" id="bCalib" type="button"><svg viewBox="0 0 16 16"><circle cx="8" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9V5.8M6.5 1.8h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Medir latencia</button>
+          <button class="btn primary big" id="bPractice" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>Practicar</button>
+          <button class="btn" id="bCalib" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9V5.8M6.5 1.8h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Medir latencia</button>
           <div class="modeseg" id="modeSeg" role="group" aria-label="Forma de tocar">
             <button type="button" data-hold="0" title="Solo cuenta el momento del golpe">Batería</button>
             <button type="button" data-hold="1" title="También cuenta cuánto mantienes pulsada cada nota">Piano</button>
@@ -106,7 +107,7 @@
       <section class="calib" id="calib" tabindex="-1" aria-label="Medición de latencia" hidden>
         <div class="calib-top">
           <div class="calib-val" id="kVal">+0 ms</div>
-          <div><h3 id="kHead"></h3><p id="kText"></p></div>
+          <div><h2 id="kHead"></h2><p id="kText"></p></div>
         </div>
         <div class="calib-strip" id="kStrip" aria-hidden="true"></div>
         <div class="res-actions">
@@ -126,10 +127,10 @@
         </div>
         <div class="res-top">
           <div class="pct" id="rPct">0%</div>
-          <div><h3 id="rHead"></h3><p id="rTrend"></p></div>
+          <div><h2 id="rHead"></h2><p id="rTrend"></p></div>
         </div>
         <div class="res-camp" id="rCamp" hidden>
-          <span class="stars" id="rcStars"></span>
+          <span class="stars" id="rcStars" role="img" aria-label=""></span>
           <p id="rcText"></p>
         </div>
         <div class="res-weak" id="rWeak" hidden>
@@ -137,23 +138,23 @@
           <button class="btn" id="rWeakBtn" type="button"></button>
         </div>
         <ul class="counts">
-          <li><span class="sw-dot c-good"></span>Exacto (±40 ms)<span class="n" id="cExact">0</span></li>
-          <li><span class="sw-dot c-ok"></span>Bien (±90 ms)<span class="n" id="cGood">0</span></li>
-          <li><span class="sw-dot c-near"></span>Cerca<span class="n" id="cNear">0</span></li>
-          <li><span class="sw-dot c-bad"></span>Sin tocar<span class="n" id="cMiss">0</span></li>
-          <li><span class="sw-dot tri c-muted"></span>Golpes de más<span class="n" id="cExtra">0</span></li>
+          <li><span aria-hidden="true" class="sw-dot c-good"></span>Exacto (±40 ms)<span class="n" id="cExact">0</span></li>
+          <li><span aria-hidden="true" class="sw-dot c-ok"></span>Bien (±90 ms)<span class="n" id="cGood">0</span></li>
+          <li><span aria-hidden="true" class="sw-dot c-near"></span>Cerca<span class="n" id="cNear">0</span></li>
+          <li><span aria-hidden="true" class="sw-dot c-bad"></span>Sin tocar<span class="n" id="cMiss">0</span></li>
+          <li><span aria-hidden="true" class="sw-dot tri c-muted"></span>Golpes de más<span class="n" id="cExtra">0</span></li>
         </ul>
         <ul class="counts" id="durCounts" hidden>
-          <li><span class="sw-dot c-good"></span>Duración justa<span class="n" id="dExact">0</span></li>
-          <li><span class="sw-dot c-ok"></span>Duración aceptable<span class="n" id="dOk">0</span></li>
-          <li><span class="sw-dot c-near"></span>Soltaste antes<span class="n" id="dShort">0</span></li>
-          <li><span class="sw-dot c-near"></span>Soltaste tarde<span class="n" id="dLong">0</span></li>
+          <li><span aria-hidden="true" class="sw-dot c-good"></span>Duración justa<span class="n" id="dExact">0</span></li>
+          <li><span aria-hidden="true" class="sw-dot c-ok"></span>Duración aceptable<span class="n" id="dOk">0</span></li>
+          <li><span aria-hidden="true" class="sw-dot c-near"></span>Soltaste antes<span class="n" id="dShort">0</span></li>
+          <li><span aria-hidden="true" class="sw-dot c-near"></span>Soltaste tarde<span class="n" id="dLong">0</span></li>
         </ul>
         <p class="res-note">Los puntos bajo cada nota muestran tu desvío: a la izquierda de la rayita tocaste antes, a la derecha tocaste tarde. Los triángulos grises marcan dónde tocaste sin que hubiera nota (golpes de más).<span id="durNote" hidden> En modo piano, la barra de debajo compara cuánto mantuviste la nota (color) con lo que debía durar (gris); la rayita marca dónde tenías que soltar.</span></p>
       </section>
     </section>
 
-    <aside class="panel" aria-label="Opciones">
+    <section class="panel" aria-label="Opciones">
       <div class="sec" id="secOwn" hidden>
         <h2>Mis ejercicios</h2>
         <div class="own-list" id="ownList"></div>
@@ -189,14 +190,14 @@
               <button type="button" data-mod="tie" aria-pressed="false">Ligar <kbd>L</kbd></button>
             </div>
             <div class="own-row own-edit">
-              <button class="btn" id="ownUndo" type="button" title="Deshacer (Ctrl+Z)" aria-label="Deshacer"><svg viewBox="0 0 16 16"><path d="M5.5 3L2.5 6l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6h6.5a4 4 0 0 1 0 8H7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Deshacer</span></button>
-              <button class="btn" id="ownRedo" type="button" title="Rehacer (Ctrl+Y)" aria-label="Rehacer"><svg viewBox="0 0 16 16"><path d="M10.5 3l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 6H6.5a4 4 0 0 0 0 8H9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Rehacer</span></button>
-              <button class="btn" id="ownDelTok" type="button" title="Borrar la figura resaltada (Retroceso)" aria-label="Borrar figura"><svg viewBox="0 0 16 16"><path d="M6 3h8v10H6L2 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6l4 4M12 6l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Borrar figura</span></button>
+              <button class="btn" id="ownUndo" type="button" title="Deshacer (Ctrl+Z)" aria-label="Deshacer"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3L2.5 6l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6h6.5a4 4 0 0 1 0 8H7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Deshacer</span></button>
+              <button class="btn" id="ownRedo" type="button" title="Rehacer (Ctrl+Y)" aria-label="Rehacer"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 6H6.5a4 4 0 0 0 0 8H9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Rehacer</span></button>
+              <button class="btn" id="ownDelTok" type="button" title="Borrar la figura resaltada (Retroceso)" aria-label="Borrar figura"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h8v10H6L2 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6l4 4M12 6l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Borrar figura</span></button>
             </div>
           </div>
           <div class="dock-top">
             <p class="own-status" id="ownStatus" aria-live="polite"></p>
-            <button class="btn primary" id="ownPractice" type="button"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>Practicar</button>
+            <button class="btn primary" id="ownPractice" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>Practicar</button>
           </div>
         </div>
         <div class="field"><label for="ownText">Notación</label><textarea id="ownText" rows="3" spellcheck="false"></textarea></div>
@@ -284,6 +285,7 @@
         <div class="field" id="tapVolField"><span class="rlabel">Volumen de mis toques <output id="tapVolOut"></output></span><input type="range" id="tapVol" min="0" max="1" step="0.05" aria-label="Volumen de mis toques"></div>
         <label class="sw" id="vibrateRow" hidden><input type="checkbox" id="vibrate"><span class="track"></span><span>Vibrar al tocar<small>Una vibración corta con cada toque en la pantalla.</small></span></label>
         <label class="sw"><input type="checkbox" id="fab"><span class="track"></span><span>Botón flotante para tocar<small>En móvil y tableta, mientras practicas aparece un botón grande abajo de la pantalla. Toca ahí en vez de sobre la partitura, que se desplaza al cambiar de línea.</small></span></label>
+        <label class="sw"><input type="checkbox" id="keys"><span class="track"></span><span>Atajos de teclado de una tecla<small>P practicar, R reproducir, N nuevo ritmo y, en Mis ejercicios, 1 2 4 8 6 T . S L para escribir figuras. Desactívalos si usas dictado por voz o un lector de pantalla con teclas rápidas. Espacio, Intro y Esc siguen funcionando.</small></span></label>
         <label class="sw"><input type="checkbox" id="autosave"><span class="track"></span><span>Guardar cada práctica automáticamente<small>Si lo desactivas, podrás guardar cada resultado a mano.</small></span></label>
         <div class="field"><span class="rlabel">Ajuste de latencia <output id="offsetOut"></output></span><input type="range" id="offset" min="-150" max="250" step="5" aria-label="Ajuste de latencia"></div>
         <p class="hint">Si siempre te marca «tarde» aunque vayas a tiempo (pasa con auriculares Bluetooth), sube este valor, o usa «Medir latencia» junto a la zona de toque para calcularlo automáticamente.</p>
@@ -293,8 +295,8 @@
       <div class="confirm" id="resetBox">
         <button class="btn" id="resetSet" type="button">Restablecer ajustes</button>
       </div>
-    </aside>
-  </main>
+    </section>
+  </div>
 
   <section class="prog" id="progView" role="tabpanel" aria-labelledby="tab-progreso" hidden>
     <div class="tiles" id="pTiles"></div>
@@ -321,10 +323,12 @@
       </div>
     </div>
   </section>
+  </main>
 </div>
 
-<button type="button" class="fab" id="tapFab" hidden aria-label="Tocar"><span class="fab-main" id="fabMain">Toca aquí</span></button>
-<button type="button" class="fab-restart" id="fabRestart" hidden aria-label="Reiniciar: mantén pulsado medio segundo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg><span>Reiniciar</span></button>
+<button type="button" class="fab" id="tapFab" hidden><span class="fab-main" id="fabMain">Toca aquí</span></button>
+<span class="sr-only" id="restartHelp">Con el dedo, mantén pulsado medio segundo. Con el teclado, Intro o Espacio reinician al instante.</span>
+<button type="button" class="fab-restart" id="fabRestart" hidden aria-describedby="restartHelp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg><span>Reiniciar</span></button>
 <div class="fab fab-post" id="postFab" role="group" aria-label="Después de la práctica" hidden>
   <button type="button" id="pfAgain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg>Repetir</button>
   <button type="button" id="pfNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7h3.2c2 0 3.2.9 4.3 2.6l2.6 4.6c1 1.8 2.3 2.8 4.3 2.8h4.6"/><path d="M2.5 17h3.2c1.3 0 2.2-.4 3-1.1"/><path d="M14.4 8.1c.8-.7 1.7-1.1 3-1.1h4.1"/><path d="M18.5 4l3 3-3 3"/><path d="M18.5 14l3 3-3 3"/></svg><span id="pfNewLbl">Nuevo ritmo</span></button>

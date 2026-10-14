@@ -152,5 +152,5 @@ function showResults(r){
   $('#results').focus({preventScroll:true});
   // que los botones de los resultados queden a la vista (sin tapar la partitura más de lo necesario)
   const ab=$('#resActions').getBoundingClientRect(), room=innerHeight-fabReserve();
-  if(ab.bottom>room) scrollTo({top:scrollY+ab.bottom-room+12, behavior:'smooth'});
+  if(ab.bottom>room) scrollTo({top:scrollY+ab.bottom-room+12, behavior:smooth()});
 }

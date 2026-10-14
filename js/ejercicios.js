@@ -253,6 +253,7 @@ function ownOpen(x){
   try{ own.toks = x ? parseNotation(x.notation, x) : []; }catch(e){ own.toks=[]; ownMsg('No se pudo leer la notación guardada de este ejercicio: '+e.message, true); }
   own.cursor=own.toks.length;
   set.ownId = x ? x.id : ''; save();
+  if($('#ownDelBox').querySelector('#ownDelYes')) renderOwnDelBox();   // una confirmación pendiente era del ejercicio anterior
   renderOwnMeter(); renderPalette(); renderOwnList();
   if(stageMode==='propio' && score){ stop(); showTempo(); buildOwn(); }
 }
@@ -273,7 +274,7 @@ function renderOwnMeter(){
 function renderPalette(){
   const m=own.mods, simple=own.cur ? sigOf(own.cur).kind==='simple' : true;
   const keys={w:'1',h:'2',q:'4',e:'8',s:'6',t:'T'};
-  $('#ownPal').innerHTML=['w','h','q','e','s','t'].map(k=>{
+  keepFocus($('#ownPal'),()=>{ $('#ownPal').innerHTML=['w','h','q','e','s','t'].map(k=>{
     let ok=true, icon, name;
     if(k==='t'){ ok=simple && !m.rest && !m.dot; icon=miniFig('t'); name='Tresillo de corcheas'; }
     else {
@@ -283,7 +284,7 @@ function renderPalette(){
       name = (m.rest?'Silencio de ':'')+(TOKNAME[d]||TOKNAME[L2D[k]]);
     }
     return `<button type="button" class="pal-b" data-k="${k}" ${ok?'':'disabled'} aria-label="${name} (tecla ${keys[k]})" title="${name} · tecla ${keys[k]}">${icon}<kbd>${keys[k]}</kbd></button>`;
-  }).join('');
+  }).join(''); });
   document.querySelectorAll('#ownMods button').forEach(b=>b.setAttribute('aria-pressed',String(!!m[b.dataset.mod])));
 }
 function renderOwnStatus(){
@@ -303,17 +304,20 @@ function renderOwnEditor(){
   if(!own.cur){ updateFab(); return; }
   renderOwnStatus();
   if(document.activeElement!==$('#ownText')) $('#ownText').value=own.cur.notation;
+  const a=document.activeElement;
   $('#ownUndo').disabled=!own.undo.length; $('#ownRedo').disabled=!own.redo.length; $('#ownDelTok').disabled=own.cursor<1;
-  if(!$('#ownDelBox').querySelector('#ownDelYes')) renderOwnDelBox();
+  // si el botón que tenía el foco se apaga (nada que deshacer, rehacer o borrar), el foco pasa a la paleta para seguir escribiendo
+  if(a && a.disabled && a.closest('#ownDock')){ const n=$('#ownPal .pal-b:not(:disabled)'); if(n) n.focus({preventScroll:true}); }
+  if(!$('#ownDelBox').querySelector('#ownDelYes, #ownDup')) renderOwnDelBox();
 }
-function renderOwnDelBox(){ $('#ownDelBox').innerHTML='<button class="btn" id="ownDup" type="button">Duplicar</button><button class="btn warn" id="ownDel" type="button">Borrar ejercicio</button>'; }
+function renderOwnDelBox(){ keepFocus($('#ownDelBox'),()=>endConfirm($('#ownDelBox'),'<button class="btn" id="ownDup" type="button">Duplicar</button><button class="btn warn" id="ownDel" type="button">Borrar ejercicio</button>')); }
 function renderOwnList(){
   const box=$('#ownList');
   if(!own.list.length){ box.innerHTML='<p class="hint">Aún no tienes ejercicios. Crea uno con «Nuevo ejercicio», impórtalo, o pulsa «Editar» sobre un ritmo de Práctica libre o de la campaña.</p>'; return; }
   const best={}; prog.sessions.forEach(r=>{ if(r.mode==='propio' && r.ex && !r.part) best[r.ex]=Math.max(best[r.ex]??0, r.pct); });
-  box.innerHTML=own.list.map(x=>{ const inf=ownInfo(x);
+  keepFocus(box,()=>{ box.innerHTML=own.list.map(x=>{ const inf=ownInfo(x);
     return `<button type="button" class="own-item" data-id="${esc(x.id)}" aria-current="${!!own.cur && own.cur.id===x.id}"><span class="own-n">${esc(x.name)}</span><span class="own-m">${x.sig}${x.grp?' ('+x.grp+')':''} · ${inf.bars} ${inf.bars===1?'compás':'compases'} · ${x.bpm} ppm${inf.complete?'':' · <i>borrador</i>'}${best[x.id]!=null?` · mejor ${best[x.id]}%`:''}</span></button>`;
-  }).join('');
+  }).join(''); });
 }
 
 /* --- Exportar e importar --- */

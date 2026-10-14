@@ -26,9 +26,10 @@ function updateFab(){
   f.hidden=!on; document.body.classList.toggle('fab-on',on||post); f.classList.toggle('idle',on && !live);
   f.classList.toggle('split',on && live); $('#fabRestart').hidden=!(on && live);
   if(!(on && live)) restartCancel();
-  f.setAttribute('aria-label', live ? 'Tocar' : 'Practicar');
   if(on && !live){ fm.textContent='Practicar'; fm.classList.remove('count'); }
   else if(on && fm.textContent==='Practicar') fm.textContent='Toca aquí';
+  // espacio inferior que tapan los elementos fijos: el foco de teclado y los desplazamientos de la página lo respetan (scroll-padding-bottom)
+  document.documentElement.style.setProperty('--pinB', (pinnedEl() ? fabReserve() : 0)+'px');
 }
 // En la campaña el tick lleva al siguiente nivel (apagado si no se superó); en práctica libre dice «Listo»
 function syncPostFab(){
@@ -39,18 +40,26 @@ function syncPostFab(){
   b.setAttribute('aria-label', camp ? 'Siguiente nivel' : 'Listo: cerrar los resultados');
 }
 // Cierra los resultados y limpia las marcas de la partitura
-function closeResults(){ $('#results').hidden=true; judg=[]; extras=0; extraTks=[]; renderScore(); updateFab(); }
-// Alto de la parte inferior de la pantalla que tapa el botón flotante (para el seguimiento de la partitura)
+function closeResults(){ $('#results').hidden=true; judg=[]; extras=0; extraTks=[]; renderScore(); updateFab(); $('#pad').focus({preventScroll:true}); }
+// Elemento fijo que tapa la parte baja de la pantalla: botón flotante, botón de tres partes o paleta (si se ve)
+const pinnedEl = () => [$('#tapFab'),$('#postFab')].find(x=>!x.hidden) || (dockShown() && $('#ownDock')) || null;
+// Alto de la parte inferior de la pantalla que tapa (para el seguimiento de la partitura)
 function fabReserve(){
-  const f=[$('#tapFab'),$('#postFab')].find(x=>!x.hidden) || (dockShown() && $('#ownDock'));
+  const f=pinnedEl();
   return f ? innerHeight-f.getBoundingClientRect().top+12 : 8;
+}
+// Foco de teclado tapado por el botón flotante o la paleta fija (WCAG 2.4.11): se desplaza lo justo para que quede por encima
+// (scroll-padding-bottom = --pinB hace que 'nearest' deje ese margen)
+function revealFocus(el){
+  const p=pinnedEl(); if(!p || !el.getBoundingClientRect || el.closest('#tapFab,#fabRestart,#postFab,#ownDock')) return;
+  if(el.getBoundingClientRect().bottom > p.getBoundingClientRect().top-4) el.scrollIntoView({block:'nearest', behavior:'auto'});
 }
 function showPad(){
   updateFab();
   const p=$('#pad'), r=p.getBoundingClientRect();
   p.focus({preventScroll:true});
   const room=innerHeight-fabReserve();
-  if(r.top<0 || r.bottom>room) p.scrollIntoView({block:r.height>room?'start':'center',behavior:'smooth'});
+  if(r.top<0 || r.bottom>room) p.scrollIntoView({block:r.height>room?'start':'center',behavior:smooth()});
 }
 function padIdle(){
   $('#pad').classList.remove('live');
