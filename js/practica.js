@@ -89,8 +89,9 @@ function updateLive(){
   $('#padSub').textContent=`Notas acertadas: ${hits} de ${S.notes.length}${extras?` · Golpes de más: ${extras}`:''}`;
 }
 let weakM=-1;
-// r = {notes, taps, hold, endT, passStart, off, spt} de la práctica que acaba de terminar
-function showResults(r){
+// r = {notes, taps, hold, endT, passStart, off, spt} de la práctica que acaba de terminar; manual = terminada con Esc o «Detener».
+// Devuelve el porcentaje.
+function showResults(r, manual){
   const {notes, taps, endT}=r, holdMode=r.hold;
   // la evaluación definitiva sale de la alineación óptima (la de directo solo pintaba los colores)
   const match=alignTaps(notes, taps.map(t=>t.t)), used=new Set();
@@ -133,9 +134,10 @@ function showResults(r){
   $('#rTrend').textContent=trend;
   $('#cExact').textContent=c.exact; $('#cGood').textContent=c.good; $('#cNear').textContent=c.near; $('#cMiss').textContent=c.miss; $('#cExtra').textContent=extras;
   const mean = errs.length ? Math.round(sum(errs)/errs.length) : null;
+  const an=resultAnalysis(notes);   // análisis fino (estudio.js): regularidad, tendencia y error por posición
   afterPractice({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), t:Date.now(), mode:stageMode,
     lvl: stageMode==='campana'?levelIdx:null, lid: stageMode==='campana'?LEVELS[levelIdx].id:null, sig:score.key, grp:score.grp, bars:score.bars, bpm:curBpm(), pct, n:N,
-    exact:c.exact, good:c.good, near:c.near, miss:c.miss, extra:extras, mean, play:holdMode?'piano':'bateria', pen:!!set.penalize, ...(score.part?{part:true}:{}), ...(stageMode==='propio'&&own.cur?{ex:own.cur.id, exn:own.cur.name}:{})});
+    exact:c.exact, good:c.good, near:c.near, miss:c.miss, extra:extras, mean, play:holdMode?'piano':'bateria', pen:!!set.penalize, ...(an?{sd:Math.round(an.sd), drift:Math.round(an.drift)}:{}), ...(score.part?{part:true}:{}), ...(stageMode==='propio'&&own.cur?{ex:own.cur.id, exn:own.cur.name}:{})});
   // compás más flojo (solo si hay varios y alguno baja del 90 %)
   weakM=-1; let weakPct=101;
   mp.forEach((m,i)=>{ if(!m.n) return; const p=Math.max(0,Math.round(m.pts/m.n)); if(p<weakPct){ weakPct=p; weakM=i; } });
@@ -145,12 +147,15 @@ function showResults(r){
     $('#rWeakText').textContent=`El compás ${weakM+1} fue el más flojo (${weakPct}%). Practícalo por separado y luego vuelve al ritmo completo.`;
     $('#rWeakBtn').textContent=`Practicar el compás ${weakM+1}`;
   }
+  const rampTxt=rampAfter(pct, manual);   // bucle de tempo (estudio.js)
+  $('#rStudy').hidden=$('#rRamp').hidden && $('#rAnal').hidden;
   $('#results').hidden=false;
   updateFab();
   if(!set.seen) dismissWelcome();
-  say(`Resultado: ${pct}%. ${$('#rHead').textContent}. ${$('#rCamp').hidden?'':$('#rcText').textContent+' '}${trend}${showWeak?` El compás ${weakM+1} fue el más flojo.`:''}`);
+  say(`Resultado: ${pct}%. ${$('#rHead').textContent}. ${$('#rCamp').hidden?'':$('#rcText').textContent+' '}${trend}${showWeak?` El compás ${weakM+1} fue el más flojo.`:''}${an&&an.tip?' '+an.tip:''}${rampTxt?' '+rampTxt:''}`);
   $('#results').focus({preventScroll:true});
   // que los botones de los resultados queden a la vista (sin tapar la partitura más de lo necesario)
   const ab=$('#resActions').getBoundingClientRect(), room=innerHeight-fabReserve();
   if(ab.bottom>room) scrollTo({top:scrollY+ab.bottom-room+12, behavior:smooth()});
+  return pct;
 }

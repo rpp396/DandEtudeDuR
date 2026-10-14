@@ -30,6 +30,8 @@ $('#restFigs').addEventListener('click',e=>{
 });
 ['sound','loop','metro','accent','countSub'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.checked; save(); if(S.running && S.mode!=='metro') stop(); }));
 $('#cursor').addEventListener('change',e=>{ set.cursor=e.target.checked; save(); if(!set.cursor && S.nowI>=0 && evEls[S.nowI]) evEls[S.nowI].classList.remove('now'); });
+// metrónomo que calla: vale para los compases que aún no se han programado (no hace falta parar)
+$('#gap').addEventListener('change',e=>{ set.gap=e.target.value; save(); });
 ['timbre','sub','countIn'].forEach(id=>$('#'+id).addEventListener('change',e=>{ set[id]=e.target.value; save(); syncSub(); syncCount(); if(S.running && S.mode!=='metro') stop(); }));
 $('#tapSound').addEventListener('change',e=>{ set.tapSound=e.target.checked; save(); syncTapVol(); });
 ['rhythmVol','metroVol','tapVol'].forEach(id=>$('#'+id).addEventListener('input',e=>{ set[id]=+e.target.value; updOutputs(); save(); liveVol(); }));
@@ -47,7 +49,7 @@ $('#tapTempo').addEventListener('click',()=>{
 });
 $('#bPlay').addEventListener('click',()=>start('play'));
 $('#bPractice').addEventListener('click',()=>start('practice'));
-$('#bStop').addEventListener('click',()=>{ if(S.running && S.mode==='practice') finish(true); else stop(); });
+$('#bStop').addEventListener('click',()=>{ if(!S.running && rampT) rampStop(); else if(S.running && S.mode==='practice') finish(true); else stop(); });
 $('#bMetro').addEventListener('click',()=>{ if(S.running && S.mode==='metro') stop(); else start('metro'); });
 $('#bNew').addEventListener('click',()=>{ if(S.running && S.mode!=='metro') stop(); generate(); });
 $('#rNew').addEventListener('click',()=>{ generate(); $('#pad').focus({preventScroll:true}); });   // los resultados (y este botón) se ocultan
@@ -122,6 +124,7 @@ $('#keys').addEventListener('change',e=>{ set.keys=e.target.checked; save(); app
 document.addEventListener('keydown',e=>{
   if(ownKeys(e)) return;
   if(e.metaKey||e.ctrlKey||e.altKey||e.repeat) return;
+  if(e.key==='Escape' && !S.running && rampT){ e.preventDefault(); rampStop(); return; }   // bucle de tempo en pausa
   if(e.key==='Escape' && S.running){ e.preventDefault(); if(S.mode==='practice') finish(true); else stop(); return; }
   // «Reiniciar» enfocado: Intro o Espacio lo activan (su clic), no cuentan como toque
   if(e.target===$('#fabRestart') && (e.code==='Space'||e.code==='Enter')) return;

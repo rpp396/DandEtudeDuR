@@ -18,11 +18,13 @@ function cleanSession(r){
     lid = typeof r.lid==='string' && lvById(r.lid)>=0 ? r.lid : null; lvl = Number.isInteger(r.lvl) && r.lvl>=0 && r.lvl<LEVELS.length ? r.lvl : null;
     if(lid==null && (lvl==null || lvById('L'+(lvl+1))<0)) return null;   // las sesiones antiguas no tienen lid: su lvl es L(lvl+1)
   }
+  // sd: regularidad (desviación típica de los desvíos, ms); drift: cambio del desvío a lo largo de la pasada (ms, − = acelera)
+  const sd=numIn(r.sd,0,2000,NaN,true), drift=numIn(r.drift,-5000,5000,NaN,true);
   const c=(v,hi)=>numIn(v,0,hi,0,true), exn=typeof r.exn==='string' && r.exn.trim() ? cleanName(r.exn) : null;
   return {id, t, mode, lvl, lid, sig, grp: has(ODD_GROUPS,sig) && ODD_GROUPS[sig].includes(r.grp) ? r.grp : null,
     bars:numIn(r.bars,1,64,1,true), bpm:numIn(r.bpm,30,240,80,true), pct, n:c(r.n,9999), exact:c(r.exact,9999), good:c(r.good,9999), near:c(r.near,9999), miss:c(r.miss,9999), extra:c(r.extra,9999),
     mean: r.mean==null ? null : numIn(r.mean,-5000,5000,null,true), play:r.play==='piano'?'piano':'bateria', pen:r.pen===true,
-    ...(r.part===true?{part:true}:{}), ...(mode==='propio' ? {ex:strIn(r.ex,/^[a-z0-9]{4,24}$/,''), ...(exn?{exn}:{})} : {})};
+    ...(isFinite(sd)?{sd}:{}), ...(isFinite(drift)?{drift}:{}), ...(r.part===true?{part:true}:{}), ...(mode==='propio' ? {ex:strIn(r.ex,/^[a-z0-9]{4,24}$/,''), ...(exn?{exn}:{})} : {})};
 }
 // Avance por nivel: solo los id de LEVELS (nunca las claves del dato), con best 0-100, stars 0-3 y tries >= 0
 function cleanLevels(l){
@@ -158,9 +160,9 @@ function renderProgress(){
   else {
     const rows=list.slice(-30).reverse().map(r=>{
       const dev = r.mean==null ? '—' : Math.abs(r.mean)<5 ? 'a tiempo' : `${Math.abs(r.mean)} ms ${r.mean>0?'tarde':'antes'}`;
-      return `<tr><td>${fmtDate(r.t)} <span class="hint">${fmtTime(r.t)}</span></td><td>${exName(r)}</td><td>${esc(r.sig)}${r.grp?' ('+esc(r.grp)+')':''} · ${esc(r.bars)} c.</td><td class="num">${esc(r.bpm)}</td><td class="num">${esc(r.pct)}%<span class="pbar"><i data-w="${esc(r.pct)}"></i></span></td><td class="num">${esc(r.exact)}/${esc(r.n)}</td><td class="num">${esc(r.miss)}</td><td>${esc(dev)}</td></tr>`;
+      return `<tr><td>${fmtDate(r.t)} <span class="hint">${fmtTime(r.t)}</span></td><td>${exName(r)}</td><td>${esc(r.sig)}${r.grp?' ('+esc(r.grp)+')':''} · ${esc(r.bars)} c.</td><td class="num">${esc(r.bpm)}</td><td class="num">${esc(r.pct)}%<span class="pbar"><i data-w="${esc(r.pct)}"></i></span></td><td class="num">${esc(r.exact)}/${esc(r.n)}</td><td class="num">${esc(r.miss)}</td><td>${esc(dev)}</td><td class="num">${typeof r.sd==='number'?'±'+esc(r.sd)+' ms':'—'}</td></tr>`;
     }).join('');
-    $('#pTable').innerHTML=`<table><thead><tr><th>Fecha</th><th>Ejercicio</th><th>Compás</th><th class="num">Tempo</th><th class="num">Precisión</th><th class="num">Exactas</th><th class="num">Sin tocar</th><th>Desvío medio</th></tr></thead><tbody>${rows}</tbody></table>`;
+    $('#pTable').innerHTML=`<table><thead><tr><th>Fecha</th><th>Ejercicio</th><th>Compás</th><th class="num">Tempo</th><th class="num">Precisión</th><th class="num">Exactas</th><th class="num">Sin tocar</th><th>Desvío medio</th><th class="num" title="Desviación típica de tus desvíos: cuanto menor, más regular">Regularidad</th></tr></thead><tbody>${rows}</tbody></table>`;
     $('#pTable').querySelectorAll('.pbar i').forEach(i=>{ i.style.width=Math.max(0,Math.min(100,+i.dataset.w||0))+'%'; });   // el ancho va por CSSOM (la CSP no admite style="")
   }
   renderStoreStatus();
@@ -187,7 +189,7 @@ function renderChart(list){
   const tip=$('#pTip');
   host.querySelectorAll('.ch-hit').forEach(h=>{
     const show=()=>{ const i=+h.dataset.i, r=data[i];
-      tip.innerHTML=`<b>${esc(r.pct)}%</b> · ${fmtDate(r.t)} ${fmtTime(r.t)}<br>${exName(r)} · ${esc(r.sig)} · ${esc(r.bpm)} ppm`;
+      tip.innerHTML=`<b>${esc(r.pct)}%</b> · ${fmtDate(r.t)} ${fmtTime(r.t)}<br>${exName(r)} · ${esc(r.sig)} · ${esc(r.bpm)} ppm${typeof r.sd==='number'?' · regularidad ±'+esc(r.sd)+' ms':''}`;
       tip.style.left=Math.min(Math.max(X(i),90),W-90)+'px'; tip.style.top=Y(r.pct)+'px'; tip.hidden=false; };
     h.addEventListener('pointerenter',show); h.addEventListener('pointerdown',show);
     h.addEventListener('pointerleave',()=>{ tip.hidden=true; });

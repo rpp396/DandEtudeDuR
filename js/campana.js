@@ -125,7 +125,7 @@ function applyStageMode(){
   if(!S.running) padIdle();
   $('#bNewLbl').textContent=camp?'Otro ritmo del nivel':'Nuevo ritmo';
   if(camp){ if(!unlocked(levelIdx)) levelIdx=firstOpenLevel(); renderLevelBar(); renderCampMap(); }
-  showTempo(); generate();
+  showTempo(); syncRamp(); generate();
 }
 function setView(v){
   stop();

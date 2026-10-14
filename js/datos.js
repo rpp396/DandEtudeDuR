@@ -122,7 +122,11 @@ function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.fig
 
 const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:false, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
-  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, countSub:true, keys:true, sv:3};
+  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, countSub:true, keys:true, sv:3,
+  // bucle de tempo (subir al superar rampPct %, de rampStep en rampStep hasta rampMax) y metrónomo que calla («a-b»: suena a compases, calla b)
+  ramp:false, rampPct:90, rampStep:5, rampMax:140, rampDown:false, gap:'0'};
+// Patrones del metrónomo intermitente (ver gapMuted en transporte.js)
+const GAPS = ['0','1-1','2-2','3-1','1-3'];
 /* ---------- Validación de lo guardado ---------- */
 // Todo lo que se lee de localStorage o del db de claude.ai (ajustes, sesiones, niveles, ejercicios) se trata como no fiable:
 // se copian solo campos conocidos, con su tipo y rango, y las claves salen de listas cerradas (nunca de propiedades heredadas).
@@ -142,7 +146,9 @@ function cleanSettings(o){
   s.timbre = oneOf(o.timbre,['tono','golpe'],D.timbre);
   s.sub = oneOf(String(o.sub),['0','6','3','4'],D.sub);
   s.countIn = oneOf(String(o.countIn),['0','1','2'],D.countIn);
-  ['sound','cursor','loop','metro','accent','autosave','penalize','hold','sync','ties','tapSound','fab','vibrate','seen','countSub','keys'].forEach(k=>{ s[k]=typeof o[k]==='boolean' ? o[k] : D[k]; });
+  s.gap = oneOf(String(o.gap),GAPS,D.gap);
+  s.rampPct = numIn(o.rampPct,50,100,D.rampPct,true); s.rampStep = numIn(o.rampStep,1,30,D.rampStep,true); s.rampMax = numIn(o.rampMax,30,240,D.rampMax,true);
+  ['sound','cursor','loop','metro','accent','autosave','penalize','hold','sync','ties','tapSound','fab','vibrate','seen','countSub','keys','ramp','rampDown'].forEach(k=>{ s[k]=typeof o[k]==='boolean' ? o[k] : D[k]; });
   const keys=(a,ok)=>Array.isArray(a) ? [...new Set(a.filter(k=>typeof k==='string' && ok.includes(k)))] : [];
   const figs=keys(o.figs,FIGS.map(f=>f.k)); s.figs = figs.length ? figs : [...D.figs];
   // silencios: lista de claves (o el booleano antiguo = silencios de las figuras elegidas)

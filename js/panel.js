@@ -121,7 +121,7 @@ function setBpm(v, fromUser=true){
 function syncControls(){
   ['sync','ties','sound','cursor','loop','metro','accent','tapSound','fab','vibrate','countSub','keys'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
   $('#vibrateRow').hidden=!('vibrate' in navigator && touchMQ.matches);
-  $('#timbre').value=set.timbre; $('#sub').value=set.sub; $('#countIn').value=set.countIn; syncSub(); syncCount();
+  $('#timbre').value=set.timbre; $('#sub').value=set.sub; $('#gap').value=set.gap; syncRamp(); $('#countIn').value=set.countIn; syncSub(); syncCount();
   $('#rhythmVol').value=set.rhythmVol; $('#metroVol').value=set.metroVol; $('#tapVol').value=set.tapVol; syncTapVol(); $('#offset').value=set.offset;
   $('#bars').textContent=set.bars;
   $('#autosave').checked=!!set.autosave; $('#penalize').checked=!!set.penalize;

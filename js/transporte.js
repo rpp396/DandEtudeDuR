@@ -3,7 +3,11 @@
 
 /* ---------- Transporte ---------- */
 let S={running:false,nowI:-1};
-function barClicks(tb,spt,countIn,force){
+// Metrónomo que calla (set.gap = «a-b»: suena a compases y calla b) en el compás k del ejercicio (0 = el primero tras la
+// cuenta previa; en bucle sigue contando). La cuenta previa siempre suena.
+function gapMuted(k){ const [a,b]=String(set.gap).split('-').map(Number); return a>0 && b>0 && k>=0 && k%(a+b)>=a; }
+// mute: compás callado (no suena nada, pero las luces siguen, marcadas como calladas)
+function barClicks(tb,spt,countIn,force,mute){
   const sig=score.sig, L=score.L, starts=new Set(); let a=0; sig.groups.forEach(g=>{ starts.add(a); a+=g; });
   // Cuenta previa en compases compuestos y de amalgama: suena cada corchea; el pulso (inicio de cada grupo) con su clic
   // y el resto, más suave. El número de la cuenta solo avanza en cada pulso.
@@ -17,7 +21,7 @@ function barClicks(tb,spt,countIn,force){
     }
     return;
   }
-  const audible = countIn || force || set.metro;
+  const audible = (countIn || force || set.metro) && !mute;
   const sb=subTicks(sig);
   // Amalgama fuera de la cuenta previa: por defecto solo suenan los pulsos (inicio de cada grupo);
   // las demás corcheas, solo si se elige una subdivisión
@@ -27,7 +31,7 @@ function barClicks(tb,spt,countIn,force){
     const lvl = tk===0 ? (set.accent?'accent':'beat') : (sig.kind==='odd' ? (starts.has(tk)?'beat':'weak') : 'beat');
     const t=tb+tk*spt;
     if(audible && (!oddPulses || starts.has(tk) || sb>0)) click(S.mBus,t,lvl,1);
-    S.vis.push({t,idx:n,count:countIn?n+1:0});
+    S.vis.push({t,idx:n,count:countIn?n+1:0,mute:!!mute});
     n++;
   }
   if(audible && !countIn && sb>0 && sb<sig.click && sig.click%sb===0){
@@ -45,7 +49,7 @@ function barAt(g){
 }
 function schedBar(g){
   const t=barAt(g); if(g<S.countBars){ barClicks(t,S.spt,true,true); return; }
-  barClicks(t,S.spt,false,false);
+  barClicks(t,S.spt,false,false,gapMuted(g-S.countBars));
   // «Reproducir» siempre hace sonar el ritmo; en la práctica depende de «Escuchar el ritmo al practicar»
   if(S.mode==='play' || set.sound){ const b=(g-S.countBars)%score.bars, base=t-b*score.L*S.spt;
     S.byBar[b].forEach(e=>noteSound(S.rBus,base+e.abs*S.spt,e.len*S.spt,1)); }
@@ -60,7 +64,7 @@ function start(mode){
     const t=own.cur ? 'Completa el último compás del ejercicio para poder practicarlo.' : 'Abre o crea un ejercicio para practicar.';
     ownMsg(t,true); say(t); return;
   }
-  stop(); if(!ensureAudio()) return;
+  rampCancel(); stop(); if(!ensureAudio()) return;
   const L=score.L, spt=60/(curBpm()*score.sig.click);
   const bus=ctx.createGain(); bus.connect(master);
   const mBus=ctx.createGain(), rBus=ctx.createGain(); mBus.gain.value=set.metroVol; rBus.gain.value=set.rhythmVol; mBus.connect(bus); rBus.connect(bus);
@@ -85,8 +89,9 @@ function start(mode){
     // antes de esto los toques son de la cuenta previa y no cuentan (con la corrección del usuario y sin pisar la ventana de la primera nota)
     const beat=score.sig.click*spt;
     S.tapFrom=Math.min(ns.length?ns[0].t-ns[0].win:Infinity, S.passStart+S.off-Math.min(0.25,beat/2));
-    pad.classList.add('live'); $('#padMain').textContent=set.hold?'Pulsa en cada nota y mantén mientras dure':'Toca en cada nota'; $('#padSub').textContent='Escucha la cuenta y empieza en el primer tiempo.';
-    say(`Práctica${set.hold?' en modo piano':''}: escucha la cuenta y toca en cada nota. Esc para terminar.`);
+    const rb=rampOn()?` · Bucle de tempo: ${curBpm()} ppm`:'';   // bucle de tempo (estudio.js): a qué tempo va esta pasada
+    pad.classList.add('live'); $('#padMain').textContent=(set.hold?'Pulsa en cada nota y mantén mientras dure':'Toca en cada nota')+rb; $('#padSub').textContent='Escucha la cuenta y empieza en el primer tiempo.'+(rb?' Esc termina y para el bucle.':'');
+    say(`Práctica${set.hold?' en modo piano':''}${rb?`, bucle de tempo a ${curBpm()} ppm`:''}: escucha la cuenta y toca en cada nota. Esc para terminar.`);
     showPad();
   }
   schedTick();
@@ -100,10 +105,10 @@ function schedTick(){
   if(S.mode==='metro'){
     // tras una pausa del hilo principal (segundo plano, tarea larga) se salta lo atrasado en vez de hacerlo sonar de golpe
     const bar=score.L*60/(curBpm()*score.sig.click);
-    if(S.nextBar<now) S.nextBar+=Math.ceil((now-S.nextBar)/bar)*bar;
+    if(S.nextBar<now){ const k=Math.ceil((now-S.nextBar)/bar); S.nextBar+=k*bar; S.mBar=(S.mBar||0)+k; }
     while(S.nextBar < now+0.3){
       const spt=60/(curBpm()*score.sig.click);
-      barClicks(S.nextBar,spt,false,true);
+      barClicks(S.nextBar,spt,false,true,gapMuted(S.mBar||0)); S.mBar=(S.mBar||0)+1;
       S.nextBar+=score.L*spt;
     }
   } else {
@@ -137,6 +142,8 @@ function setLight(i){
   S.light=i;
   if(i>=0 && ls[i]) ls[i].classList.add('on');
 }
+// Luces huecas mientras el metrónomo calla (set.gap)
+function setMuted(on){ if(on===!!S.muted) return; S.muted=on; $('#lights').classList.toggle('muted',on); }
 function showCount(c){
   const fm=$('#fabMain'), ft=c?String(c):'Toca aquí'; if(fm.textContent!==ft){ fm.textContent=ft; fm.classList.toggle('count',!!c); }
   const el=$('#padCount');
@@ -147,7 +154,7 @@ function frame(){
   const heard=heardAt();
   while(S.visPtr+1<S.vis.length && S.vis[S.visPtr+1].t<=heard) S.visPtr++;
   const v=S.vis[S.visPtr];
-  if(v && v.t<=heard) setLight(v.idx);
+  if(v && v.t<=heard){ setLight(v.idx); setMuted(!!v.mute); }
   if(S.mode==='calib'){ calibFrame(heard); return; }
   if(S.mode!=='metro'){
     if(heard<S.passStart){
@@ -174,7 +181,7 @@ function stop(){
     try{ bus.gain.setTargetAtTime(0,ctx.currentTime,0.01); setTimeout(()=>{ try{bus.disconnect();}catch(e){} },300); }catch(e){}
     stopSources();
   }
-  setNow(-1); setLight(-1); showCount('');
+  setNow(-1); setLight(-1); setMuted(false); showCount('');
   S.running=false;
   padIdle();
   updateTransport();
@@ -187,12 +194,12 @@ function finish(manual){
   setHeld(false);
   if(!wasPractice) return;
   if(manual && !r.taps.length){ say('Práctica detenida, sin resultados.'); return; }
-  showResults(r);
+  showResults(r, !!manual);
 }
 function updateTransport(){
   updateFab();
   const r=S.running, m=S.mode;
-  $('#bStop').disabled=!r;
+  $('#bStop').disabled=!r && !rampT;   // con el bucle de tempo en pausa, «Detener» lo para
   $('#bPlay').classList.toggle('active',r&&m==='play');
   $('#bPractice').classList.toggle('active',r&&m==='practice');
   // en pantallas táctiles «Practicar» no responde mientras se practica o se mide (un toque desviado la reiniciaría)
