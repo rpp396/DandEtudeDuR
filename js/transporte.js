@@ -97,7 +97,7 @@ function followScore(i){
   const el=evEls[i], sys=el && el.closest('svg.sys'); if(!sys || sys===S.sysEl) return;
   S.sysEl=sys;
   const nxt=sys.nextElementSibling, top=sys.getBoundingClientRect().top, bottom=(nxt||sys).getBoundingClientRect().bottom;
-  if(top<8 || bottom>innerHeight-fabReserve()) scrollTo({top:scrollY+top-16, behavior:'smooth'});
+  if(top<8 || bottom>innerHeight-fabReserve()) scrollTo({top:scrollY+top-16, behavior:smooth()});
 }
 function setLight(i){
   if(i===S.light) return;

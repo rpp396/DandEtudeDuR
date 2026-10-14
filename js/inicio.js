@@ -9,7 +9,7 @@ $('.tabs').addEventListener('keydown',e=>{
   if(j<0) return;
   e.preventDefault(); tabs[j].focus(); setView(tabs[j].dataset.view);
 });
-$('#campMap').addEventListener('click',e=>{ const b=e.target.closest('.lv'); if(b && !b.disabled) selectLevel(+b.dataset.lv); });
+$('#campMap').addEventListener('click',e=>{ const b=e.target.closest('.lv'); if(!b) return; if(b.getAttribute('aria-disabled')==='true'){ say(b.getAttribute('aria-label')+'. Supera el nivel anterior para abrirlo.'); return; } selectLevel(+b.dataset.lv); });
 $('#lvPrev').addEventListener('click',()=>selectLevel(levelIdx-1));
 $('#lvNext').addEventListener('click',()=>selectLevel(levelIdx+1));
 $('#rcNext').addEventListener('click',()=>selectLevel(levelIdx+1));
@@ -18,9 +18,10 @@ $('#autosave').addEventListener('change',e=>{ set.autosave=e.target.checked; sav
 $('#pFilter').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; pFilter=b.dataset.f; renderProgress(); });
 $('#pClearBox').addEventListener('click',e=>{
   const box=$('#pClearBox'), id=e.target.closest('button')?.id;
-  if(id==='pClear'){ box.innerHTML='<span>¿Borrar todas las prácticas y el avance de la campaña?</span><button class="btn warn" id="pClearYes" type="button">Sí, borrar todo</button><button class="btn" id="pClearNo" type="button">Cancelar</button>'; $('#pClearNo').focus(); }
-  else if(id==='pClearYes'){ prog=emptyProg(); commitProg(); box.innerHTML='<button class="btn warn" id="pClear" type="button">Borrar historial</button>'; renderProgress(); $('#pClear').focus(); say('Historial borrado'); }
-  else if(id==='pClearNo'){ box.innerHTML='<button class="btn warn" id="pClear" type="button">Borrar historial</button>'; $('#pClear').focus(); }
+  const BTN='<button class="btn warn" id="pClear" type="button">Borrar historial</button>';
+  if(id==='pClear') askConfirm(box,'¿Borrar todas las prácticas y el avance de la campaña?',['pClearYes','Sí, borrar todo'],['pClearNo','Cancelar']);
+  else if(id==='pClearYes'){ prog=emptyProg(); commitProg(); endConfirm(box,BTN); renderProgress(); $('#pClear').focus(); say('Historial borrado'); }
+  else if(id==='pClearNo'){ endConfirm(box,BTN); $('#pClear').focus(); }
 });
 // Editor de «Mis ejercicios»
 function ownKeys(e){
@@ -31,7 +32,7 @@ function ownKeys(e){
     if(k==='y'){ e.preventDefault(); ownUndoRedo(own.redo,own.undo); return true; }
     return false;
   }
-  if(e.altKey) return false;
+  if(e.altKey || !shortcutOK(e)) return false;
   const fig={'1':'w','2':'h','4':'q','8':'e','6':'s','t':'t'}[k];
   if(fig && !e.repeat){ e.preventDefault(); ownInsert(fig); return true; }
   const mod={'.':'dot','s':'rest','l':'tie'}[k];
@@ -46,8 +47,8 @@ function ownReveal(){
   if(!dockShown()) return;
   const el=document.querySelector('#score .ev.sel') || [...document.querySelectorAll('#score .ev')].pop(); if(!el) return;
   const r=el.getBoundingClientRect(), room=innerHeight-fabReserve();
-  if(r.bottom+40>room) scrollTo({top:scrollY+r.bottom+40-room, behavior:'smooth'});
-  else if(r.top<40) scrollTo({top:scrollY+r.top-40, behavior:'smooth'});
+  if(r.bottom+40>room) scrollTo({top:scrollY+r.bottom+40-room, behavior:smooth()});
+  else if(r.top<40) scrollTo({top:scrollY+r.top-40, behavior:smooth()});
 }
 $('#ownPal').addEventListener('click',e=>{ const b=e.target.closest('.pal-b'); if(b && !b.disabled){ ownInsert(b.dataset.k); ownReveal(); } });
 $('#ownMods').addEventListener('click',e=>{ const b=e.target.closest('button[data-mod]'); if(!b) return; own.mods[b.dataset.mod]=!own.mods[b.dataset.mod]; renderPalette(); });
@@ -57,7 +58,7 @@ $('#ownDelTok').addEventListener('click',()=>{ ownDelete(); ownReveal(); });
 $('#ownPractice').addEventListener('click',()=>start('practice'));
 // Mientras se escribe en un campo (nombre, notación…) la paleta fija se quita, para no tapar ni quedar sobre el teclado
 const isTyping = el => !!el && el.matches && el.matches('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea,select');
-document.addEventListener('focusin',e=>{ const f=isTyping(e.target); if(f!==fieldFocus){ fieldFocus=f; updateFab(); } });
+document.addEventListener('focusin',e=>{ const f=isTyping(e.target); if(f!==fieldFocus){ fieldFocus=f; updateFab(); } if(kbdNav) revealFocus(e.target); });
 document.addEventListener('focusout',()=>{ setTimeout(()=>{ const f=isTyping(document.activeElement); if(f!==fieldFocus){ fieldFocus=f; updateFab(); } }); });
 narrowMQ.addEventListener('change',updateFab);
 $('#ownName').addEventListener('input',e=>{ if(!own.cur) return; own.cur.name=cleanName(e.target.value); saveOwn(); renderOwnList(); renderSummary(); });
@@ -93,7 +94,7 @@ $('#ownNew').addEventListener('click',()=>{
   if(!ownNewEx()) return;
   ownMsg('');
   // en pantallas táctiles no se enfoca el nombre (abriría el teclado y quitaría la paleta fija): se lleva la vista a la partitura
-  if(touchMQ.matches) $('.score-card').scrollIntoView({block:'start', behavior:'smooth'});
+  if(touchMQ.matches) $('.score-card').scrollIntoView({block:'start', behavior:smooth()});
   else { $('#ownName').focus(); $('#ownName').select(); }
 });
 $('#ownImpBtn').addEventListener('click',()=>{ const b=$('#ownImport'); b.hidden=!b.hidden; $('#ownImpBtn').setAttribute('aria-expanded',String(!b.hidden)); if(!b.hidden) $('#ownImpText').focus(); });
@@ -116,12 +117,16 @@ $('#ownCopyLink').addEventListener('click',async()=>{
 $('#ownDelBox').addEventListener('click',e=>{
   const id=e.target.closest('button')?.id, x=own.cur; if(!x) return;
   if(id==='ownDup'){ const c=cleanEx({...x, id:'', name:x.name+' (copia)', created:0, updated:0}); if(ownAdd(c)) ownMsg(`Creada la copia «${c.name}».`); }
-  else if(id==='ownDel'){ $('#ownDelBox').innerHTML=`<span>¿Borrar «${esc(x.name)}»? Tus prácticas guardadas se conservan.</span><button class="btn warn" id="ownDelYes" type="button">Sí, borrar</button><button class="btn" id="ownDelNo" type="button">Cancelar</button>`; $('#ownDelNo').focus(); }
-  else if(id==='ownDelYes'){ own.list=own.list.filter(y=>y!==x); saveOwn(); renderOwnDelBox(); if(own.list.length) ownOpen(own.list[0]); else ownNewEx(); ownMsg(`Borrado «${x.name}».`); say(`Borrado ${x.name}`); }
+  else if(id==='ownDel') askConfirm($('#ownDelBox'),`¿Borrar «${esc(x.name)}»? Tus prácticas guardadas se conservan.`,['ownDelYes','Sí, borrar'],['ownDelNo','Cancelar']);
+  else if(id==='ownDelYes'){
+    own.list=own.list.filter(y=>y!==x); saveOwn(); endConfirm($('#ownDelBox'),''); renderOwnDelBox(); if(own.list.length) ownOpen(own.list[0]); else ownNewEx(); ownMsg(`Borrado «${x.name}».`); say(`Borrado ${x.name}`);
+    // el botón «Sí, borrar» ya no existe: el foco va al ejercicio que queda abierto en la lista
+    const n=document.querySelector('#ownList .own-item[aria-current="true"]') || $('#ownNew'); n.focus({preventScroll:true});
+  }
   else if(id==='ownDelNo'){ renderOwnDelBox(); $('#ownDel').focus(); }
 });
 $('#bEditThis').addEventListener('click',editThis);
-$('#pfNew').addEventListener('click',()=>{ if(postOk() && stageMode==='propio') document.querySelector('#secOwn').scrollIntoView({block:'start',behavior:'smooth'}); });
+$('#pfNew').addEventListener('click',()=>{ if(postOk() && stageMode==='propio') document.querySelector('#secOwn').scrollIntoView({block:'start',behavior:smooth()}); });
 addEventListener('hashchange',ownFromHash);
 
 // Botón flotante «Practicar» en reposo: solo si la partitura está a la vista. Se observa aquí, con todos los scripts ya cargados,

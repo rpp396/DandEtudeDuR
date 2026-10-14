@@ -74,6 +74,30 @@ function miniFig(k){
   return `<svg class="mini" viewBox="0 -8 ${w} 58" aria-hidden="true">${s}</svg>`;
 }
 
+/* ---------- Texto equivalente de la partitura (lectores de pantalla) ---------- */
+// «Compás 1: negra, dos corcheas, negra, negra.»: las figuras iguales y seguidas de un mismo pulso se agrupan («dos corcheas»);
+// un tresillo o un dosillo cuenta como una figura; la nota ligada a la anterior lo dice
+const NUMW=['','una','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce'];
+const plural=n=>n.replace(/^\S+/,w=>w+(/[aeiou]$/.test(w)?'s':'es'));   // «negra con puntillo» → «negras con puntillo»
+function measureText(evs, mi){
+  const items=[];   // {nom, n, cell, solo}
+  evs.forEach(e=>{
+    if(e.tuplet || e.duplet){ const last=items[items.length-1]; if(last && last.cell===e.cell && last.tup) return; items.push({nom:e.tuplet?'tresillo de corcheas':'dosillo de corcheas', n:1, cell:e.cell, tup:true, solo:true}); return; }
+    const base = e.mr ? 'compás entero' : (TOKNAME[e.dur]||'figura'), nom = (e.rest?'silencio de ':'')+base+(e.tie?' ligada a la anterior':'');
+    const last=items[items.length-1];
+    if(last && !last.solo && !e.tie && last.nom===nom && last.cell===e.cell) last.n++;
+    else items.push({nom, n:1, cell:e.cell, solo:!!e.tie||e.mr});
+  });
+  const txt=items.map(x=>x.n===1 ? x.nom : `${NUMW[x.n]||x.n} ${plural(x.nom)}`);
+  return `Compás ${mi+1}: ${txt.length ? txt.join(', ') : 'vacío'}.`;
+}
+// Descripción de un sistema para su svg: compás y agrupación al principio, y cada uno de sus compases
+function systemLabel(si, n, mis){
+  const head = score.part ? `Solo el compás ${score.part} del ritmo. ` : '';
+  return (n>1 ? `Sistema ${si+1} de ${n}. ` : '') + (si===0 ? `${head}Ritmo en ${score.key}${score.grp?`, agrupación ${score.grp}`:''}. ` : '')
+    + mis.map(mi=>measureText(score.measures[mi], score.part ? score.part-1 : mi) + (score.own && mi===score.measures.length-1 && !own.complete && own.toks.length ? ' Incompleto.' : '')).join(' ');
+}
+
 const PF=76, PO=34, Y0=40, SH=124;
 let evEls=[];
 function renderScore(){
@@ -96,7 +120,7 @@ function renderScore(){
     if(si===systems.length-1 && systems.length>1 && sys.used/avail<0.7) f=1;
     if(systems.length===1 && sys.used/avail<0.55) f=Math.min(f, 1.6);
     const endX=pre+sys.used*f;
-    let s=`<svg class="sys" viewBox="0 0 ${W} ${SH}" width="${W}" height="${SH}" role="img">`;
+    let s=`<svg class="sys" viewBox="0 0 ${W} ${SH}" width="${W}" height="${SH}" role="img" aria-label="${esc(systemLabel(si,systems.length,sys.mis))}">`;
     for(let l=0;l<5;l++) s+=`<line class="staff" x1="2" y1="${Y0+l*10}" x2="${endX}" y2="${Y0+l*10}"/>`;
     s+=`<rect class="clef" x="10" y="${Y0+10}" width="3.2" height="20"/><rect class="clef" x="17" y="${Y0+10}" width="3.2" height="20"/>`;
     if(si===0){ const [n,d]=score.key.split('/'); s+=`<text class="ts" x="50" y="${Y0+19}" text-anchor="middle">${n}</text><text class="ts" x="50" y="${Y0+39}" text-anchor="middle">${d}</text>`; }
@@ -162,7 +186,10 @@ function measureSVG(mi,mx,MW){
       const my=Y0+56;
       s+=`<line class="ref" x1="${e.x}" y1="${my-6}" x2="${e.x}" y2="${my+6}"/>`;
       if(j.cls==='miss') s+=`<path class="mkx" d="M${e.x-3.5} ${my-3.5}L${e.x+3.5} ${my+3.5}M${e.x+3.5} ${my-3.5}L${e.x-3.5} ${my+3.5}"/>`;
-      else { const off=Math.max(-14,Math.min(14,j.err*0.12)); s+=`<circle class="mk j-${j.cls}" cx="${e.x+off}" cy="${my}" r="3.3"/>`; }
+      else {   // exacto = círculo lleno, bien = anillo, cerca = rombo: se distinguen sin depender del color
+        const cx=e.x+Math.max(-14,Math.min(14,j.err*0.12));
+        s+= j.cls==='near' ? `<path class="mk j-near" d="M${cx} ${my-4.4}L${cx+4.4} ${my}L${cx} ${my+4.4}L${cx-4.4} ${my}Z"/>` : `<circle class="mk j-${j.cls}" cx="${cx}" cy="${my}" r="${j.cls==='good'?3:3.3}"/>`;
+      }
       if(j.dur){
         const lk=evs.indexOf(chainEnd(e));
         const nx = lk>=0 && lk<evs.length-1 ? evs[lk+1].x : mx+MW-8;

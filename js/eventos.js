@@ -50,14 +50,14 @@ $('#bPractice').addEventListener('click',()=>start('practice'));
 $('#bStop').addEventListener('click',()=>{ if(S.running && S.mode==='practice') finish(); else stop(); });
 $('#bMetro').addEventListener('click',()=>{ if(S.running && S.mode==='metro') stop(); else start('metro'); });
 $('#bNew').addEventListener('click',()=>{ if(S.running && S.mode!=='metro') stop(); generate(); });
-$('#rNew').addEventListener('click',()=>{ generate(); });
+$('#rNew').addEventListener('click',()=>{ generate(); $('#pad').focus({preventScroll:true}); });   // los resultados (y este botón) se ocultan
 $('#rAgain').addEventListener('click',()=>start('practice'));
 $('#bCalib').addEventListener('click',()=>{ if(S.running && S.mode==='calib') stop(); else startCalib(); });
 $('#kAgain').addEventListener('click',()=>startCalib());
 $('#kApply').addEventListener('click',()=>{
   if(K.suggest==null) return;
   set.offset=K.suggest; $('#offset').value=set.offset; updOutputs(); save();
-  $('#kApply').disabled=true; $('#kApply').textContent='Corrección aplicada';
+  $('#kApply').disabled=true; $('#kApply').textContent='Corrección aplicada'; $('#kAgain').focus();
 });
 // La partitura es la zona de toque, pero solo durante la práctica o la medición: en reposo se puede desplazar y seleccionar con normalidad
 function bindTapZone(el,pre){
@@ -84,17 +84,19 @@ bindTapZone($('#pad'),'p'); bindTapZone($('#tapFab'),'f');
 // «Reiniciar» del botón flotante: hay que mantenerlo pulsado medio segundo (la animación dura lo mismo)
 let restartTimer=0;
 function restartCancel(){ clearTimeout(restartTimer); restartTimer=0; $('#fabRestart').classList.remove('arming'); }
+function restartNow(){
+  const m=S.running && S.mode;
+  if(m==='practice'){ start('practice'); say('Práctica reiniciada'); }
+  else if(m==='calib'){ startCalib(); say('Medición reiniciada'); }
+}
 $('#fabRestart').addEventListener('pointerdown',e=>{
   e.preventDefault(); if(!S.running || e.button>0) return;
   try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(_){}
   restartCancel(); void e.currentTarget.offsetWidth; e.currentTarget.classList.add('arming');
-  restartTimer=setTimeout(()=>{
-    restartTimer=0; const m=S.running && S.mode;
-    if(m==='practice'){ start('practice'); say('Práctica reiniciada'); }
-    else if(m==='calib'){ startCalib(); say('Medición reiniciada'); }
-    restartCancel();
-  },500);
+  restartTimer=setTimeout(()=>{ restartTimer=0; restartNow(); restartCancel(); },500);
 });
+// Con teclado (o lector de pantalla) no hace falta mantener: Intro o Espacio reinician al instante (el clic del puntero tiene detail>0 y no cuenta)
+$('#fabRestart').addEventListener('click',e=>{ if(e.detail===0 && S.running) restartNow(); });
 ['pointerup','pointercancel','lostpointercapture'].forEach(t=>$('#fabRestart').addEventListener(t,restartCancel));
 $('#fabRestart').addEventListener('contextmenu',e=>e.preventDefault());
 // Botón de tres partes tras la práctica. Se ignoran los toques del primer instante: puede ser el dedo que seguía tocando al terminar
@@ -108,10 +110,21 @@ $('#pfNext').addEventListener('click',()=>{
 });
 $('#fab').addEventListener('change',e=>{ set.fab=e.target.checked; save(); updateFab(); });
 const isField=el=>el && (el.tagName==='INPUT'||el.tagName==='SELECT'||el.tagName==='TEXTAREA');
+// Atajos de una tecla (WCAG 2.1.4): se pueden desactivar en las opciones (set.keys) y no actúan mientras el foco, llegado con el
+// teclado (Tab), esté en un botón, pestaña, enlace o resumen, donde la tecla sorprendería. Tras usar el puntero vuelven a valer.
+let kbdNav=false;
+addEventListener('pointerdown',()=>{ kbdNav=false; },true);
+addEventListener('keydown',e=>{ if(e.key==='Tab') kbdNav=true; },true);
+const onCtrl=e=>kbdNav && !!e.target.closest && !!e.target.closest('button,summary,a[href],[role=tab]');
+const shortcutOK=e=>!!set.keys && !onCtrl(e);
+function applyKeys(){ document.body.classList.toggle('no-keys',!set.keys); if(!S.running) padIdle(); }
+$('#keys').addEventListener('change',e=>{ set.keys=e.target.checked; save(); applyKeys(); say(set.keys?'Atajos de teclado activados':'Atajos de teclado desactivados'); });
 document.addEventListener('keydown',e=>{
   if(ownKeys(e)) return;
   if(e.metaKey||e.ctrlKey||e.altKey||e.repeat) return;
   if(e.key==='Escape' && S.running){ e.preventDefault(); if(S.mode==='practice') finish(); else stop(); return; }
+  // «Reiniciar» enfocado: Intro o Espacio lo activan (su clic), no cuentan como toque
+  if(e.target===$('#fabRestart') && (e.code==='Space'||e.code==='Enter')) return;
   const practicing=S.running && (S.mode==='practice'||S.mode==='calib');
   if(practicing && (e.code==='Space'||e.code==='Enter'||(e.key.length===1 && !isField(e.target)))){
     if(isField(e.target) && e.code!=='Space') return;
@@ -120,12 +133,13 @@ document.addEventListener('keydown',e=>{
   if(isField(e.target)) return;
   if((e.code==='Space'||e.code==='Enter') && e.target===$('#pad')){ e.preventDefault(); if(S.running) tap('k'+e.code); else start('practice'); return; }
   if($('#stageView').hidden) return;
+  if(!shortcutOK(e)) return;
   const k=e.key.toLowerCase();
   if(k==='n'){ if(stageMode==='propio') return; if(S.running && S.mode!=='metro') stop(); generate(); }
   else if(k==='p'){ e.preventDefault(); start('practice'); }
   else if(k==='r'){ e.preventDefault(); start('play'); }
 });
-document.addEventListener('keyup',e=>{ if(S.running && (S.mode==='practice'||S.mode==='calib') && e.code==='Space') e.preventDefault(); release('k'+e.code); });
+document.addEventListener('keyup',e=>{ if(S.running && (S.mode==='practice'||S.mode==='calib') && e.code==='Space' && e.target!==$('#fabRestart')) e.preventDefault(); release('k'+e.code); });
 window.addEventListener('blur',()=>{ if(S.running && S.hold) [...S.holds.keys()].forEach(release); [...tapVoices.keys()].forEach(tapSoundOff); });
 function syncHold(){
   $('#holdSw').checked=!!set.hold;
@@ -136,7 +150,7 @@ $('#modeSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); 
 $('#holdSw').addEventListener('change',e=>setHold(e.target.checked));
 $('#penalize').addEventListener('change',e=>{ set.penalize=e.target.checked; save(); });
 $('#vibrate').addEventListener('change',e=>{ set.vibrate=e.target.checked; save(); });
-$('#bFull').addEventListener('click',()=>{ backToFull(); say('Ritmo completo'); });
+$('#bFull').addEventListener('click',()=>{ backToFull(); say('Ritmo completo'); $('#pad').focus({preventScroll:true}); });
 $('#rWeakBtn').addEventListener('click',()=>{ if(weakM<0) return; measureExcerpt(weakM); start('practice'); });
 // Bienvenida: se muestra hasta que se cierra o se termina la primera práctica
 function dismissWelcome(){ set.seen=true; save(); $('#welcome').hidden=true; }
@@ -154,16 +168,23 @@ document.querySelectorAll('.fold').forEach(d=>d.addEventListener('toggle',()=>{
 const RESET_BTN='<button class="btn" id="resetSet" type="button">Restablecer ajustes</button>';
 $('#resetBox').addEventListener('click',e=>{
   const box=$('#resetBox'), id=e.target.closest('button')?.id;
-  if(id==='resetSet'){ box.innerHTML='<span>¿Volver a las opciones iniciales? Se conservan tu progreso y la corrección de latencia.</span><button class="btn warn" id="resetYes" type="button">Restablecer</button><button class="btn" id="resetNo" type="button">Cancelar</button>'; $('#resetNo').focus(); }
+  if(id==='resetSet') askConfirm(box,'¿Volver a las opciones iniciales? Se conservan tu progreso y la corrección de latencia.',['resetYes','Restablecer'],['resetNo','Cancelar']);
   else if(id==='resetYes'){
     stop();
     const keep={offset:set.offset, view:set.view, level:set.level, levelId:set.levelId, seen:set.seen};
     set={...freshSettings(), ...keep}; save();
     renderSigs(); renderGrp(); renderFigs(); renderRests(); syncControls(); syncFolds(); updateFab();
     if(stageMode==='campana') showTempo(); else generate();
-    box.innerHTML=RESET_BTN; $('#resetSet').focus(); say('Ajustes restablecidos');
+    endConfirm(box,RESET_BTN); $('#resetSet').focus(); say('Ajustes restablecidos');
   }
-  else if(id==='resetNo'){ box.innerHTML=RESET_BTN; $('#resetSet').focus(); }
+  else if(id==='resetNo'){ endConfirm(box,RESET_BTN); $('#resetSet').focus(); }
+});
+
+// Red de seguridad (WCAG 2.4.3): si tras activar un control con el teclado el foco se pierde (el control se ocultó o se apagó al
+// actuar, y el foco cae en <body>), vuelve a la partitura en vez de al principio de la página
+document.addEventListener('click',e=>{
+  if(e.detail!==0 || !e.target.closest || !e.target.closest('button')) return;
+  setTimeout(()=>{ const a=document.activeElement; if((!a || a===document.body || a.disabled || a.closest('[hidden]')) && !$('#stageView').hidden) $('#pad').focus({preventScroll:true}); },80);
 });
 
 let rz=0;

@@ -3,7 +3,7 @@
 
 /* ---------- Panel ---------- */
 function renderSigs(){
-  $('#sigs').innerHTML=Object.keys(SIGS).map(k=>{ const [n,d]=k.split('/'); return `<button type="button" class="sig" data-sig="${k}" aria-pressed="${k===set.sig}" title="${SIG_TITLES[k]||'Compás '+k}" aria-label="Compás ${k}"><span>${n}</span><span>${d}</span></button>`; }).join('');
+  keepFocus($('#sigs'),()=>{ $('#sigs').innerHTML=Object.keys(SIGS).map(k=>{ const [n,d]=k.split('/'); return `<button type="button" class="sig" data-sig="${k}" aria-pressed="${k===set.sig}" title="${SIG_TITLES[k]||'Compás '+k}" aria-label="Compás ${k}"><span>${n}</span><span>${d}</span></button>`; }).join(''); });
 }
 function miniRest(k){
   const d={w:48,h:24,q:12,qd:18,e:6,s:3}[k];
@@ -11,15 +11,15 @@ function miniRest(k){
   return `<svg class="mini" viewBox="-11 -8 ${d===18?30:22} 58" aria-hidden="true">${line}${restSVG(0,2,d)}</svg>`;
 }
 function renderRests(){
-  $('#restFigs').innerHTML=RESTS.map(r=>`<button type="button" class="fig" data-r="${r.k}" aria-pressed="${set.rests.includes(r.k)}">${miniRest(r.k)}<span class="fn">${r.name}</span><span class="fv">${r.val}</span></button>`).join('');
+  keepFocus($('#restFigs'),()=>{ $('#restFigs').innerHTML=RESTS.map(r=>`<button type="button" class="fig" data-r="${r.k}" aria-pressed="${set.rests.includes(r.k)}">${miniRest(r.k)}<span class="fn">${r.name}</span><span class="fv">${r.val}</span></button>`).join(''); });
 }
 function renderGrp(){
   const opts=ODD_GROUPS[set.sig]; $('#grpRow').hidden=!opts; if(!opts) return;
   const cur=sigOf(set).grp;
-  $('#grpSeg').innerHTML=opts.map(g=>`<button type="button" data-g="${g}" aria-pressed="${g===cur}">${g}</button>`).join('');
+  keepFocus($('#grpSeg'),()=>{ $('#grpSeg').innerHTML=opts.map(g=>`<button type="button" data-g="${g}" aria-pressed="${g===cur}">${g}</button>`).join(''); });
 }
 function renderFigs(){
-  $('#figs').innerHTML=FIGS.map(f=>`<button type="button" class="fig" data-k="${f.k}" aria-pressed="${set.figs.includes(f.k)}">${miniFig(f.k)}<span class="fn">${f.name}</span><span class="fv">${f.val}</span></button>`).join('');
+  keepFocus($('#figs'),()=>{ $('#figs').innerHTML=FIGS.map(f=>`<button type="button" class="fig" data-k="${f.k}" aria-pressed="${set.figs.includes(f.k)}">${miniFig(f.k)}<span class="fn">${f.name}</span><span class="fv">${f.val}</span></button>`).join(''); });
 }
 function renderSummary(){
   if(stageMode==='propio'){
@@ -85,24 +85,26 @@ function tempoMark(b){
 function setBpm(v, fromUser=true){
   if(stageMode==='campana'){ showTempo(); return; }
   v=Math.round(+v); if(!isFinite(v)) v=curBpm(); v=Math.max(30,Math.min(240,v));
-  if(stageMode==='propio'){ if(own.cur){ own.cur.bpm=v; saveOwn(); renderOwnList(); } } else set.bpm=v; $('#bpm').value=v; $('#bpmRange').value=v; $('#bpmOut').textContent=v+' ppm'; $('#tMark').textContent=tempoMark(v);
+  if(stageMode==='propio'){ if(own.cur){ own.cur.bpm=v; saveOwn(); renderOwnList(); } } else set.bpm=v; $('#bpm').value=v; $('#bpmRange').value=v; $('#bpmOut').textContent=v+' ppm'; $('#bpmRange').setAttribute('aria-valuetext',v+' ppm'); $('#tMark').textContent=tempoMark(v);
   if(fromUser){ save(); if(S.running && S.mode!=='metro') stop(); }
 }
 function syncControls(){
-  ['sync','ties','sound','cursor','loop','metro','accent','tapSound','fab','vibrate','countSub'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
+  ['sync','ties','sound','cursor','loop','metro','accent','tapSound','fab','vibrate','countSub','keys'].forEach(id=>{ $('#'+id).checked=!!set[id]; });
   $('#vibrateRow').hidden=!('vibrate' in navigator && touchMQ.matches);
   $('#timbre').value=set.timbre; $('#sub').value=set.sub; $('#countIn').value=set.countIn;
   $('#rhythmVol').value=set.rhythmVol; $('#metroVol').value=set.metroVol; $('#tapVol').value=set.tapVol; syncTapVol(); $('#offset').value=set.offset;
   $('#bars').textContent=set.bars;
   $('#autosave').checked=!!set.autosave; $('#penalize').checked=!!set.penalize;
-  syncHold();
+  syncHold(); applyKeys();
   updOutputs(); if(stageMode==='libre') setBpm(set.bpm,false); else showTempo();
 }
 function syncTapVol(){ $('#tapVolField').hidden=!set.tapSound; }
 function updOutputs(){
-  $('#rhythmVolOut').textContent=Math.round(set.rhythmVol*100)+'%';
-  $('#metroVolOut').textContent=Math.round(set.metroVol*100)+'%';
-  $('#tapVolOut').textContent=Math.round(set.tapVol*100)+'%';
-  $('#offsetOut').textContent=(set.offset>0?'+':'')+set.offset+' ms';
+  // el texto de cada valor también va a aria-valuetext del deslizador (si no, el lector dice «0.6» o «15» sin unidad)
+  const vt=(id,out,txt)=>{ $('#'+out).textContent=txt; $('#'+id).setAttribute('aria-valuetext',txt); };
+  vt('rhythmVol','rhythmVolOut',Math.round(set.rhythmVol*100)+'%');
+  vt('metroVol','metroVolOut',Math.round(set.metroVol*100)+'%');
+  vt('tapVol','tapVolOut',Math.round(set.tapVol*100)+'%');
+  vt('offset','offsetOut',(set.offset>0?'+':'')+set.offset+' ms');
   $('#offsetNow').textContent=(set.offset>0?'+':'')+set.offset+' ms';
 }

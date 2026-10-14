@@ -122,7 +122,7 @@ function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.fig
 
 const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:false, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
-  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, countSub:true, sv:3};
+  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, countSub:true, keys:true, sv:3};
 /* ---------- Validación de lo guardado ---------- */
 // Todo lo que se lee de localStorage o del db de claude.ai (ajustes, sesiones, niveles, ejercicios) se trata como no fiable:
 // se copian solo campos conocidos, con su tipo y rango, y las claves salen de listas cerradas (nunca de propiedades heredadas).
@@ -142,7 +142,7 @@ function cleanSettings(o){
   s.timbre = oneOf(o.timbre,['tono','golpe'],D.timbre);
   s.sub = oneOf(String(o.sub),['0','6','3','4'],D.sub);
   s.countIn = oneOf(String(o.countIn),['0','1','2'],D.countIn);
-  ['sound','cursor','loop','metro','accent','autosave','penalize','hold','sync','ties','tapSound','fab','vibrate','seen','countSub'].forEach(k=>{ s[k]=typeof o[k]==='boolean' ? o[k] : D[k]; });
+  ['sound','cursor','loop','metro','accent','autosave','penalize','hold','sync','ties','tapSound','fab','vibrate','seen','countSub','keys'].forEach(k=>{ s[k]=typeof o[k]==='boolean' ? o[k] : D[k]; });
   const keys=(a,ok)=>Array.isArray(a) ? [...new Set(a.filter(k=>typeof k==='string' && ok.includes(k)))] : [];
   const figs=keys(o.figs,FIGS.map(f=>f.k)); s.figs = figs.length ? figs : [...D.figs];
   // silencios: lista de claves (o el booleano antiguo = silencios de las figuras elegidas)
@@ -177,3 +177,27 @@ const warnOn=new Set();
 function appWarn(k){ if(warnOn.has(k)) return; warnOn.add(k); const w=$('#appWarn'); w.textContent=[...warnOn].map(x=>WARNS[x]).join(' '); w.hidden=false; }
 // Anuncio para lectores de pantalla (se vacía antes para que se repita aunque el texto sea el mismo)
 function say(t){ const el=$('#srLive'); el.textContent=''; setTimeout(()=>{ el.textContent=t; },60); }
+// Con «reducir movimiento» los desplazamientos suaves pasan a instantáneos (behavior:smooth() en scrollTo / scrollIntoView)
+const reduceMQ = matchMedia('(prefers-reduced-motion: reduce)');
+const smooth = () => reduceMQ.matches ? 'auto' : 'smooth';
+// Repintar con innerHTML sin perder el foco de teclado: recuerda qué control de box lo tenía (por su data-… o su id) y, tras fn(),
+// enfoca el equivalente (si ya no se puede, el primer botón activo)
+const FOCUS_KEYS = ['data-sig','data-g','data-lv','data-id','data-k','data-r','id'];
+function keepFocus(box, fn){
+  const a=document.activeElement; let sel=null;
+  if(a && a!==box && box.contains(a)){ const at=FOCUS_KEYS.find(k=>a.hasAttribute(k)); if(at) sel=`[${at}="${CSS.escape(a.getAttribute(at))}"]`; }
+  fn();
+  if(!sel) return;
+  const n=box.querySelector(sel+':not(:disabled)') || box.querySelector('button:not(:disabled)');
+  if(n && n!==document.activeElement) n.focus({preventScroll:true});
+}
+// Confirmación en línea: la pregunta (HTML ya escapado) y «Sí»/«Cancelar» dentro de box, que pasa a ser un grupo con la pregunta como
+// nombre (y descripción de «Cancelar»). El foco va a «Cancelar». yes/no = [id, texto]. endConfirm la cierra y deja el contenido html.
+let confirmN=0;
+function askConfirm(box, q, yes, no){
+  const id='cq'+(++confirmN);
+  box.innerHTML=`<span id="${id}">${q}</span><button class="btn warn" id="${yes[0]}" type="button">${yes[1]}</button><button class="btn" id="${no[0]}" type="button" aria-describedby="${id}">${no[1]}</button>`;
+  box.setAttribute('role','group'); box.setAttribute('aria-labelledby',id);
+  $('#'+no[0]).focus();
+}
+function endConfirm(box, html){ box.removeAttribute('role'); box.removeAttribute('aria-labelledby'); box.innerHTML=html; }
