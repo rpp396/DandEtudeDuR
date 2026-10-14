@@ -33,7 +33,7 @@ const SIGS = {
   '7/8':{groups:[12,12,18],click:6,kind:'odd'},
   '8/8':{groups:[18,18,12],click:6,kind:'odd'},
 };
-const SIG_TITLES = {'2/2':'Compasillo partido (alla breve)','3/2':'Tres tiempos de blanca','5/8':'Amalgama: 3+2 o 2+3','7/8':'Amalgama: 2+2+3, 2+3+2 o 3+2+2','8/8':'Amalgama: 3+3+2, 3+2+3 o 2+3+3'};
+const SIG_TITLES = {'4/4':'Compasillo','2/2':'Compás partido (alla breve)','3/2':'Tres tiempos de blanca','5/8':'Amalgama: 3+2 o 2+3','7/8':'Amalgama: 2+2+3, 2+3+2 o 3+2+2','8/8':'Amalgama: 3+3+2, 3+2+3 o 2+3+3'};
 // Agrupaciones posibles de los compases de amalgama (la primera es la de SIGS). 2 = dos corcheas (12 ticks), 3 = tres (18).
 const ODD_GROUPS = {'5/8':['3+2','2+3'], '7/8':['2+2+3','2+3+2','3+2+2'], '8/8':['3+3+2','3+2+3','2+3+3']};
 // Compás efectivo: en amalgama aplica la agrupación elegida (set.grp[sig] en práctica libre, l.grp en campaña)

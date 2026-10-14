@@ -22,7 +22,7 @@ suite('Cobertura de figuras en los niveles', async ({ b, URL, ok, page, open }) 
     }
     return out;
   }, N);
-  ok(res.length >= 29, `se recorren los ${res.length} niveles de la campaña`);
+  ok(res.length >= 39, `se recorren los ${res.length} niveles de la campaña`);
   for (const r of res) ok(r.full === N && r.notes === N, `${r.id}: ${r.full}/${N} ritmos con todo (${r.want})` + (r.full < N ? ' faltan ' + JSON.stringify(r.miss) : '') + (r.notes < N ? ` · ${N - r.notes} sin ninguna nota` : ''));
   ok(p.errs.length === 0, 'sin errores ' + p.errs.join('|'));
 });

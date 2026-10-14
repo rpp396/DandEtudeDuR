@@ -87,7 +87,8 @@ suite('Seguridad y robustez de datos', async ({ b, URL, ok, tmp, page, open, unt
     const c2 = await clean(p);
     ok(c2.pwn === undefined && c2.imgs === 0 && c2.on === 0, 'Mi progreso (historial, tiles, gráfica y tooltip) sin código inyectado');
     await p.click('#tab-campana'); await p.waitForSelector('#campMap .lv');
-    ok((await p.$$('#campMap .lv')).length === 29, 'campaña: se pinta con 29 niveles');
+    const nLv = await p.evaluate(() => __t.LEVELS.length);
+    ok((await p.$$('#campMap .lv')).length === nLv, 'campaña: se pinta con sus ' + nLv + ' niveles');
     await p.click('#tab-propio'); await p.waitForSelector('#ownList .own-item');
     const c3 = await clean(p);
     ok(c3.pwn === undefined && c3.imgs === 0 && c3.on === 0 && (await p.$$('#ownList .own-item')).length === 2, 'Mis ejercicios se pinta; el nombre con HTML sale como texto');

@@ -86,18 +86,36 @@ function syncCount(){ $('#countHint').hidden=set.countIn!=='0'; }
 // para que las semicorcheas no queden más juntas que en 4/4 a 240 (62 ms)
 const bpmMax=k=>Math.round(240*12/Math.max(12,SIGS[k].click));
 function tempoLimits(){ const mx=bpmMax(cfg().sig); $('#bpm').max=mx; $('#bpmRange').max=mx; return mx; }
+// Los ppm van a la unidad del metrónomo (sig.click): lo dicen la figura del control (y su etiqueta) y la ficha del nivel
 function renderTempoGlyph(){
-  const k={12:'q',24:'h',18:'qd',6:'e'}[SIGS[cfg().sig].click];
-  $('#tGlyph').innerHTML=miniFig(k);
+  const sig=SIGS[cfg().sig], k={12:'q',24:'h',18:'qd',6:'e'}[sig.click];
+  $('#tGlyph').innerHTML=miniFig(k); $('#tGlyph').title=unitName(sig,true);
+  $('#bpm').setAttribute('aria-label','Pulsos por minuto de '+unitName(sig));
+  showTempoMark(curBpm());
 }
-function tempoMark(b){
+const UNIT_NAMES = {12:'negra',24:'blanca',18:'negra con puntillo',6:'corchea'};
+function unitName(sig,cap){ const n=UNIT_NAMES[sig.click]; return cap ? n[0].toUpperCase()+n.slice(1) : n; }
+function tempoLabel(b,sig){ return `${unitName(sig,true)} = ${b}`; }
+// Pulso sentido, en ticks: en simple, la unidad del metrónomo (en 2/2 y 3/2, la blanca); en compuesto (también 3/8),
+// la negra con puntillo; en amalgama, la duración media de sus grupos (7/8 = 7 corcheas en 3 pulsos)
+function pulseTicks(sig){ return sig.kind==='simple' ? sig.click : sig.kind==='compound' ? 18 : sum(sig.groups)/sig.groups.length; }
+const pulseBpm = (b,sig) => b*sig.click/pulseTicks(sig);
+// Término italiano según los ppm del pulso sentido (con sig; sin él, b ya es el pulso)
+function tempoMark(b,sig){
+  if(sig) b=Math.round(pulseBpm(b,sig));
   if(b<40) return 'Grave'; if(b<60) return 'Largo'; if(b<66) return 'Larghetto'; if(b<76) return 'Adagio';
   if(b<108) return 'Andante'; if(b<120) return 'Moderato'; if(b<168) return 'Allegro'; if(b<200) return 'Presto'; return 'Prestissimo';
+}
+function showTempoMark(b){
+  const sig=SIGS[cfg().sig], p=pulseTicks(sig), el=$('#tMark');
+  el.textContent=tempoMark(b,sig);
+  // si el pulso no es la unidad del metrónomo (3/8, amalgama), se explica de dónde sale el término
+  el.title = p===sig.click ? '' : `Según el pulso: ${sig.kind==='odd'?'unos ':''}${Math.round(pulseBpm(b,sig))} pulsos por minuto${sig.kind==='odd'?' (grupos de 2 y 3 corcheas)':' de negra con puntillo'}`;
 }
 function setBpm(v, fromUser=true){
   if(stageMode==='campana'){ showTempo(); return; }
   v=Math.round(+v); if(!isFinite(v)) v=curBpm(); v=Math.max(30,Math.min(tempoLimits(),v));
-  if(stageMode==='propio'){ if(own.cur){ own.cur.bpm=v; saveOwn(); renderOwnList(); } } else set.bpm=v; $('#bpm').value=v; $('#bpmRange').value=v; $('#bpmOut').textContent=v+' ppm'; $('#bpmRange').setAttribute('aria-valuetext',v+' ppm'); $('#tMark').textContent=tempoMark(v);
+  if(stageMode==='propio'){ if(own.cur){ own.cur.bpm=v; saveOwn(); renderOwnList(); } } else set.bpm=v; $('#bpm').value=v; $('#bpmRange').value=v; $('#bpmOut').textContent=v+' ppm'; $('#bpmRange').setAttribute('aria-valuetext',v+' ppm'); showTempoMark(v);
   if(fromUser){ save(); if(S.running && S.mode!=='metro') stop(); }
 }
 function syncControls(){
