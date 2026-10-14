@@ -192,11 +192,11 @@ Resumen de tus prácticas, gráfica de precisión con la media de las últimas c
 ### En el móvil
 
 <p>
-  <img src="docs/capturas/movil-reposo.png" alt="Móvil en reposo con el botón flotante Practicar" width="260">
+  <img src="docs/capturas/movil-reposo.png" alt="Móvil en reposo: la partitura con textos para tocar y el botón Practicar" width="260">
   &nbsp;
   <img src="docs/capturas/6-movil.png" alt="Móvil durante la práctica con el botón flotante Toca aquí" width="260">
   &nbsp;
-  <img src="docs/capturas/movil-resultado.png" alt="Móvil al terminar la práctica con el botón de tres partes: Repetir, Nuevo ritmo y Siguiente" width="260">
+  <img src="docs/capturas/movil-resultado.png" alt="Móvil al terminar la práctica: resultados pegados a la partitura y el botón de tres partes Repetir, Nuevo ritmo y Listo" width="260">
 </p>
 
 En pantallas pequeñas el panel de opciones pasa debajo de la partitura. En móvil y tableta aparece un **botón grande abajo de la pantalla** mientras la partitura está a la vista:
