@@ -120,9 +120,19 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
 .dtrack{fill:var(--line)}
 .dbar{fill:var(--muted)} .dbar.d-exact{fill:var(--good)} .dbar.d-ok{fill:none;stroke:var(--ok);stroke-width:1.6} .dbar.d-short,.dbar.d-long{fill:var(--near)}
 .dtick{stroke:var(--ink);stroke-width:1.2}
-.modeseg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
-.modeseg button{flex:1;border:0;background:transparent;padding:6px 8px;border-radius:7px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
-.modeseg button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(20,24,33,.12),inset 0 -2px 0 var(--accent)}
+/* forma de tocar (Piano / Batería): bloque destacado encima de «Practicar» */
+.mode-pick{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.mode-lbl{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.modeseg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modeseg button{display:flex;align-items:center;gap:10px;text-align:left;border:2px solid var(--ui);background:var(--paper);color:var(--ink);padding:10px 12px;border-radius:12px;cursor:pointer;font:inherit;min-height:56px}
+.modeseg button svg{width:30px;height:30px;flex:none;color:var(--muted)}
+.modeseg button span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.modeseg button b{font-size:16px}
+.modeseg button small{font-size:12px;color:var(--muted);line-height:1.25}
+.modeseg button:hover{border-color:var(--accent)}
+.modeseg button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 -3px 0 var(--accent)}
+.modeseg button[aria-pressed="true"] svg{color:var(--accent)}
+@media (max-width:380px){ .modeseg button{flex-direction:column;align-items:flex-start;gap:4px} }
 
 /* zona de toque = la partitura */
 .pad{position:relative;margin:0 -10px;padding:4px 10px 10px;border:2px solid transparent;border-radius:12px;outline:none;transition:border-color .15s,background .15s}
@@ -425,7 +435,7 @@ body.fab-on{padding-bottom:140px}
   .sw{align-content:center}
   input[type=range]{height:44px;margin:0}
   .fold summary{padding:0}
-  .seg button,.modeseg button{padding-block:0}
+  .seg button{padding-block:0}
   /* con resultados: el bloque Practicar / Medir latencia sale (los resultados quedan pegados a la partitura) y, con el botón de tres partes, no se repiten sus acciones */
   body.res-on .practice{display:none}
   body.post-on #rAgain,body.post-on #rNew,body.post-on #rcNext{display:none}

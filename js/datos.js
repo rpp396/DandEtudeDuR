@@ -122,7 +122,7 @@ function restList(C){ return Array.isArray(C.rests) ? C.rests : (C.rests ? C.fig
 
 const DEFAULTS = {sig:'4/4', bars:4, figs:['h','q','e'], rests:['h','q','e'], sound:false, cursor:true, loop:false,
   timbre:'tono', rhythmVol:0.6, bpm:80, metro:true, accent:true, sub:'0', countIn:'1', metroVol:0.7, offset:0,
-  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:false, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, countSub:true, keys:true, sv:3,
+  autosave:true, view:'libre', level:0, levelId:'', penalize:true, hold:true, sync:false, ties:false, tapSound:true, tapVol:0.6, grp:{}, fab:true, vibrate:true, seen:false, folds:{}, countSub:true, keys:true, sv:4,
   // bucle de tempo (subir al superar rampPct %, de rampStep en rampStep hasta rampMax) y metrónomo que calla («a-b»: suena a compases, calla b)
   ramp:false, rampPct:90, rampStep:5, rampMax:140, rampDown:false, gap:'0'};
 // Patrones del metrónomo intermitente (ver gapMuted en transporte.js)
@@ -170,6 +170,8 @@ function load(){
     if(s.sv<2){ s.sound=false; s.tapSound=true; s.sv=2; }
     // sv 3: en la cuenta previa de compases compuestos y de amalgama suenan pulso y subdivisión
     if(s.sv<3){ s.countSub=true; s.sv=3; }
+    // sv 4: el modo piano (se mide también cuándo se suelta cada nota) pasa a ser el de por defecto
+    if(s.sv<4){ s.hold=true; s.sv=4; }
     return s; } }catch(e){}
   return freshSettings();
 }
