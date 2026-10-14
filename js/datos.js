@@ -69,8 +69,8 @@ const SIMPLE_MULTI = [
   {ev:[[36]]},
   {ev:[[48]], wholeBar:true},
   {ev:[[18],[6]]},
-  {sync:true, ev:[[6],[12],[6]]},
-  {sync:true, ev:[[12],[24],[12]], wholeBar:true},
+  {sync:true, trait:'sinc', ev:[[6],[12],[6]]},
+  {sync:true, trait:'qhq', ev:[[12],[24],[12]], wholeBar:true},
   {ev:[[24,1]]},
 ];
 const COMP_BEAT = [
@@ -92,8 +92,8 @@ const COMP_BEAT = [
   {ev:[[3,1],[3],[6],[6]]},
   {ev:[[6],[3,1],[3],[6]]},
   {ev:[[6],[6],[3,1],[3]]},
-  {ev:[[12],[3],[3]]},
-  {ev:[[3],[3],[12]]},
+  {trait:'qss', ev:[[12],[3],[3]]},
+  {trait:'qss', ev:[[3],[3],[12]]},
   {ev:[[6],[6,1],[6]]},
   {ev:[[9],[9]], duplet:true, fig:'du'},   // dosillo: dos corcheas en el pulso de negra con puntillo (solo compuestos)
 ];

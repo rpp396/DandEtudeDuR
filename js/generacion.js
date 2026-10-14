@@ -42,7 +42,7 @@ function genMeasure(sig, L){
       if(pick.c.mr){ evs.push({dur:L,rest:true,mr:true,cell:cid,start:0}); pos=L; cid++; gi=G.length; continue; }
       if(pairs && gi%2 && prevQR && isQR(pick.c)){ evs[evs.length-1].dur=24; pos+=12; gi++; prevQR=false; continue; }
       prevQR = gi%2===0 && pick.span===1 && isQR(pick.c);
-      pick.c.ev.forEach(([d,r])=>{ evs.push({dur:d,rest:!!r,tuplet:!!pick.c.tuplet,duplet:!!pick.c.duplet,fig:pick.c.fig,cell:cid,start:pos}); pos+=d; });
+      pick.c.ev.forEach(([d,r])=>{ evs.push({dur:d,rest:!!r,tuplet:!!pick.c.tuplet,duplet:!!pick.c.duplet,fig:pick.c.fig,trait:pick.c.trait,cell:cid,start:pos}); pos+=d; });
       cid++; gi+=pick.span;
     }
     last={evs,fb};
@@ -53,7 +53,7 @@ function genMeasure(sig, L){
 }
 // Figuras escritas en un ritmo: clave de FIGS para las notas y 'r' + clave de RESTS para los silencios
 // (las notas de una celda con «fig», como el lombardo o el dosillo, cuentan como esa figura)
-function figsUsed(measures){ const k=new Set(); measures.forEach(evs=>evs.forEach(e=>k.add(e.fig || (e.rest?'r':'')+(e.mr?'w':DUR2K[e.dur])))); return k; }
+function figsUsed(measures){ const k=new Set(); measures.forEach(evs=>evs.forEach(e=>{ k.add(e.fig || (e.rest?'r':'')+(e.mr?'w':DUR2K[e.dur])); if(e.trait) k.add('~'+e.trait); })); return k; }
 const hasNote = ms => ms.some(m=>m.evs.some(e=>!e.rest));
 function generate(){
   if(stageMode==='propio'){ buildOwn(); return; }
@@ -63,7 +63,7 @@ function generate(){
   for(let a=0; a<50 && !hasNote(ms); a++) ms=newBars();
   // En la campaña el ritmo debe usar todas las figuras y silencios del nivel: se cambia un compás al azar
   // y el cambio se queda si no pierde ninguna (si alguna no puede salir en ese compás, se queda lo logrado)
-  const want = stageMode==='campana' ? [...C.figs, ...restList(C).map(k=>'r'+k)] : [];
+  const want = stageMode==='campana' ? [...C.figs, ...restList(C).map(k=>'r'+k), ...(C.need||[]).map(k=>'~'+k)] : [];   // need: celdas que el nivel enseña (rasgos: 'sinc', 'qhq', 'qss')
   const cover = t => { const u=figsUsed(t.map(m=>m.evs)); return want.filter(k=>u.has(k)).length; };
   let n=cover(ms);
   for(let it=0; it<3000 && n<want.length; it++){

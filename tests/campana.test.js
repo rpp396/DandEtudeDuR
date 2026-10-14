@@ -109,7 +109,7 @@ suite('Campaña: niveles, tempos y terminología', async ({ b, URL, ok, page, op
     return out;
   }, N);
   // las celdas de síncopa y q s s no son figuras que generate() tenga que cubrir: salen al azar (≈ 65–80 %); el resto, siempre
-  const loose = { L21: 0.5, L32: 0.5, L36: 0.5 };
+  const loose = {};   // las celdas que enseña cada nivel (síncopa, negra-blanca-negra, q s s) se declaran en need y generate() las garantiza
   for (const [id, r] of Object.entries(R)) if (r.has) ok(r.hit >= N * (loose[id] || 1), `${id}: su rasgo propio sale en ${r.hit}/${N} ritmos`);
   const slow = Object.entries(R).filter(([, r]) => r.ms > 40).map(([id, r]) => id + ' ' + r.ms.toFixed(1) + ' ms');
   ok(!slow.length, 'generate() tarda menos de 40 ms de media en todos los niveles ' + slow.join(', ') + ' (máx. ' + Math.max(...Object.values(R).map(r => r.ms)).toFixed(1) + ' ms)');
