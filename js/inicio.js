@@ -126,12 +126,14 @@ $('#ownDelBox').addEventListener('click',e=>{
   else if(id==='ownDelNo'){ renderOwnDelBox(); $('#ownDel').focus(); }
 });
 $('#bEditThis').addEventListener('click',editThis);
-$('#pfNew').addEventListener('click',()=>{ if(postOk() && stageMode==='propio') document.querySelector('#secOwn').scrollIntoView({block:'start',behavior:smooth()}); });
 addEventListener('hashchange',ownFromHash);
 
 // Botón flotante «Practicar» en reposo: solo si la partitura está a la vista. Se observa aquí, con todos los scripts ya cargados,
 // porque updateFab usa estado de varios de ellos
 new IntersectionObserver(es=>{ padInView=es[es.length-1].isIntersecting; updateFab(); }).observe($('#pad'));
+// …y no si el botón «Practicar» del transporte ya se ve (no se duplican): se cuenta como visto si queda al menos medio botón por encima del sitio del flotante
+new IntersectionObserver(es=>{ const e=es[es.length-1]; btnInView=e.isIntersecting && e.intersectionRatio>=.5; updateFab(); },{threshold:[0,.5,1],rootMargin:'0px 0px -100px 0px'}).observe($('#bPractice'));
+fineMQ.addEventListener('change',()=>{ if(!S.running) padIdle(); });
 new ResizeObserver(()=>{ if(!$('#progView').hidden) renderChart(prog.sessions.filter(r=>pFilter==='todo'||r.mode===pFilter)); }).observe($('#progView'));
 
 renderSigs(); renderGrp(); renderFigs(); renderRests(); syncControls(); syncFolds(); padIdle();

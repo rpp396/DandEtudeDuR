@@ -186,6 +186,9 @@ function say(t){ const el=$('#srLive'); el.textContent=''; setTimeout(()=>{ el.t
 // Con «reducir movimiento» los desplazamientos suaves pasan a instantáneos (behavior:smooth() en scrollTo / scrollIntoView)
 const reduceMQ = matchMedia('(prefers-reduced-motion: reduce)');
 const smooth = () => reduceMQ.matches ? 'auto' : 'smooth';
+// Ayudas de teclado (atajos, «Esc para terminar») solo si hay puntero fino (ratón o trackpad): en el móvil y la tableta sin ratón se dan textos de toque
+const fineMQ = matchMedia('(any-pointer: fine)');
+const kbOn = () => fineMQ.matches;
 // Repintar con innerHTML sin perder el foco de teclado: recuerda qué control de box lo tenía (por su data-… o su id) y, tras fn(),
 // enfoca el equivalente (si ya no se puede, el primer botón activo)
 const FOCUS_KEYS = ['data-sig','data-g','data-lv','data-id','data-k','data-r','id'];

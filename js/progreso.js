@@ -160,13 +160,16 @@ function renderProgress(){
   else {
     const rows=list.slice(-30).reverse().map(r=>{
       const dev = r.mean==null ? '—' : Math.abs(r.mean)<5 ? 'a tiempo' : `${Math.abs(r.mean)} ms ${r.mean>0?'tarde':'antes'}`;
-      return `<tr><td>${fmtDate(r.t)} <span class="hint">${fmtTime(r.t)}</span></td><td>${exName(r)}</td><td>${esc(r.sig)}${r.grp?' ('+esc(r.grp)+')':''} · ${esc(r.bars)} c.</td><td class="num">${esc(r.bpm)}</td><td class="num">${esc(r.pct)}%<span class="pbar"><i data-w="${esc(r.pct)}"></i></span></td><td class="num">${esc(r.exact)}/${esc(r.n)}</td><td class="num">${esc(r.miss)}</td><td>${esc(dev)}</td><td class="num">${typeof r.sd==='number'?'±'+esc(r.sd)+' ms':'—'}</td></tr>`;
+      // data-l: etiqueta de cada dato en la vista de tarjetas (≤ 520 px, ver styles.css); los roles mantienen la tabla para los lectores aunque el CSS la convierta en bloques
+      return `<tr role="row"><td role="cell" class="c-date" data-l="Fecha">${fmtDate(r.t)} <span class="hint">${fmtTime(r.t)}</span></td><td role="cell" class="c-ex" data-l="Ejercicio">${exName(r)}</td><td role="cell" data-l="Compás">${esc(r.sig)}${r.grp?' ('+esc(r.grp)+')':''} · ${esc(r.bars)} c.</td><td role="cell" class="num" data-l="Tempo">${esc(r.bpm)}</td><td role="cell" class="num c-pct" data-l="Precisión">${esc(r.pct)}%<span class="pbar"><i data-w="${esc(r.pct)}"></i></span></td><td role="cell" class="num" data-l="Exactas">${esc(r.exact)}/${esc(r.n)}</td><td role="cell" class="num" data-l="Sin tocar">${esc(r.miss)}</td><td role="cell" data-l="Desvío medio">${esc(dev)}</td><td role="cell" class="num" data-l="Regularidad">${typeof r.sd==='number'?'±'+esc(r.sd)+' ms':'—'}</td></tr>`;
     }).join('');
-    $('#pTable').innerHTML=`<table><thead><tr><th>Fecha</th><th>Ejercicio</th><th>Compás</th><th class="num">Tempo</th><th class="num">Precisión</th><th class="num">Exactas</th><th class="num">Sin tocar</th><th>Desvío medio</th><th class="num" title="Desviación típica de tus desvíos: cuanto menor, más regular">Regularidad</th></tr></thead><tbody>${rows}</tbody></table>`;
+    $('#pTable').innerHTML=`<table role="table"><thead><tr role="row"><th role="columnheader">Fecha</th><th role="columnheader">Ejercicio</th><th role="columnheader">Compás</th><th role="columnheader" class="num">Tempo</th><th role="columnheader" class="num">Precisión</th><th role="columnheader" class="num">Exactas</th><th role="columnheader" class="num">Sin tocar</th><th role="columnheader">Desvío medio</th><th role="columnheader" class="num" title="Desviación típica de tus desvíos: cuanto menor, más regular">Regularidad</th></tr></thead><tbody>${rows}</tbody></table>`;
     $('#pTable').querySelectorAll('.pbar i').forEach(i=>{ i.style.width=Math.max(0,Math.min(100,+i.dataset.w||0))+'%'; });   // el ancho va por CSSOM (la CSP no admite style="")
   }
   renderStoreStatus();
 }
+let chartHide=null;   // quita el tooltip fijado con el dedo al tocar fuera de la zona de toque (lo asigna renderChart)
+document.addEventListener('pointerdown',e=>{ if(chartHide) chartHide(e); },true);
 function renderChart(list){
   const host=$('#pChart');
   const data=list.slice(-60);
@@ -181,17 +184,25 @@ function renderChart(list){
   const ma=data.map((r,i)=>avg(data.slice(Math.max(0,i-4),i+1).map(x=>x.pct)));
   g+=`<path class="ch-avg" d="${ma.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join('')}"/>`;
   data.forEach((r,i)=>{ g+=`<circle class="ch-dot${i===data.length-1?' hi':''}" cx="${X(i)}" cy="${Y(r.pct)}" r="${i===data.length-1?5:4}"/>`; });
-  const hw=Math.max(8,iw/(data.length-1)/2);
-  data.forEach((r,i)=>{ g+=`<rect class="ch-hit" data-i="${i}" x="${X(i)-hw}" y="${pt}" width="${hw*2}" height="${ih}"/>`; });
+  // una sola zona de toque sobre todo el trazado: el punto es el más cercano en x (con el dedo, deslizar elige otro; con 60 puntos
+  // serían zonas de 8 px). pan-y deja desplazar la página en vertical
+  g+=`<rect class="ch-hit" x="${pl-8}" y="${pt-8}" width="${iw+16}" height="${ih+16}"/>`;
   g+='</svg><div class="tip" id="pTip" hidden></div>';
   g+=`<div class="legend"><span><i class="lg-dot"></i>Cada práctica</span><span><i class="lg-line"></i>Media de las últimas 5</span></div>`;
   host.innerHTML=g;
-  const tip=$('#pTip');
-  host.querySelectorAll('.ch-hit').forEach(h=>{
-    const show=()=>{ const i=+h.dataset.i, r=data[i];
-      tip.innerHTML=`<b>${esc(r.pct)}%</b> · ${fmtDate(r.t)} ${fmtTime(r.t)}<br>${exName(r)} · ${esc(r.sig)} · ${esc(r.bpm)} ppm${typeof r.sd==='number'?' · regularidad ±'+esc(r.sd)+' ms':''}`;
-      tip.style.left=Math.min(Math.max(X(i),90),W-90)+'px'; tip.style.top=Y(r.pct)+'px'; tip.hidden=false; };
-    h.addEventListener('pointerenter',show); h.addEventListener('pointerdown',show);
-    h.addEventListener('pointerleave',()=>{ tip.hidden=true; });
-  });
+  const tip=$('#pTip'), hit=host.querySelector('.ch-hit'), dots=[...host.querySelectorAll('.ch-dot')];
+  const hide=()=>{ tip.hidden=true; dots.forEach(d=>d.classList.remove('sel')); };
+  const at=e=>{ const bx=host.querySelector('svg').getBoundingClientRect(), x=(e.clientX-bx.left)*(W/bx.width);
+    return Math.max(0,Math.min(data.length-1,Math.round((x-pl)/iw*(data.length-1)))); };
+  const show=i=>{ const r=data[i];
+    tip.innerHTML=`<b>${esc(r.pct)}%</b> · ${fmtDate(r.t)} ${fmtTime(r.t)}<br>${exName(r)} · ${esc(r.sig)} · ${esc(r.bpm)} ppm${typeof r.sd==='number'?' · regularidad ±'+esc(r.sd)+' ms':''}`;
+    tip.style.left=Math.min(Math.max(X(i),90),W-90)+'px'; tip.style.top=Y(r.pct)+'px'; tip.hidden=false;
+    dots.forEach((d,k)=>d.classList.toggle('sel',k===i)); };
+  // ratón: el tooltip sigue al puntero y se va al salir; dedo: se fija al tocar o deslizar y se quita al tocar fuera de la zona
+  let touch=false;
+  hit.addEventListener('pointerdown',e=>{ touch=e.pointerType!=='mouse'; show(at(e)); });
+  hit.addEventListener('pointerenter',e=>{ if(e.pointerType!=='touch' && e.pointerType!=='pen') show(at(e)); });
+  hit.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse' || e.pointerType==='' || e.buttons) show(at(e)); });
+  hit.addEventListener('pointerleave',e=>{ if(!touch && e.pointerType!=='touch' && e.pointerType!=='pen') hide(); });
+  chartHide=e=>{ if(!tip.hidden && !(e.target.closest && e.target.closest('.ch-hit'))) hide(); };
 }

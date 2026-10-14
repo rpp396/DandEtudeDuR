@@ -2,7 +2,7 @@
 // Script clásico (no módulo): comparte el ámbito global con los demás de js/; el orden de carga está en index.html.
 
 /* ---------- Eventos ---------- */
-function rhythmChanged(){ save(); if(S.running && S.mode!=='metro') stop(); generate(); if(S.running && S.mode==='metro') renderLights(); }
+function rhythmChanged(){ save(); if(S.running && S.mode!=='metro') stop(); generate(); if(S.running && S.mode==='metro') renderLights(); rhythmToast(); }
 $('#sigs').addEventListener('click',e=>{
   const b=e.target.closest('.sig'); if(!b) return;
   set.sig=b.dataset.sig; renderSigs(); renderGrp(); setBpm(set.bpm,false); rhythmChanged();
@@ -67,6 +67,8 @@ function bindTapZone(el,pre){
   // cierra un toque empezado durante la práctica, para no volver a empezar al soltar después del final.
   let downWhileRunning=false;
   el.addEventListener('click',e=>{
+    // mientras suena «Reproducir» o «Solo metrónomo», el botón flotante es «Detener»
+    if(S.running && (S.mode==='play'||S.mode==='metro')){ if(el.id==='tapFab'){ stop(); say('Detenido'); } downWhileRunning=false; return; }
     if(!S.running && !downWhileRunning){
       if(el.id==='pad' && stageMode==='propio' && !judg.length){ const g=e.target.closest('.ev'); if(g){ own.cursor=own.evTok[+g.dataset.i]+1; markSel(); renderOwnStatus(); $('#ownDelTok').disabled=false; } }
       else start('practice');
@@ -104,7 +106,12 @@ $('#fabRestart').addEventListener('contextmenu',e=>e.preventDefault());
 // Botón de tres partes tras la práctica. Se ignoran los toques del primer instante: puede ser el dedo que seguía tocando al terminar
 const postOk=()=>performance.now()-postSince>700;
 $('#pfAgain').addEventListener('click',()=>{ if(postOk()) start('practice'); });
-$('#pfNew').addEventListener('click',()=>{ if(postOk()) generate(); });
+// «Nuevo ritmo»; en Mis ejercicios es «Editar»: cierra los resultados y lleva a la partitura, donde vuelve la paleta
+$('#pfNew').addEventListener('click',()=>{
+  if(!postOk()) return;
+  if(stageMode!=='propio') { generate(); return; }
+  closeResults(); $('.score-card').scrollIntoView({block:'start',behavior:smooth()});
+});
 $('#pfNext').addEventListener('click',()=>{
   if(!postOk()) return;
   if(stageMode!=='campana') closeResults();

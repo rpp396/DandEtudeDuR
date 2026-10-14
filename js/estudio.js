@@ -61,6 +61,8 @@ function resultAnalysis(notes){
   const sd=Math.round(a.sd), dr=Math.round(a.drift);
   $('#aTip').hidden=!a.tip; $('#aTip').textContent=a.tip||'';
   $('#aSd').textContent=`±${sd} ms`; $('#aSdTxt').textContent=regLabel(sd);
+  $('#aSum').textContent=` · ±${sd} ms, ${regLabel(sd)}`;
+  $('#aMore').open=!touchMQ.matches;   // táctil: cerrado (el bloque es largo)
   $('#aDrift').textContent = a.trend==='acc' ? 'Aceleras' : a.trend==='drag' ? 'Te retrasas' : 'Estable';
   $('#aDriftTxt').textContent = a.trend ? `${Math.abs(dr)} ms ${dr<0?'antes':'más tarde'} al final` : 'sin tendencia clara';
   // error medio por posición (barra = error medio absoluto, hasta 100 ms)
@@ -102,7 +104,7 @@ function rampAfter(pct, manual){
   if(ok && cur>=mx){ const t=`¡Tope alcanzado! ${pct} % a ${cur} ppm: el bucle de tempo ha terminado.`; rampMsg(t); return t; }
   const next = ok ? Math.min(mx, cur+set.rampStep) : set.rampDown ? Math.max(30, cur-set.rampStep) : cur;
   const how = next>cur ? `sube a ${next} ppm` : next<cur ? `baja a ${next} ppm` : `sigue a ${next} ppm`;
-  const t=`Bucle de tempo: ${pct} % ${ok?'llega':'no llega'} al ${set.rampPct} %, así que ${how}. La siguiente pasada empieza en unos segundos; Esc o «Parar el bucle» lo detienen.`;
+  const t=`Bucle de tempo: ${pct} % ${ok?'llega':'no llega'} al ${set.rampPct} %, así que ${how}. La siguiente pasada empieza en unos segundos; ${kbOn()?'Esc o «Parar el bucle» lo detienen':'«Parar el bucle» lo detiene'}.`;
   rampMsg(t, true);
   rampT=setTimeout(()=>{ rampT=0;
     // si entretanto se cerraron los resultados (nuevo ritmo, otra pestaña…), se empezó otra cosa o la página se ocultó, no sigue

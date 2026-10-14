@@ -5,9 +5,10 @@
 // Botón flotante: solo en pantallas táctiles (móvil, tableta) y si el ajuste está activo
 const touchMQ = matchMedia('(any-pointer: coarse)');
 const fabWanted = () => !!set.fab && touchMQ.matches;
-// En reposo el botón dice «Practicar» (solo si la partitura está a la vista); durante la práctica o la medición, «Toca aquí»
+// En reposo el botón dice «Practicar» (solo si la partitura está a la vista y el botón «Practicar» del transporte no); durante la
+// práctica o la medición, «Toca aquí»; mientras suena «Reproducir» o «Solo metrónomo», «Detener».
 // Con los resultados a la vista pasa a ser el botón de tres partes (#postFab)
-let padInView=false, postSince=0;
+let padInView=false, btnInView=false, postSince=0;
 // Paleta de «Mis ejercicios» fija abajo en pantallas estrechas (panel bajo la partitura) con un ejercicio abierto.
 // Se oculta (sin volver a su sitio en el panel, para que la página no salte) al practicar o reproducir, con resultados
 // o la medición a la vista y mientras se escribe en un campo, para no quedar encima del teclado
@@ -17,17 +18,23 @@ const dockWanted = () => narrowMQ.matches && stageMode==='propio' && !!own.cur &
 const dockShown = () => dockWanted() && !S.running && !fieldFocus && $('#results').hidden && $('#calib').hidden;
 function updateFab(){
   const f=$('#tapFab'), fm=$('#fabMain'), pf=$('#postFab'), live=S.running && (S.mode==='practice'||S.mode==='calib');
-  const post=fabWanted() && !S.running && !$('#results').hidden && !$('#stageView').hidden;
+  const play=S.running && (S.mode==='play'||S.mode==='metro');   // «Detener» abajo: el de la tarjeta de transporte queda fuera de pantalla
+  const res=!$('#results').hidden && !$('#stageView').hidden;
+  const post=fabWanted() && !S.running && res;
   const dock=dockShown();
   document.body.classList.toggle('dock-on',dockWanted()); document.body.classList.toggle('dock-away',!dock);
+  // res-on: con resultados se oculta el bloque Practicar/Medir latencia (táctil) para que queden pegados a la partitura; post-on: no se repiten sus botones
+  document.body.classList.toggle('res-on',res); document.body.classList.toggle('post-on',post);
   if(dock) document.body.style.setProperty('--dockH',$('#ownDock').offsetHeight+'px');
-  const on=fabWanted() && !post && (live || (!S.running && padInView && !dock));
+  const on=fabWanted() && !post && (live || play || (!S.running && padInView && !btnInView && !dock));
   if(post){ if(pf.hidden){ pf.hidden=false; postSince=performance.now(); } syncPostFab(); } else pf.hidden=true;
   f.hidden=!on; document.body.classList.toggle('fab-on',on||post); f.classList.toggle('idle',on && !live);
+  f.classList.toggle('stopb',on && play);
   f.classList.toggle('split',on && live); $('#fabRestart').hidden=!(on && live);
   if(!(on && live)) restartCancel();
-  if(on && !live){ fm.textContent='Practicar'; fm.classList.remove('count'); }
-  else if(on && fm.textContent==='Practicar') fm.textContent='Toca aquí';
+  if(on && play){ fm.textContent='Detener'; fm.classList.remove('count'); }
+  else if(on && !live){ fm.textContent='Practicar'; fm.classList.remove('count'); }
+  else if(on && (fm.textContent==='Practicar'||fm.textContent==='Detener')) fm.textContent='Toca aquí';
   // espacio inferior que tapan los elementos fijos: el foco de teclado y los desplazamientos de la página lo respetan (scroll-padding-bottom)
   document.documentElement.style.setProperty('--pinB', (pinnedEl() ? fabReserve() : 0)+'px');
 }
@@ -35,7 +42,10 @@ function updateFab(){
 function syncPostFab(){
   const camp=stageMode==='campana', b=$('#pfNext');
   $('#pfNextLbl').textContent=camp?'Siguiente':'Listo';
-  $('#pfNewLbl').textContent=stageMode==='propio'?'Editar':'Nuevo ritmo';
+  // en Mis ejercicios el botón central es «Editar» (lápiz): cierra los resultados y vuelve a la partitura con la paleta
+  const own=stageMode==='propio';
+  $('#pfNewLbl').textContent=own?'Editar':'Nuevo ritmo';
+  $('#pfNew .ic-new').toggleAttribute('hidden',own); $('#pfNew .ic-edit').toggleAttribute('hidden',!own);   // (los SVG no tienen la propiedad hidden)
   b.disabled = camp && $('#rcNext').hidden;
   b.setAttribute('aria-label', camp ? 'Siguiente nivel' : 'Listo: cerrar los resultados');
 }
@@ -54,6 +64,26 @@ function revealFocus(el){
   const p=pinnedEl(); if(!p || !el.getBoundingClientRect || el.closest('#tapFab,#fabRestart,#postFab,#ownDock')) return;
   if(el.getBoundingClientRect().bottom > p.getBoundingClientRect().top-4) el.scrollIntoView({block:'nearest', behavior:'auto'});
 }
+// Desplaza la página lo justo para que el bloque de topEl a botEl se vea por encima de lo que tapa lo fijo (botón flotante o paleta);
+// si no cabe entero, deja su principio arriba
+function revealBlock(topEl, botEl){
+  const room=innerHeight-fabReserve(), t=topEl.getBoundingClientRect().top, b=botEl.getBoundingClientRect().bottom;
+  if(t>=8 && b<=room) return;
+  const dy = b>room ? Math.min(b-room+10, t-8) : t-8;
+  if(dy) scrollTo({top:scrollY+dy, behavior:smooth()});
+}
+// Aviso breve «Ritmo nuevo · Ver ↑»: al cambiar opciones que regeneran el ritmo cuando la partitura no se ve (el panel va debajo en
+// pantallas estrechas). Se quita solo, al tocarlo, o al volver a verse la partitura
+let newToastT=0;
+const padSeen=()=>{ const r=$('#pad').getBoundingClientRect(); return r.bottom>60 && r.top<innerHeight-fabReserve()-60; };
+function hideNewToast(){ clearTimeout(newToastT); newToastT=0; $('#newToast').hidden=true; }
+function rhythmToast(){
+  if(padSeen()){ hideNewToast(); return; }
+  const t=$('#newToast'); if(t.hidden) say('Ritmo nuevo. El botón «Ver» lleva a la partitura.');
+  t.hidden=false; clearTimeout(newToastT); newToastT=setTimeout(hideNewToast,6000);
+}
+$('#newToast').addEventListener('click',()=>{ hideNewToast(); $('.score-card').scrollIntoView({block:'start',behavior:smooth()}); $('#pad').focus({preventScroll:true}); });
+addEventListener('scroll',()=>{ if(newToastT && padSeen()) hideNewToast(); },{passive:true});
 function showPad(){
   updateFab();
   const p=$('#pad'), r=p.getBoundingClientRect();
@@ -63,11 +93,18 @@ function showPad(){
 }
 function padIdle(){
   $('#pad').classList.remove('live');
+  const kb=kbOn();   // sin puntero fino (móvil, tableta sin ratón) no se habla de teclas
   if(stageMode==='propio'){
     $('#padMain').textContent='Toca una figura para seleccionarla: lo nuevo se añade detrás de ella';
-    $('#padSub').textContent='Con teclado: 1, 2, 4, 8 y 6 añaden redonda, blanca, negra, corchea y semicorchea; T tresillo; «.» puntillo, S silencio, L ligadura; Retroceso borra; las flechas mueven la selección. P practica y R reproduce.';
+    $('#padSub').textContent = kb ? 'Con teclado: 1, 2, 4, 8 y 6 añaden redonda, blanca, negra, corchea y semicorchea; T tresillo; «.» puntillo, S silencio, L ligadura; Retroceso borra; las flechas mueven la selección. P practica y R reproduce.'
+      : `Añade las figuras con la paleta ${dockWanted()?'de abajo':'del panel'}.`;
     return;
   }
-  $('#padMain').textContent='Toca la partitura (o «Practicar») para empezar, y luego toca sobre ella en cada nota';
-  $('#padSub').textContent='Con teclado: P empieza y, tras la cuenta, tocas con la barra espaciadora o cualquier tecla menos Esc, que detiene. Fuera de la práctica, P, R y N son atajos (practicar, reproducir, nuevo ritmo).';
+  if(kb){
+    $('#padMain').textContent='Toca la partitura (o «Practicar») para empezar, y luego toca sobre ella en cada nota';
+    $('#padSub').textContent='Con teclado: P empieza y, tras la cuenta, tocas con la barra espaciadora o cualquier tecla menos Esc, que detiene. Fuera de la práctica, P, R y N son atajos (practicar, reproducir, nuevo ritmo).';
+  } else {
+    $('#padMain').textContent='Pulsa «Practicar» y toca en cada nota';
+    $('#padSub').textContent = fabWanted() ? 'Durante la práctica, toca el botón grande de abajo en cada nota.' : 'Durante la práctica, toca la partitura en cada nota.';
+  }
 }

@@ -207,7 +207,13 @@ function markSel(){
   const ti=own.cursor-1, bad=new Set(own.issues);
   own.evTok.forEach((t,i)=>{ if(evEls[i]){ evEls[i].classList.toggle('sel', t===ti); evEls[i].classList.toggle('offp', bad.has(t)); } });
 }
-function ownMsg(t,bad){ const m=$('#ownMsg'); m.textContent=t||''; m.hidden=!t; m.classList.toggle('bad',!!bad); }
+// Aviso flotante (toast, fijo abajo por encima de la paleta o del flotante): se ve aunque la lista esté lejos. Se quita solo, o al tocarlo
+let ownMsgT=0;
+function ownMsg(t,bad){
+  const m=$('#ownMsg'); clearTimeout(ownMsgT); m.textContent=t||''; m.hidden=!t; m.classList.toggle('bad',!!bad);
+  if(t) ownMsgT=setTimeout(()=>{ m.hidden=true; }, (bad?7000:4500)+t.length*40);
+}
+$('#ownMsg').addEventListener('click',()=>ownMsg(''));
 function ownSnap(){ return {toks:own.toks, cursor:own.cursor, sig:own.cur.sig, grp:own.cur.grp}; }
 function ownCommit(){
   own.cur.notation=serialize(own.toks, own.cur); own.cur.updated=Date.now(); saveOwn();

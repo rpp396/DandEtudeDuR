@@ -94,4 +94,6 @@ function finishCalib(){
 function announceCalib(){
   say(`${$('#kHead').textContent}: ${$('#kVal').textContent}. ${$('#kText').textContent}`);
   $('#calib').focus({preventScroll:true});
+  updateFab();
+  revealBlock($('#calib'),$('#calib'));   // en el móvil queda bajo la partitura: se lleva a la vista
 }

@@ -154,8 +154,7 @@ function showResults(r, manual){
   if(!set.seen) dismissWelcome();
   say(`Resultado: ${pct}%. ${$('#rHead').textContent}. ${$('#rCamp').hidden?'':$('#rcText').textContent+' '}${trend}${showWeak?` El compás ${weakM+1} fue el más flojo.`:''}${an&&an.tip?' '+an.tip:''}${rampTxt?' '+rampTxt:''}`);
   $('#results').focus({preventScroll:true});
-  // que los botones de los resultados queden a la vista (sin tapar la partitura más de lo necesario)
-  const ab=$('#resActions').getBoundingClientRect(), room=innerHeight-fabReserve();
-  if(ab.bottom>room) scrollTo({top:scrollY+ab.bottom-room+12, behavior:smooth()});
+  // que los botones (si se ven), el porcentaje y las estrellas queden a la vista por encima de lo fijo, con la partitura lo más cerca posible
+  revealBlock($('#resActions').offsetParent ? $('#resActions') : $('.res-top'), $('#rCamp').hidden ? $('.res-top') : $('#rCamp'));
   return pct;
 }

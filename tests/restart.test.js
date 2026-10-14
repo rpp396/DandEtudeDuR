@@ -33,7 +33,8 @@ suite('Reiniciar con pulsación larga (móvil)', async ({ b, URL, ok, MOB, page,
   await tapAndStop(p); await waitResults(p);
   ok(!(await vis(p, '#fabRestart')) && !(await p.$eval('#bPractice', e => e.disabled)), 'al terminar: sin «Reiniciar» y «Practicar» habilitado');
 
-  // medición de latencia
+  // medición de latencia (con resultados el bloque «Practicar / Medir latencia» está oculto en táctil: se cierran antes)
+  await p.evaluate(() => closeResults());
   await p.click('#bCalib'); await waitRunning(p, 'calib');
   await p.waitForSelector('#fabRestart', { state: 'visible' });
   ok(await vis(p, '#fabRestart') && await p.$eval('#bPractice', e => e.disabled), 'medición: «Reiniciar» visible y «Practicar» deshabilitado');

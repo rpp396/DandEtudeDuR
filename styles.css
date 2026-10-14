@@ -88,7 +88,7 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
 .light.first.on{background:var(--accent)}
 
 /* score */
-.score-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px 18px 10px}
+.score-card{scroll-margin-top:8px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px 18px 10px}
 .score-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:6px}
 .summary{color:var(--muted);font-size:14px}
 .summary b{color:var(--ink);font-family:var(--serif);font-weight:400;font-size:17px;margin-right:4px}
@@ -266,6 +266,13 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .res-anal{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .res-anal h3{margin:0;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .anal-tip{margin:0;font-weight:700;max-width:70ch}
+.anal-more>summary{cursor:pointer;font-weight:700;font-size:13px;list-style:none;display:flex;align-items:center;gap:6px;border-radius:6px}
+.anal-more>summary::-webkit-details-marker{display:none}
+.anal-more>summary::before{content:"";width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s;flex:none}
+.anal-more[open]>summary::before{transform:rotate(45deg)}
+.anal-more[open]>summary{margin-bottom:10px}
+.anal-sum{font-weight:400;color:var(--muted);font-family:var(--mono);font-size:12px}
+.anal-body{display:flex;flex-direction:column;gap:10px}
 .anal-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
 .anal-stat{display:flex;flex-direction:column;gap:1px}
 .anal-stat .lbl,.anal-cap{font-size:12px;color:var(--muted);margin:0}
@@ -324,7 +331,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .ch-dot{fill:var(--muted);stroke:var(--paper);stroke-width:2}
 .ch-dot.hi{fill:var(--ink)}
 .ch-avg{stroke:var(--accent);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
-.ch-hit{fill:transparent;cursor:pointer}
+.ch-hit{fill:transparent;cursor:pointer;touch-action:pan-y}
+.ch-dot.sel{stroke:var(--accent);stroke-width:3}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);font-size:12px;line-height:1.35;padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,calc(-100% - 12px));z-index:2}
 .tip b{font-family:var(--mono)}
 .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
@@ -346,7 +354,36 @@ td .hint{display:inline}
 .btn.warn{color:var(--bad);border-color:var(--bad)}
 .confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
 @media (max-width:520px){ .tabs{width:100%} .tab{flex:1 1 auto;justify-content:center;padding:8px 6px;font-size:14px} .tab svg{display:none} .tiles{grid-template-columns:repeat(2,minmax(0,1fr))} .tile .big{font-size:28px} }
-@media (max-width:560px){ .level-bar{grid-template-columns:auto minmax(0,1fr) auto;gap:8px;padding:12px} .level-bar h2{font-size:21px} }
+/* Mi progreso en pantallas estrechas: el historial pasa de tabla a tarjetas (sin desplazamiento horizontal) */
+@media (max-width:520px){
+  .card{padding:14px}
+  .tbl-wrap{overflow:visible}
+  #pTable table,#pTable tbody{display:block}
+  #pTable thead{display:none}
+  #pTable tr{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px 8px;padding:10px 0;border-bottom:1px solid var(--line)}
+  #pTable tr:last-child{border-bottom:0}
+  #pTable td{display:block;padding:0;border:0;white-space:normal;text-align:left;overflow-wrap:anywhere;grid-column:span 2;font-size:13px}
+  #pTable td.num{text-align:left}
+  #pTable td.c-date{grid-column:1 / span 4;color:var(--muted)}
+  #pTable td.c-ex{grid-column:1 / span 4;font-weight:700;font-size:14px}
+  #pTable td.c-pct{grid-column:5 / span 2;grid-row:1 / span 2;text-align:right;align-self:center;font-size:24px;font-family:var(--serif);font-weight:400;line-height:1}
+  #pTable td.c-pct .pbar{display:block;width:100%;margin:6px 0 0}
+  #pTable td[data-l]:not(.c-date):not(.c-ex):not(.c-pct)::before{content:attr(data-l);display:block;font:700 10px/1.5 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  #pFilter{width:100%} #pFilter button{flex:1 1 auto;padding-inline:4px}
+}
+/* ficha del nivel compacta en el móvil: «Nivel n de N» con las estrellas, y ‹ título › en una fila (la partitura queda más arriba) */
+@media (max-width:560px){
+  .level-bar{grid-template-columns:44px minmax(0,1fr) 44px;grid-template-areas:"top top top" "prev title next" "desc desc desc" "meta meta meta";gap:2px 8px;padding:10px 12px}
+  .lv-body{display:contents}
+  .lv-top{grid-area:top;flex-wrap:nowrap}
+  .lv-ch{display:none}
+  .level-bar h2{grid-area:title;font-size:20px;margin:0;text-align:center}
+  #lvPrev{grid-area:prev} #lvNext{grid-area:next}
+  .lv-stars{font-size:18px}
+  .lv-desc{grid-area:desc;font-size:14px;line-height:1.4}
+  .lv-meta{grid-area:meta;gap:4px;margin-top:4px}
+  .lv-meta>span{font-size:11px;padding:1px 6px}
+}
 /* botón flotante para tocar (móvil y tableta) */
 .fab{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;width:min(440px,calc(100vw - 32px));height:96px;border:0;border-radius:22px;background:var(--accent);color:var(--accent-ink);font:700 22px/1 var(--sans);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 28px rgba(20,24,33,.28),inset 0 -4px 0 rgba(0,0,0,.18);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 .fab-main{font-family:var(--serif);font-weight:400;font-size:26px;letter-spacing:.01em;pointer-events:none}
@@ -380,12 +417,41 @@ body.fab-on{padding-bottom:140px}
 @keyframes fabin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%)}}
 /* sin ratón ni trackpad (móvil, tableta sin teclado) no se muestran los atajos de teclado */
 @media not all and (any-pointer: fine){ .keys,.kb{display:none} }
-/* objetivos táctiles de al menos 44 px */
+/* objetivos táctiles de al menos 44 px (WCAG 2.5.8 pide 24; 44 es lo cómodo con el pulgar) */
 @media (any-pointer: coarse){
   .step{width:44px;height:44px;font-size:20px}
   .tempo{gap:6px}
+  .btn,.tab,.modeseg button,.seg button,.fold summary,.sw,select,.tempo input,.field input[type=text],.ramp-opts input[type=number],.own-import input[type=file],.sig,.fig,.pal-mods button{min-height:44px}
+  .sw{align-content:center}
+  input[type=range]{height:44px;margin:0}
+  .fold summary{padding:0}
+  .seg button,.modeseg button{padding-block:0}
+  /* con resultados: el bloque Practicar / Medir latencia sale (los resultados quedan pegados a la partitura) y, con el botón de tres partes, no se repiten sus acciones */
+  body.res-on .practice{display:none}
+  body.post-on #rAgain,body.post-on #rNew,body.post-on #rcNext{display:none}
+  body.post-on #resActions:not(:has(#rSave:not([hidden]),#rSaved:not([hidden]))){display:none}
 }
+/* avisos flotantes (toast): bajo ellos queda lo fijo (botón flotante, paleta) */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(var(--pinB,0px),12px) + env(safe-area-inset-bottom));z-index:60;max-width:min(520px,calc(100vw - 32px));margin:0;padding:11px 16px;border:0;border-radius:12px;background:var(--ink);color:var(--paper);font:700 14px/1.35 var(--sans);box-shadow:0 10px 28px rgba(20,24,33,.3);animation:toastin .18s ease-out}
+.toast.bad{background:var(--bad);color:var(--accent-ink)}
+.own-msg{cursor:pointer}
+.toast-new{cursor:pointer;min-height:44px;-webkit-tap-highlight-color:transparent}
+@keyframes toastin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%)}}
+/* «Detener» flotante mientras suena «Reproducir» o «Solo metrónomo» */
+.fab.stopb .fab-main::before{content:"";display:inline-block;width:14px;height:14px;border-radius:2px;background:currentColor;margin-right:10px;vertical-align:-1px}
+/* pantallas bajas (móvil en horizontal, móviles pequeños): botones fijos más bajos para que no tapen la partitura */
+@media (max-height:699px){
+  .fab,.fab-restart{height:72px}
+  .fab.idle{height:56px}
+  .fab-main{font-size:22px} .fab-main.count{font-size:40px} .fab.idle .fab-main{font-size:18px}
+  .fab-restart svg{width:24px;height:24px}
+  .fab-post svg{width:26px;height:26px} .fab-post button{gap:3px;font-size:13px}
+  body.fab-on{padding-bottom:104px}
+}
+/* en Mis ejercicios, con la paleta fija a la vista, su «Practicar» es el único */
+body.dock-on:not(.dock-away) #bPractice{display:none}
 @media (prefers-reduced-motion: reduce){
+  .toast{animation:none}
   .pad.hit,.pad.miss,.fab.hit,.fab.miss,.fab-post{animation:none}
   .light,.btn,.track,.track::after,.fold summary::after,.pad,.fab-restart.arming::before,.fab-restart.arming svg{transition:none}
   html{scroll-behavior:auto}
@@ -406,8 +472,6 @@ body.no-keys .keys,body.no-keys .kb{display:none}
 .own-m{font-size:12px;color:var(--muted);font-family:var(--mono)}
 .own-m i{font-style:normal;color:var(--near)}
 .own-import{display:flex;flex-direction:column;gap:8px;border:1px dashed var(--line);border-radius:10px;padding:10px}
-.own-msg{margin:0;font-size:13px;color:var(--good)}
-.own-msg.bad{color:var(--bad)}
 .own-status{margin:0;font-size:13px;color:var(--ink)}
 .pal{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
 .pal-b{position:relative;display:grid;place-items:center;min-height:52px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);cursor:pointer;padding:4px 2px 10px}
@@ -428,7 +492,7 @@ body.no-keys .keys,body.no-keys .kb{display:none}
 .dock-row{display:flex;flex-direction:column;gap:10px}
 .dock-top{display:flex;align-items:center;gap:10px}
 #ownPractice{display:none;flex:none}
-body.dock-on #ownPractice{display:inline-flex;min-height:40px}
+body.dock-on #ownPractice{display:inline-flex;min-height:44px}
 body.dock-on .dock-top{order:-1}
 /* paleta fija abajo en pantallas estrechas mientras se edita (la pone updateFab con body.dock-on) */
 body.dock-on{padding-bottom:calc(var(--dockH,200px) + 24px)}

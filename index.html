@@ -37,7 +37,7 @@
         <h2 id="welTitle">Cómo se practica</h2>
         <ol>
           <li>Pulsa <b>Reproducir</b> <span class="kb">(<kbd>R</kbd>)</span> para escuchar el ritmo con el metrónomo.</li>
-          <li>Pulsa <b>Practicar</b> <span class="kb">(<kbd>P</kbd>)</span> o toca la partitura. Tras la cuenta previa, toca en cada nota: con el dedo, el ratón o la barra espaciadora.</li>
+          <li>Pulsa <b>Practicar</b> <span class="kb">(<kbd>P</kbd>)</span> o toca la partitura. Tras la cuenta previa, toca en cada nota: con el dedo o el ratón<span class="kb">, o con la barra espaciadora</span>.</li>
           <li>Al terminar verás tu precisión y, bajo cada nota, si llegaste antes o tarde.</li>
         </ol>
         <p class="hint">En las pestañas de arriba tienes además la <b>Campaña</b> (niveles que se desbloquean con estrellas), <b>Mis ejercicios</b> (escribe tus propios ritmos figura a figura, guárdalos y compártelos con un enlace) y <b>Mi progreso</b> (tu historial de prácticas).</p>
@@ -49,7 +49,7 @@
       </section>
       <div class="level-bar" id="levelBar" hidden>
         <button class="step" id="lvPrev" type="button" aria-label="Nivel anterior">‹</button>
-        <div>
+        <div class="lv-body">
           <div class="lv-top"><span class="lv-eyebrow" id="lvEyebrow"></span><span class="stars lv-stars" id="lvStars" role="img" aria-label=""></span></div>
           <h2 id="lvTitle"></h2>
           <p class="lv-desc" id="lvDesc"></p>
@@ -143,16 +143,22 @@
             <p id="rRampText"></p>
             <button class="btn" id="rRampStop" type="button" hidden>Parar el bucle</button>
           </div>
+          <!-- el consejo va a la vista; el detalle es plegable (abierto en pantallas con ratón, cerrado en las táctiles, donde el bloque es largo) -->
           <div class="res-anal" id="rAnal" hidden>
             <h3>Análisis de tus toques</h3>
             <p class="anal-tip" id="aTip" hidden></p>
-            <div class="anal-stats">
-              <div class="anal-stat"><span class="lbl">Regularidad</span><b id="aSd"></b><span class="sub" id="aSdTxt"></span></div>
-              <div class="anal-stat"><span class="lbl">A lo largo de la pasada</span><b id="aDrift"></b><span class="sub" id="aDriftTxt"></span></div>
-            </div>
-            <p class="anal-cap">Error medio según dónde cae la nota</p>
-            <ul class="anal-pos" id="aPos"></ul>
-            <div class="anal-chart" id="aChart"></div>
+            <details class="anal-more" id="aMore">
+              <summary>Ver el detalle<span class="anal-sum" id="aSum"></span></summary>
+              <div class="anal-body">
+                <div class="anal-stats">
+                  <div class="anal-stat"><span class="lbl">Regularidad</span><b id="aSd"></b><span class="sub" id="aSdTxt"></span></div>
+                  <div class="anal-stat"><span class="lbl">A lo largo de la pasada</span><b id="aDrift"></b><span class="sub" id="aDriftTxt"></span></div>
+                </div>
+                <p class="anal-cap">Error medio según dónde cae la nota</p>
+                <ul class="anal-pos" id="aPos"></ul>
+                <div class="anal-chart" id="aChart"></div>
+              </div>
+            </details>
           </div>
         </div>
         <ul class="counts">
@@ -188,7 +194,6 @@
           <input type="file" id="ownImpFile" accept=".json,application/json,.txt,text/plain">
           <div class="own-row"><button class="btn primary" id="ownImpGo" type="button">Importar</button><button class="btn" id="ownImpCancel" type="button">Cancelar</button></div>
         </div>
-        <p class="own-msg" id="ownMsg" role="status" hidden></p>
       </div>
       <div class="sec" id="secEdit" hidden>
         <h2>Editar ejercicio</h2>
@@ -357,12 +362,15 @@
   </main>
 </div>
 
+<!-- avisos flotantes: de Mis ejercicios (ownMsg) y «Ritmo nuevo · Ver ↑» (rhythmToast) -->
+<p class="toast own-msg" id="ownMsg" role="status" aria-live="polite" hidden></p>
+<button type="button" class="toast toast-new" id="newToast" aria-label="Ritmo nuevo: ir a la partitura" hidden>Ritmo nuevo · Ver ↑</button>
 <button type="button" class="fab" id="tapFab" hidden><span class="fab-main" id="fabMain">Toca aquí</span></button>
 <span class="sr-only" id="restartHelp">Con el dedo, mantén pulsado medio segundo. Con el teclado, Intro o Espacio reinician al instante.</span>
 <button type="button" class="fab-restart" id="fabRestart" hidden aria-describedby="restartHelp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg><span>Reiniciar</span></button>
 <div class="fab fab-post" id="postFab" role="group" aria-label="Después de la práctica" hidden>
   <button type="button" id="pfAgain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v5h5"/></svg>Repetir</button>
-  <button type="button" id="pfNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7h3.2c2 0 3.2.9 4.3 2.6l2.6 4.6c1 1.8 2.3 2.8 4.3 2.8h4.6"/><path d="M2.5 17h3.2c1.3 0 2.2-.4 3-1.1"/><path d="M14.4 8.1c.8-.7 1.7-1.1 3-1.1h4.1"/><path d="M18.5 4l3 3-3 3"/><path d="M18.5 14l3 3-3 3"/></svg><span id="pfNewLbl">Nuevo ritmo</span></button>
+  <button type="button" id="pfNew"><svg class="ic-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M4 20l1.4-5.2L16.6 3.6a2 2 0 0 1 2.8 0l1 1a2 2 0 0 1 0 2.8L9.2 18.6z"/><path d="M14.5 5.7l3.8 3.8"/></svg><svg class="ic-new" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7h3.2c2 0 3.2.9 4.3 2.6l2.6 4.6c1 1.8 2.3 2.8 4.3 2.8h4.6"/><path d="M2.5 17h3.2c1.3 0 2.2-.4 3-1.1"/><path d="M14.4 8.1c.8-.7 1.7-1.1 3-1.1h4.1"/><path d="M18.5 4l3 3-3 3"/><path d="M18.5 14l3 3-3 3"/></svg><span id="pfNewLbl">Nuevo ritmo</span></button>
   <button type="button" id="pfNext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l5 5 10-11"/></svg><span id="pfNextLbl">Listo</span></button>
 </div>
 

@@ -90,8 +90,8 @@ function start(mode){
     const beat=score.sig.click*spt;
     S.tapFrom=Math.min(ns.length?ns[0].t-ns[0].win:Infinity, S.passStart+S.off-Math.min(0.25,beat/2));
     const rb=rampOn()?` · Bucle de tempo: ${curBpm()} ppm`:'';   // bucle de tempo (estudio.js): a qué tempo va esta pasada
-    pad.classList.add('live'); $('#padMain').textContent=(set.hold?'Pulsa en cada nota y mantén mientras dure':'Toca en cada nota')+rb; $('#padSub').textContent='Escucha la cuenta y empieza en el primer tiempo.'+(rb?' Esc termina y para el bucle.':'');
-    say(`Práctica${set.hold?' en modo piano':''}${rb?`, bucle de tempo a ${curBpm()} ppm`:''}: escucha la cuenta y toca en cada nota. Esc para terminar.`);
+    pad.classList.add('live'); $('#padMain').textContent=(set.hold?'Pulsa en cada nota y mantén mientras dure':'Toca en cada nota')+rb; $('#padSub').textContent='Escucha la cuenta y empieza en el primer tiempo.'+(rb&&kbOn()?' Esc termina y para el bucle.':'');
+    say(`Práctica${set.hold?' en modo piano':''}${rb?`, bucle de tempo a ${curBpm()} ppm`:''}: escucha la cuenta y toca en cada nota.${kbOn()?' Esc para terminar.':''}`);
     showPad();
   }
   schedTick();
@@ -145,7 +145,8 @@ function setLight(i){
 // Luces huecas mientras el metrónomo calla (set.gap)
 function setMuted(on){ if(on===!!S.muted) return; S.muted=on; $('#lights').classList.toggle('muted',on); }
 function showCount(c){
-  const fm=$('#fabMain'), ft=c?String(c):'Toca aquí'; if(fm.textContent!==ft){ fm.textContent=ft; fm.classList.toggle('count',!!c); }
+  const fm=$('#fabMain'), ft=c?String(c):'Toca aquí';
+  if(S.mode!=='play' && S.mode!=='metro' && fm.textContent!==ft){ fm.textContent=ft; fm.classList.toggle('count',!!c); }   // en «Reproducir» el botón es «Detener» (la cuenta va en la partitura)
   const el=$('#padCount');
   if(c){ el.textContent=c; el.hidden=false; } else el.hidden=true;
 }

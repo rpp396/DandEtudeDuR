@@ -70,7 +70,7 @@ function showTempo(){
 }
 function renderLevelBar(){
   const l=LEVELS[levelIdx], st=lvState(levelIdx);
-  $('#lvEyebrow').textContent=`Capítulo ${l.ch+1} · ${CHAPTERS[l.ch]} — Nivel ${levelIdx+1} de ${LEVELS.length}`;
+  $('#lvEyebrow').innerHTML=`<span class="lv-ch">Capítulo ${l.ch+1} · ${CHAPTERS[l.ch]} — </span>Nivel ${levelIdx+1} de ${LEVELS.length}`;   // en pantallas estrechas solo «Nivel n de N»
   $('#lvTitle').textContent=l.title;
   $('#lvDesc').textContent=l.desc;
   // el tempo con su figura («Negra con puntillo = 50») y el término según el pulso
@@ -128,7 +128,7 @@ function applyStageMode(){
   showTempo(); syncRamp(); generate();
 }
 function setView(v){
-  stop();
+  stop(); hideNewToast(); if(v!=='propio') ownMsg('');
   document.querySelectorAll('.tab').forEach(t=>{ const on=t.dataset.view===v; t.setAttribute('aria-selected',String(on)); t.tabIndex=on?0:-1; });
   if(v!=='progreso') $('#stageView').setAttribute('aria-labelledby','tab-'+v);
   $('#stageView').hidden = v==='progreso'; $('#progView').hidden = v!=='progreso';

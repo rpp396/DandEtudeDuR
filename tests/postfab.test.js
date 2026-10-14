@@ -6,7 +6,9 @@ suite('Botón posterior a la práctica (móvil)', async ({ b, URL, ok, MOB, page
   const postVisible = p => until(p, () => !document.querySelector('#postFab').hidden);
   // Practica y termina con Esc; devuelve cuando los resultados y el botón ya se ven
   const practiceAndStop = async p => {
-    await p.click('#bPractice'); await waitRunning(p, 'practice'); await settle(p);
+    // con resultados a la vista el bloque «Practicar» no está en táctil: se repite desde el botón de tres partes
+    if (await vis(p, '#results')) { await postReady(p); await p.tap('#pfAgain'); } else await p.click('#bPractice');
+    await waitRunning(p, 'practice'); await settle(p);
     await tapAndStop(p); await waitResults(p);
     await wf(p, () => !document.querySelector('#postFab').hidden);
   };
@@ -20,8 +22,10 @@ suite('Botón posterior a la práctica (móvil)', async ({ b, URL, ok, MOB, page
   ok(await postVisible(p) && !(await vis(p, '#tapFab')), 'al terminar: botón de tres partes');
   ok(await p.textContent('#pfNextLbl') === 'Listo' && !(await p.$eval('#pfNext', e => e.disabled)), 'práctica libre: «Listo» activo');
   await postReady(p);
-  const cover = await until(p, () => document.querySelector('#resActions').getBoundingClientRect().bottom <= document.querySelector('#postFab').getBoundingClientRect().top, null, 6000);
-  ok(cover, 'los botones de resultados no quedan tapados ' + JSON.stringify(await p.evaluate(() => [Math.round(document.querySelector('#resActions').getBoundingClientRect().bottom), Math.round(document.querySelector('#postFab').getBoundingClientRect().top)])));
+  // con el botón de tres partes: porcentaje y resumen por encima de él, y «Repetir»/«Nuevo ritmo» no se duplican en los resultados (táctil)
+  const cover = await until(p, () => document.querySelector('.res-top').getBoundingClientRect().bottom <= document.querySelector('#postFab').getBoundingClientRect().top, null, 6000);
+  ok(cover, 'el porcentaje y el resumen no quedan tapados ' + JSON.stringify(await p.evaluate(() => [Math.round(document.querySelector('.res-top').getBoundingClientRect().bottom), Math.round(document.querySelector('#postFab').getBoundingClientRect().top)])));
+  ok(await p.evaluate(() => ['#rAgain', '#rNew'].every(s => getComputedStyle(document.querySelector(s)).display === 'none')), 'no se repiten «Repetir» y «Nuevo ritmo» en los resultados');
 
   // toque inmediato ignorado: nueva práctica y clic en cuanto aparece el botón
   await practiceAndStop(p);
@@ -55,7 +59,7 @@ suite('Botón posterior a la práctica (móvil)', async ({ b, URL, ok, MOB, page
   ok(await p.textContent('#pfNextLbl') === 'Siguiente' && await p.$eval('#pfNext', e => e.disabled), 'campaña sin superar: «Siguiente» apagado');
   await p.evaluate(() => document.querySelector('#pfNext').click());
   ok(await p.evaluate(() => __t.levelIdx) === 0, 'apagado no avanza');
-  await p.click('#bPractice'); await waitRunning(p, 'practice');
+  await p.tap('#pfAgain'); await waitRunning(p, 'practice');   // con resultados el bloque «Practicar» no está: se repite desde el botón de tres partes
   await scheduleTaps(p, [-6, 12, -20, 8, 30, -14, 4, -9], null);
   await waitResults(p); await postReady(p);
   ok(!(await p.$eval('#pfNext', e => e.disabled)) && await p.evaluate(() => { const s = x => getComputedStyle(document.querySelector(x)).backgroundColor; return s('#pfNext') === s('#pfAgain') && s('#pfNext') === s('#pfNew'); }), 'nivel superado: «Siguiente» activo y con el mismo fondo que los otros');

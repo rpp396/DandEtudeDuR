@@ -180,7 +180,12 @@ function measureSVG(mi,mx,MW){
     const j=judg[e.i], jc=judg[e.head];
     s+=`<g class="ev${e.rest?' rest':''}${e.tie?' tied':''}${jc?' j-'+jc.cls:''}" data-i="${e.i}">`;
     s+= e.rest ? restSVG(e.x+1,Y0,e.mr?48:e.dur) : noteSVG(e.x,ny,e.duplet?6:e.dur,beamed.has(e));
-    if(score.own) s+=`<rect class="evhit" x="${e.x-9}" y="${Y0-14}" width="22" height="62"/>`;
+    if(score.own){
+      // zona de toque: 22 px con ratón; con el dedo, hasta 44 px centrados en la figura sin invadir a las vecinas (mitad de la separación)
+      let x0=e.x-9, w=22;
+      if(touchMQ.matches){ const l=k?e.x-evs[k-1].x:88, r=k<evs.length-1?evs[k+1].x-e.x:88; x0=e.x-Math.min(22,l/2); w=Math.min(22,l/2)+Math.min(22,r/2); }
+      s+=`<rect class="evhit" x="${x0}" y="${Y0-14}" width="${w}" height="62"/>`;
+    }
     s+='</g>';
     if(j){
       const my=Y0+56;
